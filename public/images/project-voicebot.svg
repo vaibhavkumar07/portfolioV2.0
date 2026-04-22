@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#050810"/>
+      <stop offset="100%" style="stop-color:#0a1018"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg4)"/>
+  <!-- Grid -->
+  <g opacity="0.05" stroke="#ff4f1f" stroke-width="0.5">
+    <line x1="0" y1="62.5" x2="800" y2="62.5"/><line x1="0" y1="125" x2="800" y2="125"/>
+    <line x1="0" y1="187.5" x2="800" y2="187.5"/><line x1="0" y1="250" x2="800" y2="250"/>
+    <line x1="0" y1="312.5" x2="800" y2="312.5"/><line x1="0" y1="375" x2="800" y2="375"/>
+    <line x1="0" y1="437.5" x2="800" y2="437.5"/>
+    <line x1="100" y1="0" x2="100" y2="500"/><line x1="200" y1="0" x2="200" y2="500"/>
+    <line x1="300" y1="0" x2="300" y2="500"/><line x1="400" y1="0" x2="400" y2="500"/>
+    <line x1="500" y1="0" x2="500" y2="500"/><line x1="600" y1="0" x2="600" y2="500"/>
+    <line x1="700" y1="0" x2="700" y2="500"/>
+  </g>
+  <!-- Title -->
+  <rect x="0" y="0" width="800" height="30" fill="#ff4f1f" fill-opacity="0.07"/>
+  <text x="20" y="19" font-family="monospace" font-size="9" fill="#ff4f1f" letter-spacing="2">RESULT-004</text>
+  <text x="400" y="19" font-family="monospace" font-size="9" fill="#4a6890" text-anchor="middle" letter-spacing="1">CDA LAB — VOICE BOT &amp; CHATBOT · IT/NETWORKING</text>
+  <!-- Bot avatar center -->
+  <circle cx="400" cy="220" r="55" fill="none" stroke="#ff4f1f" stroke-width="1.5" opacity="0.6"/>
+  <circle cx="400" cy="220" r="40" fill="#ff4f1f" fill-opacity="0.08"/>
+  <circle cx="400" cy="220" r="25" fill="#ff4f1f" fill-opacity="0.15"/>
+  <!-- Robot face -->
+  <rect x="378" y="200" width="44" height="40" rx="4" fill="none" stroke="#ff4f1f" stroke-width="1.5" opacity="0.9"/>
+  <circle cx="390" cy="215" r="4" fill="#0084d6" opacity="0.9"/>
+  <circle cx="410" cy="215" r="4" fill="#0084d6" opacity="0.9"/>
+  <rect x="386" y="226" width="28" height="4" rx="2" fill="#00c853" opacity="0.8"/>
+  <!-- Outer rings (signal) -->
+  <circle cx="400" cy="220" r="70" fill="none" stroke="#ff4f1f" stroke-width="0.8" opacity="0.25" stroke-dasharray="6,4"/>
+  <circle cx="400" cy="220" r="90" fill="none" stroke="#ff4f1f" stroke-width="0.5" opacity="0.15" stroke-dasharray="4,6"/>
+  <!-- Chat bubbles - user left -->
+  <rect x="50" y="80" width="160" height="45" rx="16" rx="16" ry="16" fill="#0084d6" fill-opacity="0.15" stroke="#0084d6" stroke-width="1" opacity="0.8"/>
+  <polygon points="60,125 50,135 75,125" fill="#0084d6" fill-opacity="0.15" stroke="#0084d6" stroke-width="1" opacity="0.8"/>
+  <text x="130" y="100" font-family="monospace" font-size="8" fill="#0084d6" text-anchor="middle">USER QUERY</text>
+  <text x="130" y="115" font-family="monospace" font-size="9" fill="#eaeaf2" text-anchor="middle">"Schedule appt for Mon"</text>
+  <!-- Chat bubble - bot right -->
+  <rect x="590" y="80" width="160" height="45" rx="16" ry="16" fill="#ff4f1f" fill-opacity="0.1" stroke="#ff4f1f" stroke-width="1" opacity="0.8"/>
+  <polygon points="740,125 750,135 725,125" fill="#ff4f1f" fill-opacity="0.1" stroke="#ff4f1f" stroke-width="1" opacity="0.8"/>
+  <text x="670" y="100" font-family="monospace" font-size="8" fill="#ff4f1f" text-anchor="middle">BOT RESPONSE</text>
+  <text x="670" y="115" font-family="monospace" font-size="9" fill="#eaeaf2" text-anchor="middle">"Confirmed for Mon 3pm"</text>
+  <!-- Channels panel left -->
+  <rect x="50" y="180" width="140" height="160" rx="2" fill="#0a0f1a" stroke="#0084d6" stroke-width="1" opacity="0.6"/>
+  <text x="120" y="200" font-family="monospace" font-size="9" fill="#0084d6" text-anchor="middle" letter-spacing="1">CHANNELS</text>
+  <line x1="50" y1="208" x2="190" y2="208" stroke="#0084d6" stroke-width="0.5" opacity="0.4"/>
+  <g transform="translate(70, 225)" font-family="monospace" font-size="9">
+    <circle cx="0" cy="0" r="5" fill="#25D366" opacity="0.9"/>
+    <text x="14" fill="#8892a4">WhatsApp</text>
+    <circle cx="0" cy="22" r="5" fill="#1877F2" opacity="0.9"/>
+    <text x="14" y="22" fill="#8892a4">Facebook</text>
+    <circle cx="0" cy="44" r="5" fill="#0084d6" opacity="0.9"/>
+    <text x="14" y="44" fill="#8892a4">Webex SDK</text>
+    <circle cx="0" cy="66" r="5" fill="#ff4f1f" opacity="0.9"/>
+    <text x="14" y="66" fill="#8892a4">Cisco PCCE</text>
+    <circle cx="0" cy="88" r="5" fill="#00c853" opacity="0.9"/>
+    <text x="14" y="88" fill="#8892a4">Voice (ASR)</text>
+  </g>
+  <!-- Dialogflow panel right -->
+  <rect x="610" y="180" width="140" height="160" rx="2" fill="#0a0f1a" stroke="#ff4f1f" stroke-width="1" opacity="0.6"/>
+  <text x="680" y="200" font-family="monospace" font-size="9" fill="#ff4f1f" text-anchor="middle" letter-spacing="1">DIALOGFLOW</text>
+  <line x1="610" y1="208" x2="750" y2="208" stroke="#ff4f1f" stroke-width="0.5" opacity="0.4"/>
+  <g transform="translate(630, 225)" font-family="monospace" font-size="8" fill="#8892a4">
+    <text>Intent Detection</text>
+    <text y="18">Entity Extraction</text>
+    <text y="36">Context Mgmt</text>
+    <text y="54">Fulfillment</text>
+    <text y="72">ASR / TTS</text>
+    <text y="90" fill="#00c853">● NLP Accuracy: 94%</text>
+  </g>
+  <!-- Waveform bar at bottom -->
+  <g transform="translate(120, 400)" opacity="0.7">
+    <text font-family="monospace" font-size="8" fill="#4a6890" letter-spacing="1">VOICE WAVEFORM ·</text>
+    <text x="125" font-family="monospace" font-size="8" fill="#00c853"> ACTIVE</text>
+  </g>
+  <g transform="translate(50, 420)">
+    <polyline points="0,20 15,8 30,22 45,5 60,18 75,10 90,24 105,6 120,20 135,12 150,26 165,8 180,22 195,14 210,28 225,10 240,22 255,16 270,24 285,8 300,20 315,14 330,26 345,10 360,22 375,12 390,24 405,8 420,20 435,16 450,28 465,10 480,22 495,14 510,26 525,8 540,22 555,14 570,26 585,10 600,22 615,12 630,26 645,8 660,22 675,14 690,24 705,8 700,20"
+              fill="none" stroke="#ff4f1f" stroke-width="1.5" opacity="0.6"/>
+  </g>
+  <!-- Corner brackets -->
+  <g stroke="#ff4f1f" stroke-width="1.5" fill="none" opacity="0.4">
+    <polyline points="10,10 10,30 30,30"/>
+    <polyline points="790,10 790,30 770,30"/>
+    <polyline points="10,490 10,470 30,470"/>
+    <polyline points="790,490 790,470 770,470"/>
+  </g>
+</svg>

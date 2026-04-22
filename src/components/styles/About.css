@@ -1,0 +1,108 @@
+.about-section {
+  padding: 8rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+/* ── BIO LEFT ── */
+.about-bio {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.about-text {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--text-dim);
+}
+
+.about-text strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.about-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.about-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  border: 1px solid rgba(255, 79, 31, 0.25);
+  background: rgba(255, 79, 31, 0.05);
+  padding: 0.25rem 0.65rem;
+}
+
+/* ── RECORDS RIGHT ── */
+.about-records {
+  background: #0a0f1a;
+  border: 1px solid rgba(255, 79, 31, 0.12);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  transition:
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.45s ease,
+    border-color 0.3s;
+}
+
+.about-records:hover {
+  border-color: rgba(255, 79, 31, 0.28);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(255,79,31,0.09);
+}
+
+.about-records-header {
+  margin-bottom: 1rem;
+}
+
+.about-record-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 1rem;
+  align-items: start;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.about-record-row:last-child {
+  border-bottom: none;
+}
+
+.about-record-key {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  padding-top: 0.1rem;
+}
+
+.about-record-val {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+}
+
+@media (max-width: 480px) {
+  .about-section { padding: 4rem 0; }
+  .about-text { font-size: 0.9rem; }
+  .about-record-row { grid-template-columns: 90px 1fr; }
+}

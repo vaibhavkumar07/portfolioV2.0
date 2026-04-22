@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(npx vite *)",
+      "Bash(node -e ' *)",
+      "Bash(node --input-type=module --eval ' *)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"developer portfolio IVR tech dark professional\" --design-system -p \"VKY Portfolio\")",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"animation accessibility touch interaction\" --domain ux)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"focus keyboard accessibility\" --domain ux)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"touch target size button\" --domain ux)"
+    ]
+  }
+}

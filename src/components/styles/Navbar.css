@@ -1,0 +1,138 @@
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 6%;
+  background: rgba(5, 8, 16, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 79, 31, 0.12);
+}
+
+/* ── STATUS LEFT ── */
+.nav-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green, #00c853);
+  box-shadow: 0 0 8px rgba(0, 200, 83, 0.7);
+  animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.nav-waveform {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 16px;
+}
+
+.nav-wave-bar {
+  width: 2px;
+  background: var(--green, #00c853);
+  border-radius: 1px;
+  animation: navWave 0.7s ease-in-out infinite alternate;
+}
+
+.nav-wave-bar:nth-child(1) { height: 6px;  animation-duration: 0.65s; }
+.nav-wave-bar:nth-child(2) { height: 12px; animation-duration: 0.8s; }
+.nav-wave-bar:nth-child(3) { height: 16px; animation-duration: 0.6s; }
+.nav-wave-bar:nth-child(4) { height: 10px; animation-duration: 0.75s; }
+.nav-wave-bar:nth-child(5) { height: 6px;  animation-duration: 0.7s; }
+
+@keyframes navWave {
+  from { transform: scaleY(0.3); }
+  to   { transform: scaleY(1); }
+}
+
+.nav-connected {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  color: var(--green, #00c853);
+}
+
+.nav-timer {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: #4a6890;
+  letter-spacing: 0.1em;
+}
+
+/* ── CENTER LOGO ── */
+.nav-logo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ── NAV RIGHT ── */
+nav {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.nav-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  padding: 0.4rem 0.65rem;
+  min-height: 44px;
+  border-radius: 2px;
+  transition: color 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.nav-link:hover {
+  color: var(--text);
+  background: rgba(255, 79, 31, 0.07);
+}
+
+.nav-key {
+  color: var(--accent);
+  font-size: 0.56rem;
+}
+
+.nav-fade {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 90px;
+  background: linear-gradient(to bottom, rgba(5, 8, 16, 0.6) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 99;
+}
+
+@media (max-width: 768px) {
+  header { padding: 0.8rem 4%; }
+  nav { gap: 0; }
+  .nav-key { display: none; }
+  .nav-link { font-size: 0.58rem; padding: 0.35rem 0.5rem; }
+  .nav-connected { display: none; }
+  .nav-waveform { display: none; }
+}

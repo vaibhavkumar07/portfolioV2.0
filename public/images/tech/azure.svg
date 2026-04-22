@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <rect width="256" height="256" fill="#050810"/>
+  <rect x="8" y="8" width="240" height="240" fill="none" stroke="rgba(0,132,214,0.3)" stroke-width="1"/>
+  <circle cx="8" cy="8" r="3" fill="rgba(0,132,214,0.5)"/>
+  <circle cx="248" cy="8" r="3" fill="rgba(0,132,214,0.5)"/>
+  <circle cx="8" cy="248" r="3" fill="rgba(0,132,214,0.5)"/>
+  <circle cx="248" cy="248" r="3" fill="rgba(0,132,214,0.5)"/>
+  <text x="128" y="30" font-family="monospace" font-size="9" fill="rgba(0,132,214,0.6)" text-anchor="middle" letter-spacing="3">AZURE</text>
+  <!-- Azure A shape -->
+  <g transform="translate(128,130)">
+    <circle r="68" fill="none" stroke="#0084d6" stroke-width="1.5" opacity="0.15"/>
+    <!-- A shape stylized -->
+    <polygon points="0,-62 52,48 36,48 0,-18 -36,48 -52,48" fill="none" stroke="#0084d6" stroke-width="3" stroke-linejoin="round" opacity="0.9"/>
+    <!-- Crossbar -->
+    <line x1="-28" y1="12" x2="28" y2="12" stroke="#0084d6" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+    <!-- TTS/STT labels -->
+    <text x="-32" y="72" font-family="monospace" font-size="8" fill="#0084d6" text-anchor="middle">TTS</text>
+    <text x="32" y="72" font-family="monospace" font-size="8" fill="#0084d6" text-anchor="middle">STT</text>
+    <line x1="-32" y1="54" x2="-32" y2="62" stroke="#0084d6" stroke-width="1" opacity="0.5"/>
+    <line x1="32" y1="54" x2="32" y2="62" stroke="#0084d6" stroke-width="1" opacity="0.5"/>
+    <!-- Sound waves left -->
+    <path d="M-62,0 Q-70,-12 -62,-24" fill="none" stroke="#0084d6" stroke-width="1.5" opacity="0.6"/>
+    <path d="M-68,4 Q-80,-12 -68,-28" fill="none" stroke="#0084d6" stroke-width="1" opacity="0.35"/>
+    <!-- Sound waves right -->
+    <path d="M62,0 Q70,-12 62,-24" fill="none" stroke="#0084d6" stroke-width="1.5" opacity="0.6"/>
+    <path d="M68,4 Q80,-12 68,-28" fill="none" stroke="#0084d6" stroke-width="1" opacity="0.35"/>
+    <!-- Glow center -->
+    <circle r="5" fill="#0084d6" opacity="0.8"/>
+  </g>
+  <text x="128" y="232" font-family="monospace" font-size="8" fill="rgba(0,132,214,0.4)" text-anchor="middle" letter-spacing="2">COGNITIVE SERVICES</text>
+</svg>

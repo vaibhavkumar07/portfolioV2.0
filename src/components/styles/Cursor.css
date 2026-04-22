@@ -1,0 +1,29 @@
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+  transition: width 0.2s, height 0.2s, border-radius 0.2s, background 0.2s;
+}
+
+.custom-cursor.cursor-hover {
+  background: transparent;
+  border: 1.5px solid var(--accent);
+  border-radius: 4px;
+  mix-blend-mode: normal;
+}
+
+.custom-cursor.cursor-disabled {
+  opacity: 0;
+}
+
+@media (hover: none) {
+  .custom-cursor { display: none; }
+}
