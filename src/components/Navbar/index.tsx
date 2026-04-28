@@ -109,7 +109,7 @@ export default function Navbar({ elapsed, onEnd, onNav }: Props) {
                 <button className="profile-card-close" onClick={() => setProfileOpen(false)} aria-label="Close">
                   <MdClose size={14} />
                 </button>
-                <img src="/profile.jpeg" alt="Vaibhavkumar Yadav" className="profile-card-avatar" />
+                <img src={`${import.meta.env.BASE_URL}profile.jpeg`} alt="Vaibhavkumar Yadav" className="profile-card-avatar" />
                 <div className="profile-card-name">Vaibhavkumar Yadav</div>
                 <div className="profile-card-role">Package Consultant 2</div>
                 <div className="profile-card-company">Infosys Limited · Richardson, TX</div>

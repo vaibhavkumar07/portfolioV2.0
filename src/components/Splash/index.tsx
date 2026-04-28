@@ -37,7 +37,7 @@ export default function Splash({ onAccept, onDecline }: Props) {
         <div className="splash-avatar">
           <div className="splash-avatar-ring" />
           <div className="splash-avatar-inner">
-            <img src="/profile.jpeg" alt="Vaibhavkumar Yadav" className="splash-avatar-img" />
+            <img src={`${import.meta.env.BASE_URL}profile.jpeg`} alt="Vaibhavkumar Yadav" className="splash-avatar-img" />
           </div>
         </div>
 
