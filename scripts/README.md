@@ -1,52 +1,114 @@
-# Intro Presenter — asset pipeline
+# Intro Presenter — asset pipeline (Nano Banana · Hedra · Stable Diffusion · Hailuo · MiniMax)
 
-The narrated intro (shown right after "Accept call") plays per-segment audio and
-reveals the matching portfolio section. Assets live in `public/intro/`.
+The narrated intro (after "Accept call") plays one clip per step and reveals the
+matching section. Assets live in `public/intro/`. The player picks, per step:
 
-## 1. Audio (shipped, free, no API key)
+1. **`video`** (talking-avatar mp4, audio baked in) — preferred
+2. else **`file`** (voice mp3) + the coded SVG presenter
+3. else **captions only**
 
-Generated with [edge-tts](https://github.com/rany2/edge-tts) (Microsoft neural voices):
+So you can ship voice-only first, then drop in videos later with no code change.
+Manifest: `public/intro/timeline.json` (see field shapes at the bottom).
 
-```bash
-pip install edge-tts
-python3 scripts/gen-intro-audio.py --voice en-US-GuyNeural
+> These are external web tools that need a (free-tier) account. Nothing here runs
+> them for you — each produces a file you drop into `public/intro/`. Outputs are
+> drop-in; no code edits beyond adding `video` filenames to the manifest.
+
+Narration script + exact per-segment lines: [gen-intro-audio.py](gen-intro-audio.py)
+(`GREETINGS`, `SEGMENTS`, `CAPTIONS`). Steps: `greeting` (hero) → about → work →
+skills → contact.
+
+---
+
+## Step 1 — Voice (MiniMax Audio)
+
+Generate the spoken narration; one mp3 per step.
+
+1. MiniMax Audio (T2A / text-to-speech) → paste each line from `SEGMENTS` /
+   `GREETINGS`, pick a male English voice, keep clips separate.
+2. Export mp3 and save with these exact names in `public/intro/`:
+   `greet-morning.mp3`, `greet-afternoon.mp3`, `greet-evening.mp3`,
+   `seg-about.mp3`, `seg-work.mp3`, `seg-skills.mp3`, `seg-contact.mp3`.
+
+Filenames match the manifest, so this is a straight overwrite of the current
+edge-tts audio. (No-account fallback: `python3 scripts/gen-intro-audio.py`.)
+
+## Step 2 — Presenter image (Nano Banana / Gemini 2.5 Flash Image)
+
+Create the still the avatar is built from.
+
+Prompt:
+> Cinematic portrait of a friendly software developer seated at a modern home
+> workspace, wearing a black call-center headset with mic, slim glasses, dark
+> hoodie. Dual monitors with code glow behind, desk lamp, plant, night city
+> window. Facing camera, upper body, neutral closed mouth, soft teal-and-orange
+> rim light, dark background. Photorealistic, 4k.
+
+Export `portrait.png` (keep it; it feeds Hedra).
+
+## Step 3 — Talking avatar (Hedra)
+
+Lip-sync the image to the voice → one mp4 per step.
+
+1. Hedra → Character/avatar: upload `portrait.png` as the face.
+2. For each MiniMax mp3, generate a clip → export mp4.
+3. Save in `public/intro/` as: `greet-morning.mp4`, `greet-afternoon.mp4`,
+   `greet-evening.mp4`, `seg-about.mp4`, `seg-work.mp4`, `seg-skills.mp4`,
+   `seg-contact.mp4`.
+4. Add `video` to each manifest entry (snippet below). Done — player switches
+   to video automatically.
+
+## Step 4 — Cinematic plates (Stable Diffusion) — optional
+
+Backgrounds / lighting plates if you want a richer scene behind the avatar or
+section b-roll.
+
+Prompt:
+> Moody developer workspace at night, dual ultrawide monitors with teal code,
+> orange desk lamp bokeh, rain on window, volumetric light, cinematic color
+> grade, no people. 16:9.
+
+Use as Hedra's background, or as a still behind a section.
+
+## Step 5 — Cinematic video (Hailuo / MiniMax video) — optional
+
+Image-to-video for an establishing shot or animated b-roll.
+
+1. Hailuo → image-to-video: feed the Nano Banana or Stable Diffusion still.
+2. Prompt: *slow push-in on the workspace, screens flicker, steam rises from the
+   mug, subtle camera drift.*
+3. Export `intro-establish.mp4` → `public/intro/`. Use it as a full-screen
+   greeting backdrop (optional follow-up wiring).
+
+---
+
+## Wiring videos into the manifest
+
+After Step 3, edit `public/intro/timeline.json` — add `video` next to each `file`:
+
+```json
+{
+  "greetings": {
+    "morning":   { "file": "greet-morning.mp3",   "video": "greet-morning.mp4",   "section": "hero", "text": "…" },
+    "afternoon": { "file": "greet-afternoon.mp3", "video": "greet-afternoon.mp4", "section": "hero", "text": "…" },
+    "evening":   { "file": "greet-evening.mp3",   "video": "greet-evening.mp4",   "section": "hero", "text": "…" }
+  },
+  "segments": [
+    { "id": "about",   "file": "seg-about.mp3",   "video": "seg-about.mp4",   "section": "about",   "text": "…" },
+    { "id": "work",    "file": "seg-work.mp3",    "video": "seg-work.mp4",    "section": "work",    "text": "…" },
+    { "id": "skills",  "file": "seg-skills.mp3",  "video": "seg-skills.mp4",  "section": "skills",  "text": "…" },
+    { "id": "contact", "file": "seg-contact.mp3", "video": "seg-contact.mp4", "section": "contact", "text": "…" }
+  ]
+}
 ```
 
-Outputs to `public/intro/`:
-- `greet-morning.mp3`, `greet-afternoon.mp3`, `greet-evening.mp3` — time-of-day greeting
-- `seg-about.mp3`, `seg-work.mp3`, `seg-skills.mp3`, `seg-contact.mp3` — body
-- `timeline.json` — manifest (file → section → caption) the player consumes
+Encode mp4s as H.264 + AAC, faststart, for web playback. The player advances on
+each clip's `ended` event, so per-step files keep exact section sync.
 
-Edit the script text or `--voice` in `scripts/gen-intro-audio.py` and re-run.
-Other free voices: `en-US-EricNeural`, `en-IN-PrabhatNeural` (Indian English).
-List all: `edge-tts --list-voices`.
+## What's required vs optional
 
-The player ([src/hooks/useNarrationSync.ts](../src/hooks/useNarrationSync.ts))
-advances the section on each clip's `ended` event — exact sync, no timestamps.
-If audio fails to load it falls back to timed captions automatically.
-
-## 2. Talking-avatar video (optional upgrade, free + local)
-
-Current build uses a static animated avatar (`public/profile.jpeg`) + speaking
-rings. To make it a lip-synced talking head with **no paid service**:
-
-1. Provide a frontal, well-lit photo of you **seated at your workspace**
-   (upper body, desk visible, mouth closed) — replaces the headshot as the source.
-2. Generate audio (step 1 above).
-3. Lip-sync the photo to each MP3 with open-source [Wav2Lip](https://github.com/Rudrabha/Wav2Lip)
-   (or [SadTalker](https://github.com/OpenTalker/SadTalker)) — runs locally on CPU/GPU:
-   ```bash
-   python inference.py --checkpoint_path wav2lip_gan.pth \
-     --face workspace.jpg --audio public/intro/greet-morning.mp3 \
-     --outfile public/intro/greet-morning.mp4
-   # repeat for each greeting + segment clip
-   ```
-4. Compress for web with ffmpeg (`brew install ffmpeg`):
-   ```bash
-   ffmpeg -i in.mp4 -vcodec libx264 -crf 28 -preset slow -movflags +faststart out.mp4
-   ```
-5. Swap the `<img>` in [src/components/Intro/index.tsx](../src/components/Intro/index.tsx)
-   for a `<video>` that loads `intro/<id>.mp4`; the manifest already carries `file`
-   per step (point it at the `.mp4` instead of `.mp3`).
-
-That's it — same sync logic, video instead of a static avatar.
+- **Required for a talking-video intro:** Step 1 (MiniMax voice) → Step 2 (Nano
+  Banana image) → Step 3 (Hedra video) → wire manifest.
+- **Optional polish:** Step 4 (Stable Diffusion plates), Step 5 (Hailuo b-roll).
+- **Ship-anytime fallback:** voice mp3s only → coded SVG presenter lip-syncs;
+  no assets at all → captions.

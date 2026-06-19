@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, type RefObject } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   MdPlayArrow, MdPause, MdVolumeUp, MdVolumeOff, MdReplay, MdSkipNext,
@@ -10,7 +10,7 @@ import './Intro.css';
 export default function IntroPresenter({ onFinish }: { onFinish: () => void }) {
   const reduce = useReducedMotion();
   const {
-    audioRef, item, index, total, playing, muted, captionOnly, progress,
+    mediaRef, item, index, total, playing, muted, captionOnly, hasVideo, progress,
     onEnded, onError, onTimeUpdate, controls,
   } = useNarrationSync(onFinish);
 
@@ -46,7 +46,19 @@ export default function IntroPresenter({ onFinish }: { onFinish: () => void }) {
         data-reduce={reduce ? 'true' : 'false'}
       >
         <div className="intro-avatar-media">
-          <WorkspaceAvatar speaking={speaking} reduce={!!reduce} />
+          {hasVideo ? (
+            <video
+              key="intro-video"
+              ref={mediaRef as RefObject<HTMLVideoElement>}
+              className="intro-video"
+              playsInline
+              onEnded={onEnded}
+              onError={onError}
+              onTimeUpdate={onTimeUpdate}
+            />
+          ) : (
+            <WorkspaceAvatar speaking={speaking} reduce={!!reduce} />
+          )}
           <span className="intro-live">
             <span className="intro-live-dot" /> {captionOnly ? 'BRIEFING' : 'ON AIR'}
           </span>
@@ -107,7 +119,16 @@ export default function IntroPresenter({ onFinish }: { onFinish: () => void }) {
         </div>
       </div>
 
-      <audio ref={audioRef} onEnded={onEnded} onError={onError} onTimeUpdate={onTimeUpdate} hidden preload="auto" />
+      {!hasVideo && (
+        <audio
+          ref={mediaRef as RefObject<HTMLAudioElement>}
+          onEnded={onEnded}
+          onError={onError}
+          onTimeUpdate={onTimeUpdate}
+          hidden
+          preload="auto"
+        />
+      )}
     </motion.div>
   );
 }
