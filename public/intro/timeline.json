@@ -1,5 +1,5 @@
 {
-  "voice": "en-US-GuyNeural",
+  "voice": "Magpie-Multilingual.EN-US.Ray",
   "greetings": {
     "morning": {
       "file": "greet-morning.mp3",
