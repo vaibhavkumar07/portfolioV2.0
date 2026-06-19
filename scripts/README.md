@@ -27,7 +27,6 @@ Secrets live in `.env` (gitignored — never committed). Format:
 ```
 NVIDIA_TTS_API_KEY=...     # Magpie TTS multilingual (voice)
 NVIDIA_IMAGE_API_KEY=...   # FLUX.1 image generation (presenter)
-NVIDIA_API_KEY=...         # MiniMax-M3 chat LLM (unused for assets)
 ```
 
 Generate assets:
@@ -43,7 +42,6 @@ node scripts/gen-presenter-image.mjs                                  # presente
   (`flux.1-dev`, or `... schnell` for speed). The provided key exposes FLUX, **not**
   stable-diffusion-3.5 (that route 404s / isn't in the key's function list); FLUX.1
   is photorealistic and a strong replacement.
-- **MiniMax-M3** — text LLM only; not used for assets.
 - **Hedra / Hailuo** — web tools, no API key here → Steps 3 & 5 stay manual.
 
 > Security: API keys shared in plaintext should be rotated/revoked after use.
