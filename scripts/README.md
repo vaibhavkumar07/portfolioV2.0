@@ -20,6 +20,34 @@ skills → contact.
 
 ---
 
+## Automated path (API keys via `.env`)
+
+Secrets live in `.env` (gitignored — never committed). Format:
+
+```
+NANO_BANANA_API_KEY=...   # Google Gemini image API (x-goog-api-key)
+NVIDIA_API_KEY=...        # MiniMax-M3 via NVIDIA NIM (text LLM)
+```
+
+Generate the presenter image:
+
+```bash
+node scripts/gen-presenter-image.mjs        # auto-loads .env
+```
+
+**What the keys can/can't do (verified):**
+- **Nano Banana (Gemini image)** — auth works; generates `public/intro/presenter.png`.
+  Free tier is daily-quota limited; a `HTTP 429 quota exceeded` means wait for the
+  daily reset or enable billing, then re-run.
+- **MiniMax-M3 (NVIDIA NIM)** — works, but it's a **text LLM, not text-to-speech**.
+  It cannot make voice or images. Voice uses edge-tts (Step 1 fallback) or MiniMax
+  Audio (separate product/key, not this one).
+- **Hedra / Hailuo** — web tools, no API key here → Steps 3 & 5 stay manual.
+
+> Security: API keys shared in plaintext should be rotated/revoked after use.
+
+---
+
 ## Step 1 — Voice (MiniMax Audio)
 
 Generate the spoken narration; one mp3 per step.

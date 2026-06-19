@@ -8,6 +8,15 @@ dist/
 # OS / editor cruft
 .DS_Store
 
+# Secrets — NEVER commit
+.env
+.env.*
+*.key
+
+# Generated intro asset working dir (large binaries optional)
+# (kept: public/intro/*.mp3 + timeline.json; ignore raw renders)
+public/intro/_raw/
+
 # Agent / tooling (local only)
 .gstack/
 .claude/
