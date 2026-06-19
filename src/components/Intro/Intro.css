@@ -46,6 +46,8 @@
   position: relative;
   width: 312px; height: 260px;
   display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  border-radius: 16px;
   filter: drop-shadow(0 0 36px rgba(14,165,233,0.22));
 }
 
@@ -58,21 +60,20 @@
   background: #070c18;
 }
 
-/* Photoreal presenter still (FLUX) — speaking conveyed by subtle breathing */
-.intro-photo {
-  width: 100%; height: 100%;
-  object-fit: cover;
+/* Photoreal presenter (FLUX) animated to "speak" via canvas jaw-warp */
+.talk-portrait {
+  width: 100%;
+  display: block;
   border-radius: 16px;
-  border: 1px solid rgba(14,165,233,0.3);
-  box-shadow: inset 0 0 40px rgba(0,0,0,0.4);
 }
-.intro-photo--speaking { animation: intro-photo-breathe 5s ease-in-out infinite; }
-@keyframes intro-photo-breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.018); }
+.talk-portrait--live { animation: tp-bob 5.5s ease-in-out infinite; transform-origin: 50% 85%; }
+@keyframes tp-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30% { transform: translateY(-1.5px) rotate(-0.5deg); }
+  60% { transform: translateY(0.5px) rotate(0.3deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .intro-photo--speaking { animation: none; }
+  .talk-portrait--live { animation: none; }
 }
 
 /* ── WORKSPACE AVATAR (coded presenter) ── */

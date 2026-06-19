@@ -5,6 +5,7 @@ import {
 } from 'react-icons/md';
 import { useNarrationSync } from '../../hooks/useNarrationSync';
 import WorkspaceAvatar from './WorkspaceAvatar';
+import TalkingPortrait from './TalkingPortrait';
 import './Intro.css';
 
 const BASE = import.meta.env.BASE_URL;
@@ -64,10 +65,10 @@ export default function IntroPresenter({ onFinish }: { onFinish: () => void }) {
           ) : imgError ? (
             <WorkspaceAvatar speaking={speaking} reduce={!!reduce} />
           ) : (
-            <img
+            <TalkingPortrait
               src={PRESENTER_IMG}
-              alt="Vaibhav at his workspace"
-              className={`intro-photo${speaking ? ' intro-photo--speaking' : ''}`}
+              active={speaking}
+              reduce={!!reduce}
               onError={() => setImgError(true)}
             />
           )}

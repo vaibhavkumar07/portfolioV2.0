@@ -30,12 +30,13 @@ const MODELS = {
 const pick = process.argv[2] === 'schnell' ? 'schnell' : 'dev';
 const M = MODELS[pick];
 
-const PROMPT = `Photorealistic cinematic portrait of a friendly south-asian software
-developer, late 20s, seated at a modern home workspace, wearing a black call-center
-headset with boom mic, slim glasses, dark hoodie. Dual monitors with teal code glow
-behind, warm orange desk lamp, small plant, night city window with bokeh. Facing
-camera, upper body, calm neutral expression, soft teal-and-orange rim light, shallow
-depth of field, dark moody background, high detail, 4k.`;
+const PROMPT = `Photorealistic front-facing head and shoulders portrait of a friendly
+south-asian male software developer, late 20s, looking directly straight at the camera,
+calm neutral closed-mouth expression, face centered and symmetric. Wearing a slim black
+over-ear headset (mic boom away from the mouth, near the cheek), slim glasses, dark
+hoodie. Softly blurred home-office background with teal monitor code glow and a warm
+orange desk lamp. Even soft frontal lighting on the face, shallow depth of field, high
+detail, sharp eyes, 4k.`;
 
 const H = { Authorization: `Bearer ${KEY}`, Accept: 'application/json', 'Content-Type': 'application/json' };
 
