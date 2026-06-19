@@ -1,2 +1,16 @@
+# Dependencies
 node_modules
+
+# Build output (CI rebuilds via GitHub Actions)
+dist/
+*.tsbuildinfo
+
+# OS / editor cruft
+.DS_Store
+
+# Agent / tooling (local only)
 .gstack/
+.claude/
+.claude-flow/
+.mcp.json
+CLAUDE.md
