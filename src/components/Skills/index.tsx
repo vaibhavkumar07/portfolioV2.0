@@ -1,9 +1,23 @@
 import { useRef } from 'react';
 import { motion, useInView, type Variants } from 'framer-motion';
 import { skills } from '../../data/skills';
+import { useSpotlight } from '../../hooks/useSpotlight';
 import './Skills.css';
 
 const categories = ['Platform', 'AI/ML', 'Dev', 'Integration'];
+
+const CERTS = [
+  'Infosys Certified Contact Center Platform Professional',
+  'Infosys Certified Contact Center Technology Components & Integrations Professional',
+  'Infosys Certified Contact Center Professional',
+  'Infosys Certified Applied Generative AI Professional',
+  'Infosys Certified AI Consumer',
+  'Infosys Certified IoT Professional',
+  'Infosys Global Agile Developer Certification',
+  'Infosys Certified Python Associate',
+  'Infosys Certified Java SE8 Developer – 101',
+  'AI Strategy Certification — eCornell',
+];
 
 const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item: Variants = {
@@ -35,6 +49,7 @@ function SkillBar({ name, level, delay }: { name: string; level: number; delay: 
 export default function Skills() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
+  const spotlight = useSpotlight();
 
   return (
     <section className="skills" id="skills">
@@ -49,13 +64,18 @@ export default function Skills() {
             <span className="skills-num">03</span>
             <div>
               <span className="skills-prompt">{'>'} OPTION 3 SELECTED — LOADING SYSTEM PROFILE...</span>
-              <h2 className="skills-title">CAPABILITIES</h2>
+              <h2 className="skills-title text-shimmer">CAPABILITIES</h2>
             </div>
           </motion.div>
 
           <div className="skills-grid">
             {categories.map((cat) => (
-              <motion.div key={cat} variants={item} className="skills-cat neon-border">
+              <motion.div
+                key={cat}
+                variants={item}
+                className="skills-cat neon-border spotlight-card"
+                onMouseMove={spotlight.onMouseMove}
+              >
                 <div className="skills-cat-header">{cat.toUpperCase()}</div>
                 <div className="skills-cat-body">
                   {skills
@@ -68,25 +88,18 @@ export default function Skills() {
             ))}
           </div>
 
-          {/* Certifications */}
+          {/* Certifications — infinite ticker */}
           <motion.div variants={item} className="skills-certs">
             <div className="skills-certs-header">CERTIFICATIONS & QUALIFICATIONS</div>
-            <div className="skills-certs-grid">
-              {[
-                'Infosys Certified Contact Center Platform Professional',
-                'Infosys Certified Contact Center Technology Components & Integrations Professional',
-                'Infosys Certified Contact Center Professional',
-                'Infosys Certified Applied Generative AI Professional',
-                'Infosys Certified AI Consumer',
-                'Infosys Certified IoT Professional',
-                'Infosys Global Agile Developer Certification',
-                'Infosys Certified Python Associate',
-                'Infosys Certified Java SE8 Developer – 101',
-                'AI Strategy Certification — eCornell',
-              ].map((c) => (
-                <div key={c} className="skills-cert">
-                  <div className="skills-cert-dot" />
-                  <span>{c}</span>
+            <div className="marquee skills-certs-marquee">
+              {[0, 1].map((dup) => (
+                <div className="marquee-track" key={dup} aria-hidden={dup === 1}>
+                  {CERTS.map((c) => (
+                    <div key={c} className="skills-cert">
+                      <div className="skills-cert-dot" />
+                      <span>{c}</span>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>

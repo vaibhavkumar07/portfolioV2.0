@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, useInView, AnimatePresence, type Variants } from 'framer-motion';
 import { MdArrowBack, MdArrowForward } from 'react-icons/md';
 import { projects } from '../../data/projects';
+import { useSpotlight } from '../../hooks/useSpotlight';
 import './Work.css';
 
 const container: Variants = {
@@ -19,6 +20,7 @@ export default function Work() {
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [dir, setDir] = useState<1 | -1>(1);
+  const spotlight = useSpotlight();
 
   const go = (d: 1 | -1) => {
     if (animating) return;
@@ -46,7 +48,7 @@ export default function Work() {
             <span className="work-num">02</span>
             <div>
               <span className="work-prompt">{'>'} OPTION 2 SELECTED — SEARCHING RECORDS...</span>
-              <h2 className="work-title-h">PROJECT RESULTS</h2>
+              <h2 className="work-title-h text-shimmer">PROJECT RESULTS</h2>
             </div>
             <div className="work-count">
               <span className="work-count-cur">{String(current + 1).padStart(2, '0')}</span>
@@ -65,7 +67,7 @@ export default function Work() {
               exit={{ opacity: 0, x: -dir * 40 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
             >
-              <div className="work-info">
+              <div className="work-info spotlight-card" onMouseMove={spotlight.onMouseMove}>
                 <div className="work-meta">
                   <span className="work-record-id">RESULT-{p.id}</span>
                   <span className="work-category">{p.category}</span>
@@ -76,7 +78,7 @@ export default function Work() {
               </div>
 
               {/* Visual */}
-              <div className="work-visual neon-border">
+              <div className="work-visual neon-border border-beam">
                 <div className="work-visual-grid" />
                 <div className="work-visual-center">
                   <div className="work-visual-id">{p.id}</div>

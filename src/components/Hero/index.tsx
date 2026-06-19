@@ -102,7 +102,7 @@ export default function Hero() {
         </motion.div>
 
         {/* Right — 3D Scene */}
-        <div className="hero-scene">
+        <div className="hero-scene border-beam">
           <Suspense fallback={<div className="hero-scene-placeholder">LOADING TOPOLOGY...</div>}>
             <Scene />
           </Suspense>

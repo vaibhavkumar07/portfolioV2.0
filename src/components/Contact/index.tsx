@@ -1,6 +1,7 @@
 import { useRef, useState, FormEvent } from 'react';
 import { motion, useInView, type Variants } from 'framer-motion';
 import { MdCallEnd, MdSend, MdPhone, MdEmail, MdLocationOn, MdOpenInNew } from 'react-icons/md';
+import { useSpotlight } from '../../hooks/useSpotlight';
 import './Contact.css';
 
 const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
@@ -13,6 +14,7 @@ export default function Contact({ onEnd }: { onEnd: () => void }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
   const [sent, setSent] = useState(false);
+  const spotlight = useSpotlight();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -32,13 +34,17 @@ export default function Contact({ onEnd }: { onEnd: () => void }) {
             <span className="contact-num">04</span>
             <div>
               <span className="contact-prompt">{'>'} OPTION 4 SELECTED — TO CONNECT, PRESS 9</span>
-              <h2 className="contact-title">TRANSFER CALL</h2>
+              <h2 className="contact-title text-shimmer">TRANSFER CALL</h2>
             </div>
           </motion.div>
 
           <div className="contact-grid">
             {/* Info */}
-            <motion.div variants={item} className="contact-info">
+            <motion.div
+              variants={item}
+              className="contact-info spotlight-card"
+              onMouseMove={spotlight.onMouseMove}
+            >
               <div className="contact-info-header">DIRECT EXTENSIONS</div>
               {[
                 { icon: <MdEmail size={14} />, label: 'EMAIL', val: 'yadavvaibhavkumar7@gmail.com', href: 'mailto:yadavvaibhavkumar7@gmail.com' },
@@ -77,7 +83,7 @@ export default function Contact({ onEnd }: { onEnd: () => void }) {
                   <p>Call request received. Will connect within 24 hours.</p>
                 </div>
               ) : (
-                <form className="contact-form" onSubmit={handleSubmit}>
+                <form className="contact-form spotlight-card" onSubmit={handleSubmit} onMouseMove={spotlight.onMouseMove}>
                   <div className="contact-form-header">INITIATE TRANSFER</div>
                   <div className="contact-field">
                     <label className="contact-label" htmlFor="cf-name">CALLER NAME</label>

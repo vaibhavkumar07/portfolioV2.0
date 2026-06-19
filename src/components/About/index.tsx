@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { motion, useInView, type Variants } from 'framer-motion';
+import { useSpotlight } from '../../hooks/useSpotlight';
 import './About.css';
 
 const BIO_LINES = [
@@ -37,6 +38,7 @@ const container: Variants = {
 export default function About() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
+  const spotlight = useSpotlight();
 
   return (
     <section className="about" id="about">
@@ -52,7 +54,7 @@ export default function About() {
             <span className="about-num">01</span>
             <div className="about-header-line">
               <span className="about-prompt">{'>'} OPTION 1 SELECTED</span>
-              <h2 className="about-title">ABOUT ME</h2>
+              <h2 className="about-title text-shimmer">ABOUT ME</h2>
             </div>
           </motion.div>
 
@@ -68,7 +70,11 @@ export default function About() {
             </motion.div>
 
             {/* Info panel */}
-            <motion.div variants={item} className="about-panel">
+            <motion.div
+              variants={item}
+              className="about-panel spotlight-card"
+              onMouseMove={spotlight.onMouseMove}
+            >
               <div className="about-panel-header">CALLER DETAILS</div>
               {[
                 ['NAME',     'Vaibhavkumar Yadav'],
