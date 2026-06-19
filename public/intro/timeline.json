@@ -1,0 +1,46 @@
+{
+  "voice": "en-US-GuyNeural",
+  "greetings": {
+    "morning": {
+      "file": "greet-morning.mp3",
+      "section": "hero",
+      "text": "Good morning, and thanks for picking up. I'm Vaibhav, a Genesys Cloud IVR developer based in Richardson, Texas. Welcome to my workspace \u2014 let me walk you through what I do."
+    },
+    "afternoon": {
+      "file": "greet-afternoon.mp3",
+      "section": "hero",
+      "text": "Good afternoon, and thanks for picking up. I'm Vaibhav, a Genesys Cloud IVR developer based in Richardson, Texas. Welcome to my workspace \u2014 let me walk you through what I do."
+    },
+    "evening": {
+      "file": "greet-evening.mp3",
+      "section": "hero",
+      "text": "Good evening, and thanks for taking my call. I'm Vaibhav, a Genesys Cloud IVR developer based in Richardson, Texas. Welcome to my workspace \u2014 let me walk you through what I do."
+    }
+  },
+  "segments": [
+    {
+      "id": "about",
+      "file": "seg-about.mp3",
+      "section": "about",
+      "text": "For 7+ years at Infosys I've designed enterprise contact-center solutions handling millions of calls for healthcare and e-commerce clients \u2014 IVR and bot flows in Genesys Architect and AI Studio."
+    },
+    {
+      "id": "work",
+      "file": "seg-work.mp3",
+      "section": "work",
+      "text": "Projects I'm proud of: a cloud contact-center modernization with OpenAI-powered journeys, a full Genesys configuration tool, and omnichannel voice bots on Dialogflow and Cisco."
+    },
+    {
+      "id": "skills",
+      "file": "seg-skills.mp3",
+      "section": "skills",
+      "text": "My toolkit spans the Genesys platform, AI services like Azure Speech and OpenAI, and engineering in Java, Python, and React \u2014 backed by 10 certifications and an IoT patent."
+    },
+    {
+      "id": "contact",
+      "file": "seg-contact.mp3",
+      "section": "contact",
+      "text": "If this fits what you're building, let's talk. Press the contact option, or just stay on the line. Thanks for connecting."
+    }
+  ]
+}

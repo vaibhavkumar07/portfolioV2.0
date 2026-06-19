@@ -1,4 +1,4 @@
-export type CallState = 'ringing' | 'active' | 'ended';
+export type CallState = 'ringing' | 'intro' | 'active' | 'ended';
 
 export interface Project {
   id: string;

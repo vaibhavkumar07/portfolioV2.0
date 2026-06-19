@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import { lazy, Suspense } from 'react';
 import { useCallStateMachine } from './hooks/useCallState';
 import Background from './components/Background';
 import Splash from './components/Splash';
@@ -10,12 +11,17 @@ import Skills from './components/Skills';
 import Contact from './components/Contact';
 import './index.css';
 
+const IntroPresenter = lazy(() => import('./components/Intro'));
+
 function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 export default function App() {
-  const { state, elapsed, accept, end } = useCallStateMachine();
+  const { state, elapsed, accept, finishIntro, end } = useCallStateMachine();
+
+  // Sections are mounted during the intro too, so the presenter can scroll/reveal them.
+  const showMain = state === 'intro' || state === 'active';
 
   return (
     <>
@@ -28,7 +34,7 @@ export default function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {state === 'active' && (
+        {showMain && (
           <motion.div
             key="main"
             initial={{ opacity: 0 }}
@@ -37,7 +43,7 @@ export default function App() {
             transition={{ duration: 0.4 }}
             style={{ position: 'relative', zIndex: 1 }}
           >
-            <Navbar elapsed={elapsed} onEnd={end} onNav={scrollTo} />
+            {state === 'active' && <Navbar elapsed={elapsed} onEnd={end} onNav={scrollTo} />}
             <main>
               <Hero />
               <About />
@@ -48,6 +54,14 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {state === 'intro' && (
+            <IntroPresenter key="intro" onFinish={finishIntro} />
+          )}
+        </AnimatePresence>
+      </Suspense>
 
       <AnimatePresence>
         {state === 'ended' && (
