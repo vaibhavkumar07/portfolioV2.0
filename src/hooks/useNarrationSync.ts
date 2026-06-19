@@ -78,6 +78,16 @@ export function useNarrationSync(onFinish: () => void) {
 
   const advance = useCallback(() => setIndex((i) => i + 1), []);
 
+  // Guard against an `ended` that fires with no real playback (e.g. a browser
+  // that can't decode the mp3): drop to timed captions instead of skipping.
+  const handleEnded = useCallback(() => {
+    const a = audioRef.current;
+    if (!captionOnly && a && a.currentTime < 0.25) { setCaptionOnly(true); return; }
+    advance();
+  }, [captionOnly, advance]);
+
+  const handleError = useCallback(() => setCaptionOnly(true), []);
+
   // Drive each step: reveal its section, then play audio (or run a timed
   // fallback). Side effects live here, not in the setIndex updater, so React
   // StrictMode's double-invoked updaters can't skip or double-fire them.
@@ -153,7 +163,8 @@ export function useNarrationSync(onFinish: () => void) {
     muted,
     captionOnly,
     progress,
-    onEnded: advance,
+    onEnded: handleEnded,
+    onError: handleError,
     onTimeUpdate,
     controls: { togglePlay, toggleMute, replay, skip: finish },
   };

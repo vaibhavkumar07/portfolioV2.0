@@ -4,15 +4,14 @@ import {
   MdPlayArrow, MdPause, MdVolumeUp, MdVolumeOff, MdReplay, MdSkipNext,
 } from 'react-icons/md';
 import { useNarrationSync } from '../../hooks/useNarrationSync';
+import WorkspaceAvatar from './WorkspaceAvatar';
 import './Intro.css';
-
-const BASE = import.meta.env.BASE_URL;
 
 export default function IntroPresenter({ onFinish }: { onFinish: () => void }) {
   const reduce = useReducedMotion();
   const {
     audioRef, item, index, total, playing, muted, captionOnly, progress,
-    onEnded, onTimeUpdate, controls,
+    onEnded, onError, onTimeUpdate, controls,
   } = useNarrationSync(onFinish);
 
   // Keyboard shortcuts: Space = play/pause, M = mute, S/Esc = skip.
@@ -47,14 +46,7 @@ export default function IntroPresenter({ onFinish }: { onFinish: () => void }) {
         data-reduce={reduce ? 'true' : 'false'}
       >
         <div className="intro-avatar-media">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className={`intro-ring${speaking ? ' intro-ring--on' : ''}`}
-              style={{ animationDelay: `${i * 0.5}s` }}
-            />
-          ))}
-          <img src={`${BASE}profile.jpeg`} alt="Vaibhavkumar Yadav" className="intro-avatar-img" />
+          <WorkspaceAvatar speaking={speaking} reduce={!!reduce} />
           <span className="intro-live">
             <span className="intro-live-dot" /> {captionOnly ? 'BRIEFING' : 'ON AIR'}
           </span>
@@ -115,7 +107,7 @@ export default function IntroPresenter({ onFinish }: { onFinish: () => void }) {
         </div>
       </div>
 
-      <audio ref={audioRef} onEnded={onEnded} onTimeUpdate={onTimeUpdate} hidden preload="auto" />
+      <audio ref={audioRef} onEnded={onEnded} onError={onError} onTimeUpdate={onTimeUpdate} hidden preload="auto" />
     </motion.div>
   );
 }
