@@ -25,23 +25,25 @@ skills → contact.
 Secrets live in `.env` (gitignored — never committed). Format:
 
 ```
-NANO_BANANA_API_KEY=...   # Google Gemini image API (x-goog-api-key)
-NVIDIA_API_KEY=...        # MiniMax-M3 via NVIDIA NIM (text LLM)
+NVIDIA_TTS_API_KEY=...     # Magpie TTS multilingual (voice)
+NVIDIA_IMAGE_API_KEY=...   # FLUX.1 image generation (presenter)
+NVIDIA_API_KEY=...         # MiniMax-M3 chat LLM (unused for assets)
 ```
 
-Generate the presenter image:
+Generate assets:
 
 ```bash
-node scripts/gen-presenter-image.mjs        # auto-loads .env
+set -a && . ./.env && set +a && python3 scripts/gen-intro-voice.py   # voice mp3s
+node scripts/gen-presenter-image.mjs                                  # presenter.jpg
 ```
 
-**What the keys can/can't do (verified):**
-- **Nano Banana (Gemini image)** — auth works; generates `public/intro/presenter.png`.
-  Free tier is daily-quota limited; a `HTTP 429 quota exceeded` means wait for the
-  daily reset or enable billing, then re-run.
-- **MiniMax-M3 (NVIDIA NIM)** — works, but it's a **text LLM, not text-to-speech**.
-  It cannot make voice or images. Voice uses edge-tts (Step 1 fallback) or MiniMax
-  Audio (separate product/key, not this one).
+**What the keys do (verified):**
+- **Magpie TTS** ✅ — generates the narration mp3s (Step 1).
+- **FLUX.1 image** ✅ — generates `public/intro/presenter.jpg` via NVCF
+  (`flux.1-dev`, or `... schnell` for speed). The provided key exposes FLUX, **not**
+  stable-diffusion-3.5 (that route 404s / isn't in the key's function list); FLUX.1
+  is photorealistic and a strong replacement.
+- **MiniMax-M3** — text LLM only; not used for assets.
 - **Hedra / Hailuo** — web tools, no API key here → Steps 3 & 5 stay manual.
 
 > Security: API keys shared in plaintext should be rotated/revoked after use.
@@ -68,18 +70,18 @@ Fallbacks (same filenames, drop-in): free edge-tts
 (`python3 scripts/gen-intro-audio.py`), or MiniMax Audio (paste the lines, export
 mp3 as `greet-*.mp3` / `seg-*.mp3`).
 
-## Step 2 — Presenter image (Nano Banana / Gemini 2.5 Flash Image)
+## Step 2 — Presenter image (FLUX.1 via NVIDIA) ✅ automated
 
-Create the still the avatar is built from.
+```bash
+node scripts/gen-presenter-image.mjs            # flux.1-dev → public/intro/presenter.jpg
+node scripts/gen-presenter-image.mjs schnell    # faster
+```
 
-Prompt:
-> Cinematic portrait of a friendly software developer seated at a modern home
-> workspace, wearing a black call-center headset with mic, slim glasses, dark
-> hoodie. Dual monitors with code glow behind, desk lamp, plant, night city
-> window. Facing camera, upper body, neutral closed mouth, soft teal-and-orange
-> rim light, dark background. Photorealistic, 4k.
-
-Export `portrait.png` (keep it; it feeds Hedra).
+Edit the prompt in [gen-presenter-image.mjs](gen-presenter-image.mjs). The result
+is shown in the intro (greeting + docked), used as the `<video>` poster, and is the
+source still for the Hedra talking avatar (Step 3). The coded SVG presenter
+([WorkspaceAvatar.tsx](../src/components/Intro/WorkspaceAvatar.tsx)) is the fallback
+if `presenter.jpg` is missing.
 
 ## Step 3 — Talking avatar (Hedra)
 

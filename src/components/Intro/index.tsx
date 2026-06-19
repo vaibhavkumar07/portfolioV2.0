@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from 'react';
+import { useEffect, useState, type RefObject } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   MdPlayArrow, MdPause, MdVolumeUp, MdVolumeOff, MdReplay, MdSkipNext,
@@ -7,8 +7,12 @@ import { useNarrationSync } from '../../hooks/useNarrationSync';
 import WorkspaceAvatar from './WorkspaceAvatar';
 import './Intro.css';
 
+const BASE = import.meta.env.BASE_URL;
+const PRESENTER_IMG = `${BASE}intro/presenter.jpg`;
+
 export default function IntroPresenter({ onFinish }: { onFinish: () => void }) {
   const reduce = useReducedMotion();
+  const [imgError, setImgError] = useState(false);
   const {
     mediaRef, item, index, total, playing, muted, captionOnly, hasVideo, progress,
     onEnded, onError, onTimeUpdate, controls,
@@ -51,13 +55,21 @@ export default function IntroPresenter({ onFinish }: { onFinish: () => void }) {
               key="intro-video"
               ref={mediaRef as RefObject<HTMLVideoElement>}
               className="intro-video"
+              poster={PRESENTER_IMG}
               playsInline
               onEnded={onEnded}
               onError={onError}
               onTimeUpdate={onTimeUpdate}
             />
-          ) : (
+          ) : imgError ? (
             <WorkspaceAvatar speaking={speaking} reduce={!!reduce} />
+          ) : (
+            <img
+              src={PRESENTER_IMG}
+              alt="Vaibhav at his workspace"
+              className={`intro-photo${speaking ? ' intro-photo--speaking' : ''}`}
+              onError={() => setImgError(true)}
+            />
           )}
           <span className="intro-live">
             <span className="intro-live-dot" /> {captionOnly ? 'BRIEFING' : 'ON AIR'}
