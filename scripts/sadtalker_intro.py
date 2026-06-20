@@ -60,16 +60,19 @@ def _replace_in_file(path, replacements):
 def patch_sadtalker_source():
     """Idempotent source patches for numpy>=2 / torchvision>=0.17 compatibility.
     Safe to run on a fresh SadTalker clone."""
-    # basicsr (installed): functional_tensor was removed from torchvision
+    # basicsr (installed): functional_tensor was removed from torchvision.
+    # Locate WITHOUT importing basicsr — importing it is what crashes.
     try:
-        import basicsr, importlib  # noqa: F401
-        deg = os.path.join(os.path.dirname(basicsr.__file__), "data", "degradations.py")
-        _replace_in_file(deg, [(
-            "from torchvision.transforms.functional_tensor import rgb_to_grayscale",
-            "from torchvision.transforms.functional import rgb_to_grayscale",
-        )])
-    except Exception:
-        pass
+        import importlib.util
+        spec = importlib.util.find_spec("basicsr")
+        locs = list(spec.submodule_search_locations) if spec else []
+        for loc in locs:
+            _replace_in_file(os.path.join(loc, "data", "degradations.py"), [(
+                "from torchvision.transforms.functional_tensor import rgb_to_grayscale",
+                "from torchvision.transforms.functional import rgb_to_grayscale",
+            )])
+    except Exception as e:
+        print(f"  basicsr patch skipped: {e}")
 
     # numpy>=2: float(array) and inhomogeneous arrays now raise
     fp = os.path.join(SAD, "src", "face3d", "util", "preprocess.py")
@@ -109,8 +112,7 @@ def patch_sadtalker_source():
 def patch_numpy():
     """Restore numpy<2 aliases SadTalker relies on (np.float, np.int, etc.)."""
     import numpy as np
-    for name, typ in [("float", float), ("int", int), ("bool", bool),
-                      ("object", object), ("str", str), ("complex", complex)]:
+    for name, typ in [("float", float), ("int", int), ("bool", bool), ("complex", complex)]:
         if not hasattr(np, name):
             setattr(np, name, typ)
     if not hasattr(np, "VisibleDeprecationWarning"):
