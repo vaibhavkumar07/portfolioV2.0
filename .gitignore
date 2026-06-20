@@ -25,3 +25,6 @@ public/intro/_raw/
 .claude-flow/
 .mcp.json
 CLAUDE.md
+
+# SadTalker tooling (local only)
+tools/

@@ -81,17 +81,23 @@ source still for the Hedra talking avatar (Step 3). The coded SVG presenter
 ([WorkspaceAvatar.tsx](../src/components/Intro/WorkspaceAvatar.tsx)) is the fallback
 if `presenter.jpg` is missing.
 
-## Step 3 — Talking avatar (Hedra)
+## Step 3 — Talking avatar (SadTalker, free GPU) ✅ scripted
 
-Lip-sync the image to the voice → one mp4 per step.
+Lip-syncs `presenter.jpg` to the voice mp3s → one mp4 per step, and patches
+`timeline.json` with `video` fields. The player then auto-switches to video.
 
-1. Hedra → Character/avatar: upload `portrait.png` as the face.
-2. For each MiniMax mp3, generate a clip → export mp4.
-3. Save in `public/intro/` as: `greet-morning.mp4`, `greet-afternoon.mp4`,
-   `greet-evening.mp4`, `seg-about.mp4`, `seg-work.mp4`, `seg-skills.mp4`,
-   `seg-contact.mp4`.
-4. Add `video` to each manifest entry (snippet below). Done — player switches
-   to video automatically.
+**Runner:** [sadtalker_intro.py](sadtalker_intro.py) — auto-applies the numpy>=2 /
+new-torchvision source patches, GPU-aware (drops `--cpu` when CUDA is present).
+
+**Run it on free GPU (recommended):** open [sadtalker_colab.ipynb](sadtalker_colab.ipynb)
+in Google Colab (Runtime → GPU), run all cells. It clones the repo, installs
+SadTalker, renders all 7 clips in ~2-3 min, and downloads a zip. Unzip into
+`public/intro/`, commit.
+
+> Local CPU render works but is impractical (~20+ min per clip with no GPU). Use Colab.
+
+Hedra remains a manual alternative (upload `presenter.jpg` + each mp3, export mp4
+with the same names).
 
 ## Step 4 — Cinematic plates (Stable Diffusion) — optional
 
