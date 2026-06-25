@@ -1,5 +1,5 @@
 import { buildSystemPrompt } from "@/lib/kb";
-import { rateLimit, clientKey, sameOrigin } from "@/lib/ratelimit";
+import { limited, clientKey, sameOrigin } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   if (!key) return new Response("Agent unavailable", { status: 503 });
 
   if (!sameOrigin(req)) return new Response("Forbidden", { status: 403 });
-  if (rateLimit(clientKey(req), RL_LIMIT, RL_WINDOW))
+  if (await limited(clientKey(req), RL_LIMIT, RL_WINDOW))
     return new Response("Too many requests — give it a moment.", { status: 429 });
 
   let body: unknown;
