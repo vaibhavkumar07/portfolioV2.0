@@ -4,7 +4,9 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 const NIM_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-const MODEL = "minimaxai/minimax-m3";
+// Fast instruct model (~0.8s first token) — responsive for a voice agent;
+// grounded + kept in character by the system prompt. minimax-m3 was 6-13s.
+const MODEL = "meta/llama-3.1-8b-instruct";
 
 // Tiny in-memory per-IP rate limit (best-effort on serverless).
 const hits = new Map<string, { n: number; t: number }>();
@@ -63,8 +65,8 @@ export async function POST(req: Request) {
     body: JSON.stringify({
       model: MODEL,
       messages,
-      max_tokens: 600,
-      temperature: 0.6,
+      max_tokens: 320,
+      temperature: 0.5,
       top_p: 0.95,
       stream: true,
     }),

@@ -26,9 +26,34 @@ export default function VoiceAgent() {
   const [listening, setListening] = useState(false);
   const [voiceOn, setVoiceOn] = useState(true);
   const [sttSupported, setSttSupported] = useState(false);
+  const [note, setNote] = useState("");
 
   const recRef = useRef<SpeechRec | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
+
+  // Pick a male English voice (avoid the default female voice).
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    const pick = () => {
+      const vs = window.speechSynthesis.getVoices();
+      if (!vs.length) return;
+      const pref = [
+        "Rishi", "Alex", "Daniel", "Aaron", "Fred", "Google UK English Male",
+        "Microsoft Guy", "Microsoft David", "Microsoft Mark",
+      ];
+      let v: SpeechSynthesisVoice | undefined;
+      for (const name of pref) {
+        v = vs.find((x) => x.name.includes(name));
+        if (v) break;
+      }
+      if (!v) v = vs.find((x) => /^en/i.test(x.lang) && /male|guy|david|mark|rishi|alex|daniel/i.test(x.name));
+      if (!v) v = vs.find((x) => /en-US/i.test(x.lang)) || vs[0];
+      voiceRef.current = v ?? null;
+    };
+    pick();
+    window.speechSynthesis.onvoiceschanged = pick;
+  }, []);
 
   useEffect(() => {
     const w = window as unknown as {
@@ -44,10 +69,13 @@ export default function VoiceAgent() {
       rec.continuous = false;
       rec.onresult = (e) => {
         const t = e.results[0]?.[0]?.transcript ?? "";
-        if (t) send(t);
+        if (t) { setNote(""); send(t); }
       };
       rec.onend = () => setListening(false);
-      rec.onerror = () => setListening(false);
+      rec.onerror = () => {
+        setListening(false);
+        setNote("Mic didn't catch that — allow microphone access in your browser and try again, or just type.");
+      };
       recRef.current = rec;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -57,19 +85,18 @@ export default function VoiceAgent() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, busy]);
 
-  const speak = useCallback(
+  // Enqueue a chunk of speech (does not cancel — sentences queue in order).
+  const speakChunk = useCallback(
     (text: string) => {
-      if (!voiceOn || typeof window === "undefined" || !window.speechSynthesis) return;
-      window.speechSynthesis.cancel();
+      if (!voiceOn || !text || typeof window === "undefined" || !window.speechSynthesis) return;
       const u = new SpeechSynthesisUtterance(text);
-      u.rate = 1.04;
-      u.pitch = 1;
-      const v = window.speechSynthesis
-        .getVoices()
-        .find((x) => /en-US/.test(x.lang) && /male|google|daniel|alex/i.test(x.name));
-      if (v) u.voice = v;
+      u.rate = 1.02;
+      u.pitch = 0.95;
+      if (voiceRef.current) u.voice = voiceRef.current;
       u.onstart = () => setSpeaking(true);
-      u.onend = () => setSpeaking(false);
+      u.onend = () => {
+        if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) setSpeaking(false);
+      };
       window.speechSynthesis.speak(u);
     },
     [voiceOn],
@@ -93,14 +120,25 @@ export default function VoiceAgent() {
         const reader = res.body.getReader();
         const dec = new TextDecoder();
         let acc = "";
+        let spoken = 0;
+        window.speechSynthesis?.cancel();
         setMessages([...next, { role: "assistant", content: "" }]);
         for (;;) {
           const { done, value } = await reader.read();
           if (done) break;
           acc += dec.decode(value, { stream: true });
           setMessages([...next, { role: "assistant", content: acc }]);
+          // Speak complete sentences as they arrive (voice starts early).
+          let m;
+          // eslint-disable-next-line no-cond-assign
+          while ((m = /[.!?]\s/.exec(acc.slice(spoken)))) {
+            const end = spoken + m.index + 1;
+            speakChunk(acc.slice(spoken, end).trim());
+            spoken = end;
+          }
         }
-        speak(acc);
+        const tail = acc.slice(spoken).trim();
+        if (tail) speakChunk(tail);
       } catch {
         setMessages([
           ...next,
@@ -110,7 +148,7 @@ export default function VoiceAgent() {
         setBusy(false);
       }
     },
-    [busy, speak],
+    [busy, speakChunk],
   );
 
   // keep a ref of messages so send() always appends to latest
@@ -165,7 +203,7 @@ export default function VoiceAgent() {
       {/* Avatar + waveform */}
       <div className="relative flex items-center gap-4 border-b border-border px-4 py-4">
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border">
-          <Image src="/intro/presenter.jpg" alt="Vaibhav" fill className="object-cover" sizes="64px" />
+          <Image src="/profile.jpeg" alt="Vaibhavkumar Yadav" fill className="object-cover" sizes="64px" />
           <span
             className={`absolute inset-0 transition-opacity ${speaking ? "opacity-100" : "opacity-0"}`}
             style={{ boxShadow: "inset 0 0 0 2px var(--brand-orange)" }}
@@ -207,11 +245,15 @@ export default function VoiceAgent() {
                   : "bg-secondary/60 text-foreground"
               }`}
             >
-              {m.content || (busy ? "…" : "")}
+              {m.content || (busy ? <span className="inline-flex gap-1 align-middle">{[0, 1, 2].map((d) => (<span key={d} className="h-1.5 w-1.5 animate-bounce rounded-full bg-current opacity-60" style={{ animationDelay: `${d * 0.15}s` }} />))}</span> : "")}
             </p>
           </div>
         ))}
       </div>
+
+      {note && (
+        <p className="mono border-t border-border px-4 py-1.5 text-[0.66rem] leading-snug text-[var(--brand-orange)]">{note}</p>
+      )}
 
       {/* Input */}
       <form
