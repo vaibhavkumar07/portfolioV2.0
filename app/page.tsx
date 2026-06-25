@@ -21,7 +21,7 @@ const jsonLd = {
   name: PROFILE.name,
   jobTitle: PROFILE.title,
   email: `mailto:${PROFILE.email}`,
-  url: "https://vaibhav.cx",
+  url: "https://vaibhavkumarcx.dev",
   sameAs: [PROFILE.linkedin],
   address: { "@type": "PostalAddress", addressLocality: "Richardson", addressRegion: "TX", addressCountry: "US" },
   knowsAbout: ["Genesys Cloud CX", "IVR", "Conversational AI", "Contact Center", "Voice AI"],

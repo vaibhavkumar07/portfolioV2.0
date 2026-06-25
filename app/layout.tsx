@@ -9,7 +9,7 @@ const mono = JetBrains_Mono({
   weight: ["400", "500", "700"],
 });
 
-const SITE = "https://vaibhav.cx";
+const SITE = "https://vaibhavkumarcx.dev";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
