@@ -48,3 +48,4 @@ tools/
 __pycache__/
 *.pyc
 .gstack/
+!.env*.example
