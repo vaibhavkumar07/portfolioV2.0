@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ModeSwitch from "@/components/ModeSwitch";
 import Reveal from "@/components/Reveal";
+import TrustPanel from "@/components/TrustPanel";
 import VoiceAgent from "@/components/VoiceAgent";
 import { PROFILE, HIGHLIGHTS } from "@/lib/kb";
 import { projects } from "@/lib/projects";
@@ -94,6 +95,8 @@ export default function Home() {
       </section>
 
       <ModeSwitch>
+      <Reveal><TrustPanel /></Reveal>
+
       {/* Work */}
       <Section id="work" num="01" title="Selected work" hint="case studies">
         <div className="grid gap-4 sm:grid-cols-2">
