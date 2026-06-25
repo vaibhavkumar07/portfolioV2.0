@@ -54,7 +54,7 @@ export default function VoiceAgent() {
           else interim += r[0].transcript;
         }
         if (interim) setInput(interim);
-        if (final) { setInput(""); setNote(""); send(final); }
+        if (final) { setInput(""); setNote(""); sendRef.current(final); }
       };
       rec.onend = () => setListening(false);
       rec.onerror = (e) => {
@@ -144,13 +144,21 @@ export default function VoiceAgent() {
       const next: Msg[] = [...messagesRef.current, { role: "user", content: q }];
       setMessages(next);
       setBusy(true);
+      const FALLBACK = "I couldn't reach my brain just now — but I'd love to talk. Email me at yadavvaibhavkumar7@gmail.com.";
       try {
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ messages: next }),
         });
-        if (!res.ok || !res.body) throw new Error(await res.text());
+        if (!res.ok || !res.body) {
+          const msg =
+            res.status === 429
+              ? "I'm getting a lot of questions right now — give me a few seconds and ask again."
+              : FALLBACK;
+          setMessages([...next, { role: "assistant", content: msg }]);
+          return;
+        }
         const reader = res.body.getReader();
         const dec = new TextDecoder();
         let acc = "";
@@ -173,11 +181,10 @@ export default function VoiceAgent() {
         }
         const tail = acc.slice(spoken).trim();
         if (tail) speakChunk(tail);
+        // Empty/blank stream → still give the visitor a useful reply.
+        if (!acc.trim()) setMessages([...next, { role: "assistant", content: FALLBACK }]);
       } catch {
-        setMessages([
-          ...next,
-          { role: "assistant", content: "Connection hiccup — reach me at yadavvaibhavkumar7@gmail.com." },
-        ]);
+        setMessages([...next, { role: "assistant", content: FALLBACK }]);
       } finally {
         setBusy(false);
       }
@@ -190,6 +197,12 @@ export default function VoiceAgent() {
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
+
+  // latest send() for the STT callback (set up once on mount)
+  const sendRef = useRef(send);
+  useEffect(() => {
+    sendRef.current = send;
+  }, [send]);
 
   const toggleMic = () => {
     const rec = recRef.current;

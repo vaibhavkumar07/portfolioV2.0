@@ -45,7 +45,7 @@ export default async function CaseStudyPage({
 
   return (
     <article className="mx-auto max-w-3xl px-5 py-14">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
       <Link href="/#work" className="mono text-[0.72rem] tracking-[0.14em] text-muted-foreground transition hover:text-foreground">
         ← BACK TO WORK

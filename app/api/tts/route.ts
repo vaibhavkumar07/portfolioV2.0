@@ -1,5 +1,6 @@
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import { pronounce } from "@/lib/pronounce";
+import { rateLimit, clientKey, sameOrigin } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 20;
@@ -8,6 +9,10 @@ export const maxDuration = 20;
 const VOICE = process.env.TTS_VOICE || "en-US-GuyNeural";
 
 export async function POST(req: Request) {
+  if (!sameOrigin(req)) return new Response("Forbidden", { status: 403 });
+  if (rateLimit(`tts:${clientKey(req)}`, 60, 60_000))
+    return new Response("Too many requests", { status: 429 });
+
   let text = "";
   try {
     ({ text } = await req.json());
