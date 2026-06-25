@@ -30,30 +30,6 @@ export default function VoiceAgent() {
 
   const recRef = useRef<SpeechRec | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
-
-  // Pick a male English voice (avoid the default female voice).
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    const pick = () => {
-      const vs = window.speechSynthesis.getVoices();
-      if (!vs.length) return;
-      const pref = [
-        "Rishi", "Alex", "Daniel", "Aaron", "Fred", "Google UK English Male",
-        "Microsoft Guy", "Microsoft David", "Microsoft Mark",
-      ];
-      let v: SpeechSynthesisVoice | undefined;
-      for (const name of pref) {
-        v = vs.find((x) => x.name.includes(name));
-        if (v) break;
-      }
-      if (!v) v = vs.find((x) => /^en/i.test(x.lang) && /male|guy|david|mark|rishi|alex|daniel/i.test(x.name));
-      if (!v) v = vs.find((x) => /en-US/i.test(x.lang)) || vs[0];
-      voiceRef.current = v ?? null;
-    };
-    pick();
-    window.speechSynthesis.onvoiceschanged = pick;
-  }, []);
 
   useEffect(() => {
     const w = window as unknown as {
@@ -85,22 +61,62 @@ export default function VoiceAgent() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, busy]);
 
-  // Enqueue a chunk of speech (does not cancel — sentences queue in order).
+  // ── Neural voice via /api/tts (free Edge neural). Fetch sentences in
+  //    parallel, play them in order so it sounds natural and starts early. ──
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioQ = useRef<Promise<string | null>[]>([]);
+  const workingRef = useRef(false);
+
+  const fetchTTS = useCallback(async (text: string): Promise<string | null> => {
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) return null;
+      const buf = await res.arrayBuffer();
+      return URL.createObjectURL(new Blob([buf], { type: "audio/mpeg" }));
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const pump = useCallback(async () => {
+    if (workingRef.current) return;
+    workingRef.current = true;
+    setSpeaking(true);
+    const a = audioRef.current;
+    while (audioQ.current.length) {
+      const url = await audioQ.current.shift();
+      if (!url || !a) continue;
+      await new Promise<void>((resolve) => {
+        a.src = url;
+        a.onended = () => { URL.revokeObjectURL(url); resolve(); };
+        a.onerror = () => resolve();
+        a.play().catch(() => resolve());
+      });
+    }
+    workingRef.current = false;
+    setSpeaking(false);
+  }, []);
+
   const speakChunk = useCallback(
     (text: string) => {
-      if (!voiceOn || !text || typeof window === "undefined" || !window.speechSynthesis) return;
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = 1.02;
-      u.pitch = 0.95;
-      if (voiceRef.current) u.voice = voiceRef.current;
-      u.onstart = () => setSpeaking(true);
-      u.onend = () => {
-        if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) setSpeaking(false);
-      };
-      window.speechSynthesis.speak(u);
+      if (!voiceOn || !text) return;
+      audioQ.current.push(fetchTTS(text));
+      pump();
     },
-    [voiceOn],
+    [voiceOn, fetchTTS, pump],
   );
+
+  const stopAudio = useCallback(() => {
+    audioQ.current = [];
+    const a = audioRef.current;
+    if (a) { a.pause(); a.removeAttribute("src"); }
+    workingRef.current = false;
+    setSpeaking(false);
+  }, []);
 
   const send = useCallback(
     async (text: string) => {
@@ -121,7 +137,7 @@ export default function VoiceAgent() {
         const dec = new TextDecoder();
         let acc = "";
         let spoken = 0;
-        window.speechSynthesis?.cancel();
+        stopAudio();
         setMessages([...next, { role: "assistant", content: "" }]);
         for (;;) {
           const { done, value } = await reader.read();
@@ -148,7 +164,7 @@ export default function VoiceAgent() {
         setBusy(false);
       }
     },
-    [busy, speakChunk],
+    [busy, speakChunk, stopAudio],
   );
 
   // keep a ref of messages so send() always appends to latest
@@ -164,7 +180,7 @@ export default function VoiceAgent() {
       rec.stop();
       setListening(false);
     } else {
-      window.speechSynthesis?.cancel();
+      stopAudio();
       setSpeaking(false);
       try {
         rec.start();
@@ -191,7 +207,7 @@ export default function VoiceAgent() {
         <button
           onClick={() => {
             setVoiceOn((v) => !v);
-            window.speechSynthesis?.cancel();
+            stopAudio();
             setSpeaking(false);
           }}
           className="mono text-[0.68rem] tracking-[0.14em] text-muted-foreground hover:text-foreground"
@@ -291,6 +307,8 @@ export default function VoiceAgent() {
           SEND
         </button>
       </form>
+
+      <audio ref={audioRef} hidden />
     </div>
   );
 }
