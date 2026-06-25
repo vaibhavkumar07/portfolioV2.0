@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ModeSwitch from "@/components/ModeSwitch";
 import VoiceAgent from "@/components/VoiceAgent";
 import { PROFILE, HIGHLIGHTS } from "@/lib/kb";
 import { projects } from "@/lib/projects";
@@ -92,6 +93,7 @@ export default function Home() {
         </div>
       </section>
 
+      <ModeSwitch>
       {/* Work */}
       <Section id="work" num="01" title="Selected work" hint="case studies">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -163,6 +165,7 @@ export default function Home() {
           </div>
         </div>
       </Section>
+      </ModeSwitch>
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-6 text-center sm:flex-row sm:text-left">
