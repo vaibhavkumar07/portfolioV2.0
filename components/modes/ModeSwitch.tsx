@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
 const Dashboard = dynamic(() => import("./Dashboard"), { ssr: false, loading: () => <Loading label="command center" /> });
@@ -12,25 +12,52 @@ const MODES: { id: Mode; label: string }[] = [
   { id: "dashboard", label: "DASHBOARD" },
   { id: "playground", label: "PLAYGROUND" },
 ];
+const SECTIONS = ["work", "about", "stack", "contact"];
 
 export default function ModeSwitch({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<Mode>("home");
+  const modeRef = useRef(mode);
+  const pendingScroll = useRef<string | null>(null);
+  useEffect(() => { modeRef.current = mode; }, [mode]);
 
-  // Restore from URL (?view=) or localStorage.
+  // Deep-link via ?view= only (no localStorage) — a fresh visit always lands on
+  // HOME, so the section nav links always resolve.
   useEffect(() => {
-    const url = new URLSearchParams(window.location.search).get("view") as Mode | null;
-    const saved = (url || (localStorage.getItem("view") as Mode | null)) ?? "home";
-    if (saved === "dashboard" || saved === "playground") setMode(saved);
+    const url = new URLSearchParams(window.location.search).get("view");
+    if (url === "dashboard" || url === "playground") setMode(url);
   }, []);
 
   const select = (m: Mode) => {
     setMode(m);
-    localStorage.setItem("view", m);
     const u = new URL(window.location.href);
     if (m === "home") u.searchParams.delete("view");
     else u.searchParams.set("view", m);
     window.history.replaceState(null, "", u);
   };
+
+  // A section nav link clicked while in a mode → switch to HOME, then scroll.
+  useEffect(() => {
+    const onHash = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      if (SECTIONS.includes(id) && modeRef.current !== "home") {
+        pendingScroll.current = id;
+        select("home");
+      }
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  // After switching back to HOME, scroll to the requested section.
+  useEffect(() => {
+    if (mode === "home" && pendingScroll.current) {
+      const id = pendingScroll.current;
+      pendingScroll.current = null;
+      requestAnimationFrame(() =>
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+    }
+  }, [mode]);
 
   return (
     <>
