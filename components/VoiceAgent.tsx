@@ -12,8 +12,9 @@ type SpeechRec = {
   interimResults: boolean;
   continuous: boolean;
   onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onstart: (() => void) | null;
   onend: (() => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((e: { error: string }) => void) | null;
   start: () => void;
   stop: () => void;
 };
@@ -43,14 +44,24 @@ export default function VoiceAgent() {
       rec.lang = "en-US";
       rec.interimResults = false;
       rec.continuous = false;
+      rec.onstart = () => { setListening(true); setNote(""); };
       rec.onresult = (e) => {
         const t = e.results[0]?.[0]?.transcript ?? "";
         if (t) { setNote(""); send(t); }
       };
       rec.onend = () => setListening(false);
-      rec.onerror = () => {
+      rec.onerror = (e) => {
         setListening(false);
-        setNote("Mic didn't catch that — allow microphone access in your browser and try again, or just type.");
+        const code = e?.error || "unknown";
+        if (code === "aborted") return;
+        if (code === "no-speech") setNote("Didn't hear anything — tap the mic and speak right away.");
+        else if (code === "not-allowed" || code === "service-not-allowed")
+          setNote("Mic blocked for this site — click the camera/lock icon in the address bar → allow microphone, then retry.");
+        else if (code === "network")
+          setNote("Speech service unreachable. Chrome routes voice to Google — check your network/VPN, or just type.");
+        else if (code === "audio-capture")
+          setNote("No microphone found — check your input device, or just type.");
+        else setNote(`Voice input error (${code}) — you can type instead.`);
       };
       recRef.current = rec;
     }
