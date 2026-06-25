@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import Backdrop from "@/components/fx/Backdrop";
 import "./globals.css";
 
@@ -58,6 +59,7 @@ export default function RootLayout({
         <Backdrop />
         {children}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
