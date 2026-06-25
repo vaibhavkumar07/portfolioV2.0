@@ -1,5 +1,6 @@
 import { buildSystemPrompt } from "@/lib/data/kb";
 import { limited, clientKey, sameOrigin } from "@/lib/server/ratelimit";
+import { env } from "@/lib/server/env";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -15,7 +16,7 @@ const RL_WINDOW = 60_000;    // per minute
 type Msg = { role: "user" | "assistant"; content: string };
 
 export async function POST(req: Request) {
-  const key = process.env.NVIDIA_CHAT_API_KEY;
+  const key = env.nvidiaChatKey;
   if (!key) return new Response("Agent unavailable", { status: 503 });
 
   if (!sameOrigin(req)) return new Response("Forbidden", { status: 403 });

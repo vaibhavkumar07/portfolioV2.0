@@ -1,5 +1,6 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { env } from "@/lib/server/env";
 
 /**
  * Durable rate limiting via Upstash Redis (sliding window, global across
@@ -27,8 +28,8 @@ function memLimited(key: string, limit: number, windowMs: number): boolean {
 // ── Upstash (cached per limit/window config) ──
 const limiters = new Map<string, Ratelimit>();
 function getUpstash(limit: number, windowSec: number): Ratelimit | null {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url = env.upstashUrl;
+  const token = env.upstashToken;
   if (!url || !token) return null;
   const cfg = `${limit}:${windowSec}`;
   let rl = limiters.get(cfg);

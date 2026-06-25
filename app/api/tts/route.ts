@@ -1,12 +1,13 @@
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import { pronounce } from "@/lib/pronounce";
 import { limited, clientKey, sameOrigin } from "@/lib/server/ratelimit";
+import { env } from "@/lib/server/env";
 
 export const runtime = "nodejs";
 export const maxDuration = 20;
 
 // Free Microsoft Edge neural voice (no key). Natural male US voice.
-const VOICE = process.env.TTS_VOICE || "en-US-GuyNeural";
+const VOICE = env.ttsVoice;
 
 export async function POST(req: Request) {
   if (!sameOrigin(req)) return new Response("Forbidden", { status: 403 });
