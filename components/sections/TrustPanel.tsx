@@ -42,7 +42,7 @@ export default function TrustPanel() {
                 <Headset className="h-6 w-6 text-[var(--brand-sky)]" />
               </div>
               <div>
-                <div className="text-3xl font-bold tracking-tight">7+ years</div>
+                <div className="text-3xl font-bold tracking-tight">8+ years</div>
                 <div className="text-sm text-muted-foreground">on Genesys Cloud CX</div>
               </div>
             </div>

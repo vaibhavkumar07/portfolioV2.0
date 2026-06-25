@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s · Vaibhavkumar Yadav",
   },
   description:
-    "Genesys Cloud IVR developer and contact-center voice-AI engineer. 7+ years building enterprise IVR, bot flows, and AI-assisted CX for healthcare, automotive, and e-commerce. Talk to my portfolio.",
+    "Genesys Cloud IVR developer and contact-center voice-AI engineer. 8+ years building enterprise IVR, bot flows, and AI-assisted CX for healthcare, automotive, and e-commerce. Talk to my portfolio.",
   keywords: [
     "Genesys Cloud", "IVR developer", "contact center", "voice AI",
     "Genesys Architect", "AI Studio", "Dialogflow", "conversational AI",

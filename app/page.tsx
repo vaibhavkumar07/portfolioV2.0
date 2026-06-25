@@ -72,7 +72,7 @@ export default function Home() {
               and e-commerce.
             </p>
             <div className="mono mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-              {[["7+", "years"], ["5", "flagship builds"], ["10", "certs"], ["1", "IoT patent"]].map(([n, l]) => (
+              {[["8+", "years"], ["5", "flagship builds"], ["10", "certs"], ["1", "IoT patent"]].map(([n, l]) => (
                 <div key={l}>
                   <span className="text-2xl font-bold text-foreground">{n}</span>{" "}
                   <span className="text-muted-foreground">{l}</span>

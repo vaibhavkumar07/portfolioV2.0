@@ -12,12 +12,12 @@ export const PROFILE = {
   email: "yadavvaibhavkumar7@gmail.com",
   phone: "+1 945-542-0116",
   linkedin: "https://www.linkedin.com/in/vaibhavkumar-yadav-633552233/",
-  experienceYears: "7+",
+  experienceYears: "8+",
   availability: "Open to Genesys Cloud / contact-center voice-AI roles globally.",
 };
 
 export const HIGHLIGHTS = [
-  "7+ years building enterprise IVR and contact-center solutions on Genesys Cloud CX.",
+  "8+ years building enterprise IVR and contact-center solutions on Genesys Cloud CX.",
   "SME in Genesys Architect, AI Studio, Data Actions, and CX-as-Code (Terraform).",
   "Integrates Azure TTS/STT, OpenAI/ChatGPT, Google Dialogflow, Observe.AI, Moveworks.",
   "Delivered PII/PHI/PCI-compliant flows for healthcare and regulated industries.",
