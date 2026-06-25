@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
-const Dashboard = dynamic(() => import("./modes/Dashboard"), { ssr: false, loading: () => <Loading label="command center" /> });
-const Playground = dynamic(() => import("./modes/Playground"), { ssr: false, loading: () => <Loading label="flow builder" /> });
+const Dashboard = dynamic(() => import("./Dashboard"), { ssr: false, loading: () => <Loading label="command center" /> });
+const Playground = dynamic(() => import("./Playground"), { ssr: false, loading: () => <Loading label="flow builder" /> });
 
 type Mode = "home" | "dashboard" | "playground";
 const MODES: { id: Mode; label: string }[] = [

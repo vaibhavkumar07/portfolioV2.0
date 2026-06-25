@@ -1,5 +1,5 @@
 import { projects } from "./projects";
-import { slug } from "./slug";
+import { slug } from "../slug";
 
 export interface CaseStudy {
   slug: string;

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { SUGGESTED } from "@/lib/kb";
+import { SUGGESTED } from "@/lib/data/kb";
 
 type Msg = { role: "user" | "assistant"; content: string };
 

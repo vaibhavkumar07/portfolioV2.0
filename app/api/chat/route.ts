@@ -1,5 +1,5 @@
-import { buildSystemPrompt } from "@/lib/kb";
-import { limited, clientKey, sameOrigin } from "@/lib/ratelimit";
+import { buildSystemPrompt } from "@/lib/data/kb";
+import { limited, clientKey, sameOrigin } from "@/lib/server/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;

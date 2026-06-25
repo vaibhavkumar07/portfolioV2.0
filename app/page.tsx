@@ -1,11 +1,11 @@
 import Link from "next/link";
-import ModeSwitch from "@/components/ModeSwitch";
-import Reveal from "@/components/Reveal";
-import TrustPanel from "@/components/TrustPanel";
-import VoiceAgent from "@/components/VoiceAgent";
-import { PROFILE, HIGHLIGHTS } from "@/lib/kb";
-import { projects } from "@/lib/projects";
-import { skills } from "@/lib/skills";
+import ModeSwitch from "@/components/modes/ModeSwitch";
+import Reveal from "@/components/fx/Reveal";
+import TrustPanel from "@/components/sections/TrustPanel";
+import VoiceAgent from "@/components/agent/VoiceAgent";
+import { PROFILE, HIGHLIGHTS } from "@/lib/data/kb";
+import { projects } from "@/lib/data/projects";
+import { skills } from "@/lib/data/skills";
 import { slug } from "@/lib/slug";
 
 const NAV = [
@@ -57,9 +57,9 @@ export default function Home() {
       {/* Hero — statement + live agent */}
       <section className="relative overflow-hidden">
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:py-24 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rise">
-            <p className="mono mb-5 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-[0.68rem] tracking-[0.16em] text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand-green)]" /> AVAILABLE FOR VOICE-AI / CX ROLES
+          <div className="rise min-w-0">
+            <p className="mono mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-border px-3 py-1 text-[0.62rem] tracking-[0.16em] text-muted-foreground sm:text-[0.68rem]">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--brand-green)]" /> AVAILABLE FOR VOICE-AI / CX ROLES
             </p>
             <h1 className="text-[2.6rem] font-bold leading-[1.02] tracking-tight sm:text-6xl">
               I build the voice
@@ -82,7 +82,7 @@ export default function Home() {
           </div>
 
           {/* Live agent */}
-          <div className="rise h-[30rem]" style={{ animationDelay: "0.15s" }}>
+          <div className="rise h-[30rem] min-w-0" style={{ animationDelay: "0.15s" }}>
             <div className="mono mb-2 flex items-center justify-between text-[0.66rem] tracking-[0.16em] text-muted-foreground">
               <span>◉ TALK TO MY PORTFOLIO</span>
               <span className="text-[var(--brand-sky)]">LIVE</span>

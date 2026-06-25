@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { caseStudies, getCaseStudy } from "@/lib/work";
-import { PROFILE } from "@/lib/kb";
+import { caseStudies, getCaseStudy } from "@/lib/data/work";
+import { PROFILE } from "@/lib/data/kb";
 
 export function generateStaticParams() {
   return caseStudies.map((c) => ({ slug: c.slug }));

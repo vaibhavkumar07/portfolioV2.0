@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
-import Backdrop from "@/components/Backdrop";
+import Backdrop from "@/components/fx/Backdrop";
 import "./globals.css";
 
 const mono = JetBrains_Mono({

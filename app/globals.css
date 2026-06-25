@@ -136,10 +136,12 @@
   html {
     @apply font-sans;
     scroll-behavior: smooth;
+    overflow-x: clip; /* contain decorative glows without breaking sticky */
   }
   body {
     @apply bg-background text-foreground;
     /* atmosphere now lives in <Backdrop /> (animated aurora + grid) */
+    overflow-x: hidden; /* clip decorative glows on very small screens */
   }
   h1, h2, h3, h4 {
     @apply font-[family-name:var(--font-heading)] tracking-tight;

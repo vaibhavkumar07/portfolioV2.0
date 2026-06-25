@@ -4,7 +4,7 @@ import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer,
   Tooltip, XAxis, YAxis,
 } from "recharts";
-import { skills } from "@/lib/skills";
+import { skills } from "@/lib/data/skills";
 
 const SKY = "#0ea5e9";
 const ORANGE = "#ff4f1f";

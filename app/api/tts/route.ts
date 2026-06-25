@@ -1,6 +1,6 @@
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import { pronounce } from "@/lib/pronounce";
-import { limited, clientKey, sameOrigin } from "@/lib/ratelimit";
+import { limited, clientKey, sameOrigin } from "@/lib/server/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 20;

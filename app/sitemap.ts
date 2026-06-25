@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { caseStudies } from "@/lib/work";
+import { caseStudies } from "@/lib/data/work";
 
 const SITE = "https://vaibhav.cx";
 
