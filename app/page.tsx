@@ -12,9 +12,23 @@ const NAV = [
   { id: "contact", label: "CONTACT", key: "4" },
 ];
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: PROFILE.name,
+  jobTitle: PROFILE.title,
+  email: `mailto:${PROFILE.email}`,
+  url: "https://vaibhav.cx",
+  sameAs: [PROFILE.linkedin],
+  address: { "@type": "PostalAddress", addressLocality: "Richardson", addressRegion: "TX", addressCountry: "US" },
+  knowsAbout: ["Genesys Cloud CX", "IVR", "Conversational AI", "Contact Center", "Voice AI"],
+  worksFor: { "@type": "Organization", name: "Infosys Limited" },
+};
+
 export default function Home() {
   return (
     <div className="relative">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Nav */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/70 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
