@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import Backdrop from "@/components/fx/Backdrop";
 import "./globals.css";
 
@@ -56,6 +57,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Backdrop />
         {children}
+        <Analytics />
       </body>
     </html>
   );
