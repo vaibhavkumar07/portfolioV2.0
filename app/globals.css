@@ -8,8 +8,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-heading);
   --color-brand-orange: var(--brand-orange);
   --color-brand-sky: var(--brand-sky);
   --color-brand-green: var(--brand-green);
@@ -52,6 +52,10 @@
 }
 
 :root {
+  /* Type: distinctive display + body, mono for the "system" voice */
+  --font-heading: "Clash Display", "General Sans", ui-sans-serif, sans-serif;
+  --font-sans: "General Sans", ui-sans-serif, system-ui, sans-serif;
+
   /* Brand: dark navy base, Genesys orange + sky blue accents */
   --brand-orange: oklch(0.69 0.21 36);
   --brand-sky: oklch(0.68 0.14 233);
@@ -129,10 +133,73 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Operator-console atmosphere: layered accent glows over deep navy */
+    background-image:
+      radial-gradient(60rem 40rem at 85% -10%, oklch(0.69 0.21 36 / 0.10), transparent 60%),
+      radial-gradient(50rem 50rem at -10% 110%, oklch(0.68 0.14 233 / 0.12), transparent 55%);
+    background-attachment: fixed;
+  }
+  h1, h2, h3, h4 {
+    @apply font-[family-name:var(--font-heading)] tracking-tight;
+  }
+  ::selection {
+    background: oklch(0.68 0.14 233 / 0.32);
+    color: var(--foreground);
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: oklch(0.68 0.14 233 / 0.25);
+    border-radius: 99px;
+  }
+}
+
+@layer utilities {
+  /* Oscilloscope grid — the console floor */
+  .bg-grid {
+    background-image:
+      linear-gradient(oklch(0.68 0.14 233 / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(0.68 0.14 233 / 0.06) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  /* Fine scanlines overlay */
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px, oklch(0 0 0 / 0.05) 2px, oklch(0 0 0 / 0.05) 3px
+    );
+  }
+  /* Subtle film grain */
+  .noise::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+  .text-orange { color: var(--brand-orange); }
+  .text-sky { color: var(--brand-sky); }
+  .glow-sky { box-shadow: 0 0 0 1px oklch(0.68 0.14 233 / 0.25), 0 0 30px oklch(0.68 0.14 233 / 0.18); }
+  .glow-orange { box-shadow: 0 0 0 1px oklch(0.69 0.21 36 / 0.3), 0 0 32px oklch(0.69 0.21 36 / 0.22); }
+  .mono { font-family: var(--font-mono); }
+  /* page-load staggered reveal */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  .rise { animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @media (prefers-reduced-motion: reduce) {
+    .rise { animation: none; }
+    html { scroll-behavior: auto; }
   }
 }
