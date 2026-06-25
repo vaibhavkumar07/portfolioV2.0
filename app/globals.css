@@ -139,11 +139,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* Operator-console atmosphere: layered accent glows over deep navy */
-    background-image:
-      radial-gradient(60rem 40rem at 85% -10%, oklch(0.69 0.21 36 / 0.10), transparent 60%),
-      radial-gradient(50rem 50rem at -10% 110%, oklch(0.68 0.14 233 / 0.12), transparent 55%);
-    background-attachment: fixed;
+    /* atmosphere now lives in <Backdrop /> (animated aurora + grid) */
   }
   h1, h2, h3, h4 {
     @apply font-[family-name:var(--font-heading)] tracking-tight;
@@ -161,6 +157,23 @@
 }
 
 @layer utilities {
+  /* ── Backdrop (GitHub-style atmosphere) ── */
+  .backdrop-fade {
+    opacity: 0.55;
+    -webkit-mask-image: radial-gradient(ellipse 110% 75% at 50% 0%, #000 25%, transparent 72%);
+    mask-image: radial-gradient(ellipse 110% 75% at 50% 0%, #000 25%, transparent 72%);
+  }
+  .aurora-1 { background: radial-gradient(circle, oklch(0.68 0.14 233 / 0.5), transparent 64%); animation: drift1 22s ease-in-out infinite; }
+  .aurora-2 { background: radial-gradient(circle, oklch(0.69 0.21 36 / 0.42), transparent 64%); animation: drift2 27s ease-in-out infinite; }
+  .aurora-3 { background: radial-gradient(circle, oklch(0.62 0.16 300 / 0.28), transparent 66%); animation: pulse3 12s ease-in-out infinite; }
+  .backdrop-vignette { background: radial-gradient(ellipse 130% 100% at 50% -5%, transparent 55%, oklch(0.1 0.02 264 / 0.65)); }
+  @keyframes drift1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-4%, 7%) scale(1.08); } }
+  @keyframes drift2 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(6%, -5%) scale(1.1); } }
+  @keyframes pulse3 { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .aurora-1, .aurora-2, .aurora-3 { animation: none; }
+  }
+
   /* Oscilloscope grid — the console floor */
   .bg-grid {
     background-image:

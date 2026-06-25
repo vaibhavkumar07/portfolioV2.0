@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ModeSwitch from "@/components/ModeSwitch";
+import Reveal from "@/components/Reveal";
 import VoiceAgent from "@/components/VoiceAgent";
 import { PROFILE, HIGHLIGHTS } from "@/lib/kb";
 import { projects } from "@/lib/projects";
@@ -54,7 +55,6 @@ export default function Home() {
 
       {/* Hero — statement + live agent */}
       <section className="relative overflow-hidden">
-        <div className="bg-grid pointer-events-none absolute inset-0 opacity-60" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:py-24 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="rise">
             <p className="mono mb-5 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-[0.68rem] tracking-[0.16em] text-muted-foreground">
@@ -184,14 +184,16 @@ function Section({
 }) {
   return (
     <section id={id} className="mx-auto max-w-6xl scroll-mt-20 px-5 py-16">
-      <div className="mb-8 flex items-end gap-4">
-        <span className="mono text-5xl font-bold leading-none text-[var(--brand-sky)]/15">{num}</span>
-        <div>
-          <span className="mono block text-[0.66rem] tracking-[0.2em] text-muted-foreground">&gt; {hint.toUpperCase()}</span>
-          <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
+      <Reveal>
+        <div className="mb-8 flex items-end gap-4">
+          <span className="mono text-5xl font-bold leading-none text-[var(--brand-sky)]/15">{num}</span>
+          <div>
+            <span className="mono block text-[0.66rem] tracking-[0.2em] text-muted-foreground">&gt; {hint.toUpperCase()}</span>
+            <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
+          </div>
         </div>
-      </div>
-      {children}
+        {children}
+      </Reveal>
     </section>
   );
 }

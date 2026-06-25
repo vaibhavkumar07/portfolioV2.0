@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import Backdrop from "@/components/Backdrop";
 import "./globals.css";
 
 const mono = JetBrains_Mono({
@@ -53,6 +54,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <Backdrop />
         {children}
       </body>
     </html>
