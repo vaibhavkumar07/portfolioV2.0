@@ -1,4 +1,4 @@
-import type { Skill } from '../types';
+import type { Skill } from './types';
 
 export const skills: Skill[] = [
   { name: 'Genesys Cloud CX',        level: 95, category: 'Platform' },
