@@ -11,7 +11,7 @@ type SpeechRec = {
   lang: string;
   interimResults: boolean;
   continuous: boolean;
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onresult: ((e: { results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null;
   onstart: (() => void) | null;
   onend: (() => void) | null;
   onerror: ((e: { error: string }) => void) | null;
@@ -42,12 +42,19 @@ export default function VoiceAgent() {
       setSttSupported(true);
       const rec = new Ctor();
       rec.lang = "en-US";
-      rec.interimResults = false;
+      rec.interimResults = true; // live words as you speak (less "no-speech")
       rec.continuous = false;
       rec.onstart = () => { setListening(true); setNote(""); };
       rec.onresult = (e) => {
-        const t = e.results[0]?.[0]?.transcript ?? "";
-        if (t) { setNote(""); send(t); }
+        let interim = "";
+        let final = "";
+        for (let i = 0; i < e.results.length; i++) {
+          const r = e.results[i];
+          if (r.isFinal) final += r[0].transcript;
+          else interim += r[0].transcript;
+        }
+        if (interim) setInput(interim);
+        if (final) { setInput(""); setNote(""); send(final); }
       };
       rec.onend = () => setListening(false);
       rec.onerror = (e) => {
