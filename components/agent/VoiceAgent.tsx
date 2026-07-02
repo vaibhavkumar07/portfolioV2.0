@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { motion, useReducedMotion } from "framer-motion";
 import { SUGGESTED } from "@/lib/data/kb";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -31,6 +32,7 @@ export default function VoiceAgent() {
 
   const recRef = useRef<SpeechRec | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
 
   useEffect(() => {
     const w = window as unknown as {
@@ -207,6 +209,10 @@ export default function VoiceAgent() {
     sendRef.current = send;
   }, [send]);
 
+  // Suggested questions not asked yet — resurfaced as follow-up chips.
+  const askedSet = new Set(messages.filter((m) => m.role === "user").map((m) => m.content));
+  const remaining = SUGGESTED.filter((s) => !askedSet.has(s));
+
   const toggleMic = () => {
     const rec = recRef.current;
     if (!rec) return;
@@ -238,18 +244,29 @@ export default function VoiceAgent() {
             {speaking ? "AGENT SPEAKING" : busy ? "THINKING…" : "LINE OPEN"}
           </span>
         </div>
-        <button
-          onClick={() => {
-            setVoiceOn((v) => !v);
-            stopAudio();
-            setSpeaking(false);
-          }}
-          aria-pressed={voiceOn}
-          aria-label={voiceOn ? "Turn voice replies off" : "Turn voice replies on"}
-          className="focus-ring mono min-h-8 rounded-md px-1.5 text-[0.68rem] tracking-[0.14em] text-muted-foreground hover:text-foreground"
-        >
-          VOICE {voiceOn ? "ON" : "OFF"}
-        </button>
+        <div className="flex items-center gap-2">
+          {speaking && (
+            <button
+              onClick={stopAudio}
+              aria-label="Stop the agent's voice"
+              className="focus-ring mono min-h-8 rounded-md border border-[var(--brand-orange)]/40 px-2 text-[0.62rem] tracking-[0.14em] text-[var(--brand-orange)] transition hover:bg-[var(--brand-orange)]/10"
+            >
+              ■ STOP
+            </button>
+          )}
+          <button
+            onClick={() => {
+              setVoiceOn((v) => !v);
+              stopAudio();
+              setSpeaking(false);
+            }}
+            aria-pressed={voiceOn}
+            aria-label={voiceOn ? "Turn voice replies off" : "Turn voice replies on"}
+            className="focus-ring mono min-h-8 rounded-md px-1.5 text-[0.68rem] tracking-[0.14em] text-muted-foreground hover:text-foreground"
+          >
+            VOICE {voiceOn ? "ON" : "OFF"}
+          </button>
+        </div>
       </div>
 
       {/* Avatar + waveform */}
@@ -288,7 +305,13 @@ export default function VoiceAgent() {
           </div>
         )}
         {messages.map((m, i) => (
-          <div key={i} className={m.role === "user" ? "text-right" : ""}>
+          <motion.div
+            key={i}
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: reduce ? 0.15 : 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className={m.role === "user" ? "text-right" : ""}
+          >
             <span className="mono mb-1 block text-[0.6rem] tracking-[0.18em] text-muted-foreground">
               {m.role === "user" ? "YOU" : "VAIBHAV"}
             </span>
@@ -301,8 +324,28 @@ export default function VoiceAgent() {
             >
               {m.content || (busy ? <span className="inline-flex gap-1 align-middle">{[0, 1, 2].map((d) => (<span key={d} className="h-1.5 w-1.5 animate-bounce rounded-full bg-current opacity-60" style={{ animationDelay: `${d * 0.15}s` }} />))}</span> : "")}
             </p>
-          </div>
+          </motion.div>
         ))}
+
+        {/* Follow-up suggestions once the conversation is going */}
+        {messages.length > 0 && !busy && remaining.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+            className="flex flex-wrap gap-1.5 pt-1"
+          >
+            {remaining.slice(0, 2).map((s) => (
+              <button
+                key={s}
+                onClick={() => send(s)}
+                className="focus-ring mono rounded-full border border-border/70 px-2.5 py-1 text-[0.64rem] text-muted-foreground transition hover:border-[var(--brand-sky)] hover:text-foreground"
+              >
+                {s}
+              </button>
+            ))}
+          </motion.div>
+        )}
       </div>
 
       {note && (
@@ -322,12 +365,18 @@ export default function VoiceAgent() {
             type="button"
             onClick={toggleMic}
             aria-label={listening ? "Stop listening" : "Talk"}
-            className={`focus-ring grid h-11 w-11 shrink-0 place-items-center rounded-lg border transition ${
+            className={`focus-ring relative grid h-11 w-11 shrink-0 place-items-center rounded-lg border transition ${
               listening
                 ? "border-[var(--brand-orange)] glow-orange text-[var(--brand-orange)]"
                 : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
+            {listening && (
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 animate-ping rounded-lg border border-[var(--brand-orange)]/60 motion-reduce:hidden"
+              />
+            )}
             <MicIcon />
           </button>
         )}
@@ -359,7 +408,7 @@ function Waveform({ active }: { active: boolean }) {
       {Array.from({ length: bars }).map((_, i) => (
         <span
           key={i}
-          className="w-full rounded-full bg-[var(--brand-sky)]/70"
+          className="wf-bar w-full rounded-full bg-[var(--brand-sky)]/70"
           style={{
             height: active ? undefined : "3px",
             animation: active
@@ -368,7 +417,8 @@ function Waveform({ active }: { active: boolean }) {
           }}
         />
       ))}
-      <style>{`@keyframes wf{0%,100%{height:4px;opacity:.5}50%{height:34px;opacity:1}}`}</style>
+      <style>{`@keyframes wf{0%,100%{height:4px;opacity:.5}50%{height:34px;opacity:1}}
+@media (prefers-reduced-motion: reduce){.wf-bar{animation:none !important;height:6px !important}}`}</style>
     </div>
   );
 }

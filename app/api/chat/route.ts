@@ -51,7 +51,9 @@ export async function POST(req: Request) {
   // Analytics: one conversation turn per accepted request (server-side only,
   // never client-writable). Fire-and-forget — must not delay the stream.
   bump("chats").catch(() => {});
-  const systemPrompt = buildSystemPrompt();
+  // Retrieval: the last user message steers which KB sections get stuffed.
+  // Only used for scoring — user text never lands inside the system prompt.
+  const systemPrompt = buildSystemPrompt(history[history.length - 1].content);
   const promptChars =
     systemPrompt.length + history.reduce((n, m) => n + m.content.length, 0);
 
@@ -68,7 +70,7 @@ export async function POST(req: Request) {
         model: MODEL,
         messages: [{ role: "system", content: systemPrompt }, ...history],
         max_tokens: 320,
-        temperature: 0.5,
+        temperature: 0.3,
         top_p: 0.95,
         stream: true,
       }),
