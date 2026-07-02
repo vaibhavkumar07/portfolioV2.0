@@ -27,7 +27,9 @@ export async function POST(req: Request) {
     return new Response("Bad request", { status: 400 });
   }
 
-  const metric = CLIENT_EVENTS[event];
+  // Object.hasOwn: a plain lookup would resolve prototype members
+  // ("constructor", "toString", …) and write junk fields to the stats hash.
+  const metric = Object.hasOwn(CLIENT_EVENTS, event) ? CLIENT_EVENTS[event] : undefined;
   if (!metric) return new Response("Bad request", { status: 400 });
 
   await bump(metric);
