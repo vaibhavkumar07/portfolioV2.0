@@ -33,14 +33,29 @@ export default async function CaseStudyPage({
   const c = getCaseStudy(slug);
   if (!c) notFound();
 
+  const SITE = "https://vaibhavkumarcx.dev";
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
-    headline: c.title,
-    about: c.category,
-    author: { "@type": "Person", name: PROFILE.name, jobTitle: PROFILE.title },
-    description: c.summary,
-    keywords: c.stack.join(", "),
+    "@graph": [
+      {
+        "@type": "Article",
+        headline: c.title,
+        about: c.category,
+        author: { "@type": "Person", name: PROFILE.name, jobTitle: PROFILE.title, url: SITE, "@id": `${SITE}/#person` },
+        description: c.summary,
+        keywords: c.stack.join(", "),
+        mainEntityOfPage: `${SITE}/work/${c.slug}`,
+        inLanguage: "en-US",
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE },
+          { "@type": "ListItem", position: 2, name: "Work", item: `${SITE}/#work` },
+          { "@type": "ListItem", position: 3, name: c.title, item: `${SITE}/work/${c.slug}` },
+        ],
+      },
+    ],
   };
 
   return (

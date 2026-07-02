@@ -26,8 +26,19 @@ export const metadata: Metadata = {
     "Genesys Cloud", "IVR developer", "contact center", "voice AI",
     "Genesys Architect", "AI Studio", "Dialogflow", "conversational AI",
     "Vaibhavkumar Yadav", "CX engineer",
+    // Geo targeting: DFW metro + national reach
+    "Genesys developer Dallas", "IVR developer Texas", "Genesys Cloud consultant USA",
+    "contact center engineer Richardson TX", "voice AI engineer Dallas Fort Worth",
+    "remote Genesys Cloud developer",
   ],
   authors: [{ name: "Vaibhavkumar Yadav" }],
+  // Classic geo meta tags — still read by local/AI crawlers.
+  other: {
+    "geo.region": "US-TX",
+    "geo.placename": "Richardson, Texas",
+    "geo.position": "32.9483;-96.7299",
+    ICBM: "32.9483, -96.7299",
+  },
   openGraph: {
     type: "website",
     url: SITE,

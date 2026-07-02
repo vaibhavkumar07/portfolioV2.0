@@ -9,21 +9,68 @@ import SiteNav from "@/components/sections/SiteNav";
 import TrustPanel from "@/components/sections/TrustPanel";
 import VoiceAgent from "@/components/agent/VoiceAgent";
 import { PROFILE, HIGHLIGHTS } from "@/lib/data/kb";
+import { FAQ } from "@/lib/data/faq";
 import { projects } from "@/lib/data/projects";
 import { skills } from "@/lib/data/skills";
 import { slug } from "@/lib/slug";
 
+const SITE = "https://vaibhavkumarcx.dev";
+
+// Entity graph for search + answer engines (Google AI Overviews, ChatGPT,
+// Perplexity): Person with geo anchoring, WebSite, ProfilePage with speakable
+// hints for voice assistants, and an FAQPage mirroring the visible FAQ section.
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "Person",
-  name: PROFILE.name,
-  jobTitle: PROFILE.title,
-  email: `mailto:${PROFILE.email}`,
-  url: "https://vaibhavkumarcx.dev",
-  sameAs: [PROFILE.linkedin],
-  address: { "@type": "PostalAddress", addressLocality: "Richardson", addressRegion: "TX", addressCountry: "US" },
-  knowsAbout: ["Genesys Cloud CX", "IVR", "Conversational AI", "Contact Center", "Voice AI"],
-  worksFor: { "@type": "Organization", name: "Infosys Limited" },
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${SITE}/#person`,
+      name: PROFILE.name,
+      jobTitle: PROFILE.title,
+      email: `mailto:${PROFILE.email}`,
+      url: SITE,
+      sameAs: [PROFILE.linkedin],
+      address: { "@type": "PostalAddress", addressLocality: "Richardson", addressRegion: "TX", addressCountry: "US" },
+      homeLocation: {
+        "@type": "Place",
+        name: "Richardson, Texas, USA",
+        geo: { "@type": "GeoCoordinates", latitude: 32.9483, longitude: -96.7299 },
+      },
+      workLocation: { "@type": "Place", name: "Dallas–Fort Worth metro, Texas, USA" },
+      knowsAbout: [
+        "Genesys Cloud CX", "Genesys Architect", "IVR", "Conversational AI",
+        "Contact Center", "Voice AI", "Azure TTS/STT", "OpenAI", "Google Dialogflow",
+        "CX as Code", "Terraform",
+      ],
+      worksFor: { "@type": "Organization", name: "Infosys Limited" },
+      description: `${PROFILE.title} with ${PROFILE.experienceYears} years of experience. ${PROFILE.availability}`,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE}/#website`,
+      url: SITE,
+      name: "Vaibhavkumar Yadav — Portfolio",
+      publisher: { "@id": `${SITE}/#person` },
+      inLanguage: "en-US",
+    },
+    {
+      "@type": "ProfilePage",
+      "@id": `${SITE}/#profilepage`,
+      url: SITE,
+      mainEntity: { "@id": `${SITE}/#person` },
+      isPartOf: { "@id": `${SITE}/#website` },
+      speakable: { "@type": "SpeakableSpecification", cssSelector: ["h1", "#about"] },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${SITE}/#faq`,
+      mainEntity: FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
 };
 
 export default function Home() {
@@ -118,8 +165,23 @@ export default function Home() {
         </RevealStagger>
       </Section>
 
+      {/* FAQ — visible twin of the FAQPage JSON-LD (answer engines quote this) */}
+      <Section id="faq" num="04" title="Quick answers" hint="frequently asked">
+        <div className="space-y-2">
+          {FAQ.map((f) => (
+            <details key={f.q} className="group rounded-xl border border-border bg-card/40 px-5 py-4">
+              <summary className="focus-ring mono cursor-pointer list-none rounded-md text-sm font-medium text-foreground/90 transition hover:text-foreground [&::-webkit-details-marker]:hidden">
+                <span className="mr-2 text-[var(--brand-sky)] transition-transform group-open:rotate-90 inline-block">›</span>
+                {f.q}
+              </summary>
+              <p className="mt-3 pl-5 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </Section>
+
       {/* Contact */}
-      <Section id="contact" num="04" title="Transfer the call" hint="press 9 to connect">
+      <Section id="contact" num="05" title="Transfer the call" hint="press 9 to connect">
         <div className="rounded-xl border border-border bg-card/40 p-8 text-center">
           <p className="mx-auto max-w-md text-base text-muted-foreground">
             Building something in CX or voice AI? Ask the agent above, or reach me directly.
