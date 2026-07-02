@@ -213,6 +213,15 @@
     to { opacity: 1; transform: none; }
   }
   .rise { animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  /* keyboard focus ring — apply to every interactive element */
+  .focus-ring {
+    outline: none;
+  }
+  .focus-ring:focus-visible {
+    box-shadow:
+      0 0 0 2px var(--background),
+      0 0 0 4px var(--brand-sky);
+  }
   @media (prefers-reduced-motion: reduce) {
     .rise { animation: none; }
     html { scroll-behavior: auto; }

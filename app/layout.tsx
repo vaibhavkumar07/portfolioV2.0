@@ -56,6 +56,12 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <a
+          href="#main"
+          className="focus-ring sr-only rounded-md border border-border bg-background px-3 py-2 text-sm focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50"
+        >
+          Skip to content
+        </a>
         <Backdrop />
         {children}
         <Analytics />

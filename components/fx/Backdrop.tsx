@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 
 /**
  * GitHub-homepage-style atmosphere: deep base, drifting aurora glows, a grid
@@ -9,6 +15,7 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
  * behind all content, non-interactive.
  */
 export default function Backdrop() {
+  const reduce = useReducedMotion();
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 40, damping: 20 });
@@ -20,13 +27,15 @@ export default function Backdrop() {
   const a2y = useTransform(sy, [-1, 1], [16, -16]);
 
   useEffect(() => {
+    // Parallax is pointless on touch devices and unwanted under reduced motion.
+    if (reduce || window.matchMedia("(pointer: coarse)").matches) return;
     const onMove = (e: MouseEvent) => {
       mx.set((e.clientX / window.innerWidth) * 2 - 1);
       my.set((e.clientY / window.innerHeight) * 2 - 1);
     };
     window.addEventListener("mousemove", onMove);
     return () => window.removeEventListener("mousemove", onMove);
-  }, [mx, my]);
+  }, [mx, my, reduce]);
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-background">

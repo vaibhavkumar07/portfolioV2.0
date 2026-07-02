@@ -1,19 +1,17 @@
 import Link from "next/link";
 import ModeSwitch from "@/components/modes/ModeSwitch";
-import Reveal from "@/components/fx/Reveal";
+import Reveal, { RevealItem, RevealStagger } from "@/components/fx/Reveal";
+import Hero3D from "@/components/fx/Hero3D";
+import Magnetic from "@/components/fx/Magnetic";
+import TiltCard from "@/components/fx/TiltCard";
+import HeroIntro from "@/components/sections/HeroIntro";
+import SiteNav from "@/components/sections/SiteNav";
 import TrustPanel from "@/components/sections/TrustPanel";
 import VoiceAgent from "@/components/agent/VoiceAgent";
 import { PROFILE, HIGHLIGHTS } from "@/lib/data/kb";
 import { projects } from "@/lib/data/projects";
 import { skills } from "@/lib/data/skills";
 import { slug } from "@/lib/slug";
-
-const NAV = [
-  { id: "work", label: "WORK", key: "1" },
-  { id: "about", label: "ABOUT", key: "2" },
-  { id: "stack", label: "STACK", key: "3" },
-  { id: "contact", label: "CONTACT", key: "4" },
-];
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -32,64 +30,27 @@ export default function Home() {
   return (
     <div className="relative">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      {/* Nav */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/70 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-          <Link href="/" className="flex items-center gap-2.5">
-            <span className="grid h-7 w-7 place-items-center rounded-md border border-[var(--brand-orange)]/40">
-              <span className="h-2 w-2 rounded-full bg-[var(--brand-orange)]" style={{ boxShadow: "0 0 8px var(--brand-orange)" }} />
-            </span>
-            <span className="mono text-xs tracking-[0.16em] text-foreground">V. YADAV</span>
-          </Link>
-          <nav className="hidden items-center gap-6 md:flex">
-            {NAV.map((n) => (
-              <a key={n.id} href={`#${n.id}`} className="mono text-[0.72rem] tracking-[0.14em] text-muted-foreground transition hover:text-foreground">
-                <span className="text-[var(--brand-sky)]">{n.key}</span> {n.label}
-              </a>
-            ))}
-          </nav>
-          <a href={`mailto:${PROFILE.email}`} className="mono rounded-md border border-[var(--brand-sky)]/40 bg-[var(--brand-sky)]/10 px-3 py-1.5 text-[0.7rem] tracking-[0.12em] text-[var(--brand-sky)] transition hover:bg-[var(--brand-sky)]/20">
-            HIRE ME
-          </a>
-        </div>
-      </header>
+      <SiteNav email={PROFILE.email} />
 
+      <main id="main">
       {/* Hero — statement + live agent */}
       <section className="relative overflow-hidden">
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:py-24 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rise min-w-0">
-            <p className="mono mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-border px-3 py-1 text-[0.62rem] tracking-[0.16em] text-muted-foreground sm:text-[0.68rem]">
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--brand-green)]" /> AVAILABLE FOR VOICE-AI / CX ROLES
-            </p>
-            <h1 className="text-[2.6rem] font-bold leading-[1.02] tracking-tight sm:text-6xl">
-              I build the voice
-              <br />
-              behind the <span className="text-orange">call.</span>
-            </h1>
-            <p className="mt-6 max-w-md text-base leading-relaxed text-muted-foreground">
-              {PROFILE.title}. {PROFILE.experienceYears} years designing enterprise IVR,
-              bot flows, and AI-assisted CX on Genesys Cloud for healthcare, automotive,
-              and e-commerce.
-            </p>
-            <div className="mono mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-              {[["8+", "years"], ["5", "flagship builds"], ["10", "certs"], ["1", "IoT patent"]].map(([n, l]) => (
-                <div key={l}>
-                  <span className="text-2xl font-bold text-foreground">{n}</span>{" "}
-                  <span className="text-muted-foreground">{l}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* 3D flow-node constellation (WebGL on desktop, CSS fallback elsewhere) */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <Hero3D />
+        </div>
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:py-24 lg:grid-cols-[1.05fr_0.95fr] xl:py-28">
+          <HeroIntro title={PROFILE.title} experienceYears={PROFILE.experienceYears} />
 
           {/* Live agent */}
-          <div className="rise h-[30rem] min-w-0" style={{ animationDelay: "0.15s" }}>
+          <div className="rise h-[26rem] min-w-0 sm:h-[30rem]" style={{ animationDelay: "0.15s" }}>
             <div className="mono mb-2 flex items-center justify-between text-[0.66rem] tracking-[0.16em] text-muted-foreground">
               <span>◉ TALK TO MY PORTFOLIO</span>
               <span className="text-[var(--brand-sky)]">LIVE</span>
             </div>
-            <div className="h-[calc(100%-1.5rem)]">
+            <TiltCard maxTilt={3} className="h-[calc(100%-1.5rem)]">
               <VoiceAgent />
-            </div>
+            </TiltCard>
           </div>
         </div>
       </section>
@@ -99,28 +60,31 @@ export default function Home() {
 
       {/* Work */}
       <Section id="work" num="01" title="Selected work" hint="case studies">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <RevealStagger className="grid gap-4 sm:grid-cols-2 lg:gap-6">
           {projects.map((p) => (
-            <Link
-              key={p.id}
-              href={`/work/${slug(p.title)}`}
-              className="group relative overflow-hidden rounded-xl border border-border bg-card/40 p-5 transition hover:border-[var(--brand-sky)]/50"
-            >
-              <div className="mono mb-3 flex items-center justify-between text-[0.64rem] tracking-[0.16em] text-muted-foreground">
-                <span>RESULT-{p.id}</span>
-                <span className="text-[var(--brand-sky)] opacity-0 transition group-hover:opacity-100">OPEN →</span>
-              </div>
-              <h3 className="text-lg font-semibold leading-snug">{p.title}</h3>
-              <p className="mono mt-1.5 text-[0.7rem] tracking-wide text-[var(--brand-orange)]/90">{p.category}</p>
-              <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
-            </Link>
+            <RevealItem key={p.id}>
+              <TiltCard className="h-full rounded-xl">
+                <Link
+                  href={`/work/${slug(p.title)}`}
+                  className="focus-ring group relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card/40 p-5 transition hover:border-[var(--brand-sky)]/50"
+                >
+                  <div className="mono mb-3 flex items-center justify-between text-[0.64rem] tracking-[0.16em] text-muted-foreground">
+                    <span>RESULT-{p.id}</span>
+                    <span className="text-[var(--brand-sky)] opacity-0 transition group-hover:opacity-100">OPEN →</span>
+                  </div>
+                  <h3 className="text-lg font-semibold leading-snug">{p.title}</h3>
+                  <p className="mono mt-1.5 text-[0.7rem] tracking-wide text-[var(--brand-orange)]/90">{p.category}</p>
+                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
+                </Link>
+              </TiltCard>
+            </RevealItem>
           ))}
-        </div>
+        </RevealStagger>
       </Section>
 
       {/* About */}
       <Section id="about" num="02" title="About" hint="caller profile">
-        <div className="grid gap-8 md:grid-cols-[1fr_0.8fr]">
+        <div className="grid gap-6 md:grid-cols-[1fr_0.8fr] md:gap-8">
           <ul className="space-y-3">
             {HIGHLIGHTS.map((h) => (
               <li key={h} className="flex gap-3 text-sm leading-relaxed text-foreground/90">
@@ -143,13 +107,15 @@ export default function Home() {
 
       {/* Stack */}
       <Section id="stack" num="03" title="Stack" hint="capabilities">
-        <div className="flex flex-wrap gap-2">
+        <RevealStagger className="flex flex-wrap gap-2" stagger={0.02}>
           {skills.map((s) => (
-            <span key={s.name} className="mono rounded-full border border-border bg-card/40 px-3 py-1.5 text-[0.74rem] text-foreground/85">
-              {s.name} <span className="text-[var(--brand-sky)]">{s.level}</span>
-            </span>
+            <RevealItem key={s.name}>
+              <span className="mono rounded-full border border-border bg-card/40 px-3 py-1.5 text-[0.74rem] text-foreground/85">
+                {s.name} <span className="text-[var(--brand-sky)]">{s.level}</span>
+              </span>
+            </RevealItem>
           ))}
-        </div>
+        </RevealStagger>
       </Section>
 
       {/* Contact */}
@@ -159,16 +125,21 @@ export default function Home() {
             Building something in CX or voice AI? Ask the agent above, or reach me directly.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <a href={`mailto:${PROFILE.email}`} className="mono rounded-lg border border-[var(--brand-orange)]/40 bg-[var(--brand-orange)]/10 px-5 py-2.5 text-sm tracking-[0.1em] text-[var(--brand-orange)] transition hover:bg-[var(--brand-orange)]/20">
-              {PROFILE.email}
-            </a>
-            <a href={PROFILE.linkedin} target="_blank" rel="noopener noreferrer" className="mono rounded-lg border border-border px-5 py-2.5 text-sm tracking-[0.1em] text-foreground/85 transition hover:border-[var(--brand-sky)]/50">
-              LINKEDIN ↗
-            </a>
+            <Magnetic>
+              <a href={`mailto:${PROFILE.email}`} className="focus-ring mono inline-block rounded-lg border border-[var(--brand-orange)]/40 bg-[var(--brand-orange)]/10 px-5 py-2.5 text-sm tracking-[0.1em] text-[var(--brand-orange)] transition hover:bg-[var(--brand-orange)]/20">
+                {PROFILE.email}
+              </a>
+            </Magnetic>
+            <Magnetic>
+              <a href={PROFILE.linkedin} target="_blank" rel="noopener noreferrer" className="focus-ring mono inline-block rounded-lg border border-border px-5 py-2.5 text-sm tracking-[0.1em] text-foreground/85 transition hover:border-[var(--brand-sky)]/50">
+                LINKEDIN ↗
+              </a>
+            </Magnetic>
           </div>
         </div>
       </Section>
       </ModeSwitch>
+      </main>
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-6 text-center sm:flex-row sm:text-left">
@@ -189,7 +160,7 @@ function Section({
     <section id={id} className="mx-auto max-w-6xl scroll-mt-20 px-5 py-16">
       <Reveal>
         <div className="mb-8 flex items-end gap-4">
-          <span className="mono text-5xl font-bold leading-none text-[var(--brand-sky)]/15">{num}</span>
+          <span aria-hidden="true" className="mono text-5xl font-bold leading-none text-[var(--brand-sky)]/15">{num}</span>
           <div>
             <span className="mono block text-[0.66rem] tracking-[0.2em] text-muted-foreground">&gt; {hint.toUpperCase()}</span>
             <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
