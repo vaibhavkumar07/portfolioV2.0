@@ -4,9 +4,11 @@ import type { NextConfig } from "next";
 // framer-motion inline styles, and the JSON-LD script; 'unsafe-eval' only in dev
 // (Next dev runtime needs it — never ship it to production).
 const isDev = process.env.NODE_ENV === "development";
+// Vercel Analytics/Speed Insights load debug scripts from va.vercel-scripts.com
+// in dev only; in production they are served same-origin under /_vercel/*.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval' https://va.vercel-scripts.com" : ""}`,
   "style-src 'self' 'unsafe-inline' https://api.fontshare.com",
   "font-src 'self' https://cdn.fontshare.com data:",
   "img-src 'self' data: blob:",
