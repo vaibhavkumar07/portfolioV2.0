@@ -44,6 +44,7 @@ next-env.d.ts
 .claude/
 .claude-flow/
 .mcp.json
+AGENTS.md
 tools/
 __pycache__/
 *.pyc
