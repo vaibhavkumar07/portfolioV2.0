@@ -1,6 +1,7 @@
 import { buildSystemPrompt } from "@/lib/data/kb";
 import { limited, clientKey, sameOrigin } from "@/lib/server/ratelimit";
 import { env } from "@/lib/server/env";
+import { bump } from "@/lib/server/stats";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -47,6 +48,13 @@ export async function POST(req: Request) {
   if (!history.length || history[history.length - 1].role !== "user")
     return new Response("Ask a question first.", { status: 400 });
 
+  // Analytics: one conversation turn per accepted request (server-side only,
+  // never client-writable). Fire-and-forget — must not delay the stream.
+  bump("chats").catch(() => {});
+  const systemPrompt = buildSystemPrompt();
+  const promptChars =
+    systemPrompt.length + history.reduce((n, m) => n + m.content.length, 0);
+
   let upstream: Response;
   try {
     upstream = await fetch(NIM_URL, {
@@ -58,7 +66,7 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         model: MODEL,
-        messages: [{ role: "system", content: buildSystemPrompt() }, ...history],
+        messages: [{ role: "system", content: systemPrompt }, ...history],
         max_tokens: 320,
         temperature: 0.5,
         top_p: 0.95,
@@ -79,10 +87,22 @@ export async function POST(req: Request) {
   const encoder = new TextEncoder();
   let buf = "";
 
+  // Token accounting (~4 chars/token estimate). The stream has three
+  // termination paths (reader done, [DONE] frame, client cancel) — the
+  // `counted` guard makes sure we record exactly once.
+  let completionChars = 0;
+  let counted = false;
+  const finish = async () => {
+    if (counted) return;
+    counted = true;
+    await bump("tokens", Math.ceil((promptChars + completionChars) / 4)).catch(() => {});
+  };
+
   const stream = new ReadableStream({
     async pull(controller) {
       const { done, value } = await reader.read();
       if (done) {
+        await finish();
         controller.close();
         return;
       }
@@ -94,19 +114,24 @@ export async function POST(req: Request) {
         if (!t.startsWith("data:")) continue;
         const data = t.slice(5).trim();
         if (data === "[DONE]") {
+          await finish();
           controller.close();
           return;
         }
         try {
           const json = JSON.parse(data);
           const delta = json.choices?.[0]?.delta?.content;
-          if (delta) controller.enqueue(encoder.encode(delta));
+          if (delta) {
+            completionChars += delta.length;
+            controller.enqueue(encoder.encode(delta));
+          }
         } catch {
           /* keep-alives / partial frames */
         }
       }
     },
     cancel() {
+      void finish();
       reader.cancel().catch(() => {});
     },
   });

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer,
   Tooltip, XAxis, YAxis,
@@ -36,15 +37,76 @@ function Panel({ title, children, className = "" }: { title: string; children: R
   );
 }
 
+// ── Real site telemetry (from /api/stats) ──
+type SiteStats = {
+  visits: number; chats: number; tokens: number;
+  mode_home: number; mode_dashboard: number; mode_playground: number;
+};
+
+function fmt(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
+
+function RealStats() {
+  const [stats, setStats] = useState<SiteStats | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/stats")
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((s: SiteStats) => { if (alive) setStats(s); })
+      .catch(() => { if (alive) setFailed(true); });
+    return () => { alive = false; };
+  }, []);
+
+  const val = (n?: number) =>
+    stats ? fmt(n ?? 0) : failed ? "—" : <span className="animate-pulse">—</span>;
+
+  return (
+    <>
+      <div className="mono mb-1 mt-8 text-[0.66rem] tracking-[0.2em] text-[var(--brand-green)]">&gt; REAL · THIS SITE</div>
+      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Panel title="VISITORS">
+          <span className="text-2xl font-bold tracking-tight">{val(stats?.visits)}</span>
+        </Panel>
+        <Panel title="TALKED TO MY PORTFOLIO">
+          <span className="text-2xl font-bold tracking-tight">{val(stats?.chats)}</span>
+        </Panel>
+        <Panel title="TOKENS USED (EST.)">
+          <span className="text-2xl font-bold tracking-tight">{val(stats?.tokens)}</span>
+        </Panel>
+        <Panel title="MODE VIEWS">
+          <div className="flex items-end justify-between gap-2">
+            {([["HOME", stats?.mode_home], ["DASH", stats?.mode_dashboard], ["PLAY", stats?.mode_playground]] as const).map(([l, n]) => (
+              <div key={l} className="text-center">
+                <div className="text-lg font-semibold leading-tight">{val(n)}</div>
+                <div className="mono text-[0.56rem] tracking-[0.12em] text-muted-foreground">{l}</div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+    </>
+  );
+}
+
 export default function Dashboard() {
   return (
     <div className="mx-auto max-w-6xl px-5 py-10">
-      <div className="mono mb-1 text-[0.66rem] tracking-[0.2em] text-[var(--brand-sky)]">&gt; LIVE · ILLUSTRATIVE</div>
+      <div className="mono mb-1 text-[0.66rem] tracking-[0.2em] text-[var(--brand-sky)]">&gt; COMMAND CENTER</div>
       <h2 className="mb-6 text-3xl font-bold tracking-tight">CX command center</h2>
-      <p className="mb-8 max-w-xl text-sm text-muted-foreground">
-        The kind of contact-center analytics I build on Genesys — traffic, containment,
-        and routing health at a glance. Numbers here are illustrative; the skill chart is real.
+      <p className="max-w-xl text-sm text-muted-foreground">
+        Live telemetry from this portfolio up top — real visitors, agent conversations,
+        and token spend. Below it, the kind of contact-center analytics I build on
+        Genesys (illustrative numbers; the skill chart is real).
       </p>
+
+      <RealStats />
+
+      <div className="mono mb-1 text-[0.66rem] tracking-[0.2em] text-[var(--brand-sky)]">&gt; ILLUSTRATIVE · CONTACT CENTER</div>
 
       {/* KPI row */}
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">

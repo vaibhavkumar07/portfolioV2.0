@@ -3,6 +3,7 @@ import { JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Backdrop from "@/components/fx/Backdrop";
+import TrackVisit from "@/components/fx/TrackVisit";
 import "./globals.css";
 
 const mono = JetBrains_Mono({
@@ -63,6 +64,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <Backdrop />
+        <TrackVisit />
         {children}
         <Analytics />
         <SpeedInsights />

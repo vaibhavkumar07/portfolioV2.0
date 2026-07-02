@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { track } from "@/lib/track";
 
 const Dashboard = dynamic(() => import("./Dashboard"), { ssr: false, loading: () => <Loading label="command center" /> });
 const Playground = dynamic(() => import("./Playground"), { ssr: false, loading: () => <Loading label="flow builder" /> });
@@ -26,12 +27,16 @@ export default function ModeSwitch({ children }: { children: React.ReactNode }) 
     const url = new URLSearchParams(window.location.search).get("view");
     // Deep-link read must happen post-hydration (SSR always renders HOME),
     // so this one-shot setState is intentional.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (url === "dashboard" || url === "playground") setMode(url);
+    if (url === "dashboard" || url === "playground") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMode(url);
+      track(`mode_${url}`);
+    }
   }, []);
 
   const select = (m: Mode) => {
     setMode(m);
+    track(`mode_${m}`);
     const u = new URL(window.location.href);
     if (m === "home") u.searchParams.delete("view");
     else u.searchParams.set("view", m);

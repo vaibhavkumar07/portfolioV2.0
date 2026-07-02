@@ -9,8 +9,15 @@ import {
 import "@xyflow/react/dist/style.css";
 import {
   PhoneCall, MessageSquare, Volume2, MessageCircle, ListTree, Brain,
-  Sparkles, Headset, Users, ClipboardCheck, CheckCircle2, type LucideIcon,
+  Briefcase, User, Layers, Mail, ClipboardCheck, CheckCircle2, type LucideIcon,
 } from "lucide-react";
+import { PROFILE, HIGHLIGHTS } from "@/lib/data/kb";
+import { projects } from "@/lib/data/projects";
+import { skills } from "@/lib/data/skills";
+
+// Real portfolio data, spoken-style.
+const TOP_PROJECTS = projects.slice(0, 3).map((p) => p.title).join(", ");
+const TOP_SKILLS = [...skills].sort((a, b) => b.level - a.level).slice(0, 5).map((s) => s.name).join(", ");
 
 type Kind = "start" | "prompt" | "menu" | "bot" | "queue" | "end";
 type NodeData = { label: string; sub?: string; kind: Kind; icon: LucideIcon; active?: boolean };
@@ -64,7 +71,7 @@ function FlowNode({ data }: NodeProps) {
 const nodeTypes = { flow: FlowNode };
 
 // ── Flow content per channel (voice IVR vs chat) ──
-type Branch = { key: string; id: string; label: string; sub: string; icon: LucideIcon; kind: Kind; choice: string; reply: string };
+type Branch = { key: string; id: string; label: string; sub: string; icon: LucideIcon; kind: Kind; choice: string; reply: string; reply2?: string };
 type FlowDef = {
   start: { label: string; sub: string; icon: LucideIcon };
   welcome: { label: string; sub: string; icon: LucideIcon; line: string };
@@ -78,39 +85,42 @@ const FLOWS: Record<"voice" | "chat", FlowDef> = {
   voice: {
     callerName: "CALLER",
     start: { label: "Inbound Call", sub: "DNIS · 1-800", icon: PhoneCall },
-    welcome: { label: "Welcome Prompt", sub: "Azure TTS", icon: Volume2, line: "Thanks for calling. For billing press 1, support press 2, sales press 3." },
+    welcome: { label: "Welcome Prompt", sub: "Azure TTS", icon: Volume2, line: "Thanks for calling Vaibhav's portfolio. For selected work press 1, about Vaibhav press 2, tech stack press 3, contact press 4." },
     menu: { label: "Main Menu", sub: "DTMF capture", icon: ListTree, prompt: "Waiting for the caller to press a key…" },
     branches: [
-      { key: "1", id: "billing", label: "Billing", sub: "Skill queue", icon: Headset, kind: "queue", choice: "Pressed 1", reply: "Connecting you to billing — your wait is under a minute." },
-      { key: "2", id: "bot", label: "AI Voice Bot", sub: "Self-service", icon: Sparkles, kind: "bot", choice: "Pressed 2", reply: "Hi, I'm the support assistant. I can reset your PIN or track an order — what do you need?" },
-      { key: "3", id: "sales", label: "Sales", sub: "Priority route", icon: Users, kind: "queue", choice: "Pressed 3", reply: "Routing you to a sales specialist now." },
+      { key: "1", id: "work", label: "Work", sub: "Case studies", icon: Briefcase, kind: "queue", choice: "Pressed 1", reply: `I've shipped ${projects.length} flagship builds — ${TOP_PROJECTS}, and more.`, reply2: "Full case studies are in the Work section of this site." },
+      { key: "2", id: "about", label: "About", sub: "Bio & experience", icon: User, kind: "bot", choice: "Pressed 2", reply: `I'm ${PROFILE.name} — ${PROFILE.experienceYears} years on Genesys Cloud, currently ${PROFILE.role}, based in ${PROFILE.location}.`, reply2: HIGHLIGHTS[1] },
+      { key: "3", id: "stack", label: "Stack", sub: `${skills.length} skills`, icon: Layers, kind: "prompt", choice: "Pressed 3", reply: `Core stack: ${TOP_SKILLS}.`, reply2: "The full skill matrix is in the Stack section." },
+      { key: "4", id: "contact", label: "Contact", sub: "Email & LinkedIn", icon: Mail, kind: "queue", choice: "Pressed 4", reply: `Reach me at ${PROFILE.email}, or connect on LinkedIn.`, reply2: PROFILE.availability },
     ],
-    end: { label: "Post-call Survey", sub: "AI scoring", icon: ClipboardCheck, line: "Before you go — please rate your experience from 1 to 5." },
+    end: { label: "Wrap-up", sub: "CSAT · AI scoring", icon: ClipboardCheck, line: "Anything else? Run the flow again — and rate this portfolio 5 stars on your way out." },
   },
   chat: {
     callerName: "VISITOR",
     start: { label: "New Chat", sub: "Web / WhatsApp", icon: MessageSquare },
-    welcome: { label: "Greeting", sub: "Bot opener", icon: MessageCircle, line: "Hi! 👋 How can I help — billing, support, or sales?" },
+    welcome: { label: "Greeting", sub: "Bot opener", icon: MessageCircle, line: "Hi! 👋 I'm Vaibhav's portfolio bot — want to see his work, learn about him, browse his tech stack, or get in touch?" },
     menu: { label: "Intent Router", sub: "NLU classify", icon: Brain, prompt: "Classifying the visitor's intent…" },
     branches: [
-      { key: "1", id: "billing", label: "Billing", sub: "Live agent", icon: Headset, kind: "queue", choice: "Billing", reply: "I'll connect you with a billing specialist — one moment." },
-      { key: "2", id: "bot", label: "AI Assistant", sub: "RAG + tools", icon: Sparkles, kind: "bot", choice: "Support", reply: "On it! I can reset your password or check an order status. Which one?" },
-      { key: "3", id: "sales", label: "Sales", sub: "Qualify lead", icon: Users, kind: "queue", choice: "Sales", reply: "Great — let me grab a few details and bring in our sales team." },
+      { key: "1", id: "work", label: "Work", sub: "Case studies", icon: Briefcase, kind: "queue", choice: "Show me the work", reply: `He's shipped ${projects.length} flagship builds — ${TOP_PROJECTS}, and more.`, reply2: "Full case studies live in the Work section of this site." },
+      { key: "2", id: "about", label: "About", sub: "Bio & experience", icon: User, kind: "bot", choice: "About Vaibhav", reply: `${PROFILE.name} — ${PROFILE.experienceYears} years on Genesys Cloud, currently ${PROFILE.role}, based in ${PROFILE.location}.`, reply2: HIGHLIGHTS[1] },
+      { key: "3", id: "stack", label: "Stack", sub: `${skills.length} skills`, icon: Layers, kind: "prompt", choice: "Tech stack", reply: `Core stack: ${TOP_SKILLS}.`, reply2: "The full skill matrix is in the Stack section." },
+      { key: "4", id: "contact", label: "Contact", sub: "Email & LinkedIn", icon: Mail, kind: "queue", choice: "Get in touch", reply: `Email ${PROFILE.email}, or connect on LinkedIn.`, reply2: PROFILE.availability },
     ],
-    end: { label: "CSAT", sub: "Post-chat", icon: CheckCircle2, line: "Thanks for chatting! How would you rate this conversation?" },
+    end: { label: "CSAT", sub: "Post-chat", icon: CheckCircle2, line: "Thanks for stopping by! How would you rate this portfolio?" },
   },
 };
 
 function buildGraph(def: FlowDef): { nodes: Node[]; edges: Edge[] } {
   const n = (id: string, x: number, y: number, data: NodeData): Node => ({ id, type: "flow", position: { x, y }, data });
+  // Branches stack at x=720; the spine (start → welcome → menu → end) sits
+  // vertically centered against them.
+  const midY = ((def.branches.length - 1) * 105) / 2;
   const nodes: Node[] = [
-    n("start", 0, 150, { ...def.start, kind: "start" }),
-    n("welcome", 230, 150, { ...def.welcome, kind: "prompt" }),
-    n("menu", 460, 150, { ...def.menu, kind: "menu" }),
-    n("billing", 720, 20, { ...def.branches[0], kind: def.branches[0].kind }),
-    n("bot", 720, 150, { ...def.branches[1], kind: def.branches[1].kind }),
-    n("sales", 720, 280, { ...def.branches[2], kind: def.branches[2].kind }),
-    n("end", 980, 150, { ...def.end, kind: "end" }),
+    n("start", 0, midY, { ...def.start, kind: "start" }),
+    n("welcome", 230, midY, { ...def.welcome, kind: "prompt" }),
+    n("menu", 460, midY, { ...def.menu, kind: "menu" }),
+    ...def.branches.map((b, i) => n(b.id, 720, i * 105, { ...b, kind: b.kind })),
+    n("end", 980, midY, { ...def.end, kind: "end" }),
   ];
   const e = (id: string, s: string, t: string, label?: string): Edge => ({
     id, source: s, target: t, label,
@@ -122,19 +132,15 @@ function buildGraph(def: FlowDef): { nodes: Node[]; edges: Edge[] } {
   const edges: Edge[] = [
     e("e1", "start", "welcome"),
     e("e2", "welcome", "menu"),
-    e("e3", "menu", "billing", def.branches[0].key),
-    e("e4", "menu", "bot", def.branches[1].key),
-    e("e5", "menu", "sales", def.branches[2].key),
-    e("e6", "billing", "end"),
-    e("e7", "bot", "end"),
-    e("e8", "sales", "end"),
+    ...def.branches.flatMap((b) => [
+      e(`m-${b.id}`, "menu", b.id, b.key),
+      e(`${b.id}-end`, b.id, "end"),
+    ]),
   ];
   return { nodes, edges };
 }
 
 type Line = { who: "sys" | "caller" | "bot"; text: string };
-const EDGE_OF: Record<string, string> = { billing: "e3", bot: "e4", sales: "e5" };
-const ENDEDGE_OF: Record<string, string> = { billing: "e6", bot: "e7", sales: "e8" };
 
 export default function Playground() {
   const [mode, setMode] = useState<"voice" | "chat">("voice");
@@ -204,11 +210,15 @@ export default function Playground() {
     if (!awaiting) return;
     setAwaiting(false);
     setTranscript((t) => [...t, { who: "caller", text: `${def.callerName}: ${b.choice}` }]);
-    lightEdge(["e1", "e2", EDGE_OF[b.id]]);
+    lightEdge(["e1", "e2", `m-${b.id}`]);
     lightNode(b.id);
     after(700, () => setTranscript((t) => [...t, { who: "bot", text: b.reply }]));
-    after(1600, () => { lightEdge(["e1", "e2", EDGE_OF[b.id], ENDEDGE_OF[b.id]]); lightNode("end"); });
-    after(2300, () => {
+    if (b.reply2) {
+      const extra = b.reply2;
+      after(1600, () => setTranscript((t) => [...t, { who: "bot", text: extra }]));
+    }
+    after(2400, () => { lightEdge(["e1", "e2", `m-${b.id}`, `${b.id}-end`]); lightNode("end"); });
+    after(3100, () => {
       setTranscript((t) => [...t, { who: "bot", text: def.end.line }, { who: "sys", text: mode === "voice" ? "✅ Call complete · CSAT logged" : "✅ Chat resolved · CSAT logged" }]);
       lightNode(null);
       setRunning(false);
