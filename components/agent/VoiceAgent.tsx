@@ -39,6 +39,9 @@ export default function VoiceAgent() {
     };
     const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
     if (Ctor) {
+      // Browser capability detection must run post-hydration (SSR renders
+      // without the mic button), so a one-shot setState here is intentional.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSttSupported(true);
       const rec = new Ctor();
       rec.lang = "en-US";
@@ -72,7 +75,7 @@ export default function VoiceAgent() {
       };
       recRef.current = rec;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   useEffect(() => {
@@ -172,7 +175,7 @@ export default function VoiceAgent() {
           setMessages([...next, { role: "assistant", content: acc }]);
           // Speak complete sentences as they arrive (voice starts early).
           let m;
-          // eslint-disable-next-line no-cond-assign
+           
           while ((m = /[.!?]\s/.exec(acc.slice(spoken)))) {
             const end = spoken + m.index + 1;
             speakChunk(acc.slice(spoken, end).trim());
@@ -241,7 +244,9 @@ export default function VoiceAgent() {
             stopAudio();
             setSpeaking(false);
           }}
-          className="mono text-[0.68rem] tracking-[0.14em] text-muted-foreground hover:text-foreground"
+          aria-pressed={voiceOn}
+          aria-label={voiceOn ? "Turn voice replies off" : "Turn voice replies on"}
+          className="focus-ring mono min-h-8 rounded-md px-1.5 text-[0.68rem] tracking-[0.14em] text-muted-foreground hover:text-foreground"
         >
           VOICE {voiceOn ? "ON" : "OFF"}
         </button>
@@ -256,7 +261,9 @@ export default function VoiceAgent() {
             style={{ boxShadow: "inset 0 0 0 2px var(--brand-orange)" }}
           />
         </div>
-        <Waveform active={speaking || listening} />
+        <div aria-hidden="true" className="min-w-0 flex-1">
+          <Waveform active={speaking || listening} />
+        </div>
       </div>
 
       {/* Transcript */}
@@ -272,7 +279,7 @@ export default function VoiceAgent() {
                 <button
                   key={s}
                   onClick={() => send(s)}
-                  className="mono rounded-full border border-border px-3 py-1.5 text-[0.72rem] text-foreground/80 transition hover:border-[var(--brand-sky)] hover:text-foreground"
+                  className="focus-ring mono min-h-9 rounded-full border border-border px-3 py-1.5 text-[0.72rem] text-foreground/80 transition hover:border-[var(--brand-sky)] hover:text-foreground"
                 >
                   {s}
                 </button>
@@ -315,7 +322,7 @@ export default function VoiceAgent() {
             type="button"
             onClick={toggleMic}
             aria-label={listening ? "Stop listening" : "Talk"}
-            className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg border transition ${
+            className={`focus-ring grid h-11 w-11 shrink-0 place-items-center rounded-lg border transition ${
               listening
                 ? "border-[var(--brand-orange)] glow-orange text-[var(--brand-orange)]"
                 : "border-border text-muted-foreground hover:text-foreground"
@@ -328,12 +335,13 @@ export default function VoiceAgent() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={listening ? "Listening…" : "Ask about my work…"}
+          aria-label="Ask the portfolio agent"
           className="min-w-0 flex-1 bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground"
         />
         <button
           type="submit"
           disabled={busy || !input.trim()}
-          className="mono shrink-0 rounded-lg border border-[var(--brand-sky)]/40 bg-[var(--brand-sky)]/10 px-3 py-2 text-[0.72rem] tracking-[0.12em] text-[var(--brand-sky)] transition enabled:hover:bg-[var(--brand-sky)]/20 disabled:opacity-40"
+          className="focus-ring mono min-h-11 shrink-0 rounded-lg border border-[var(--brand-sky)]/40 bg-[var(--brand-sky)]/10 px-3 py-2 text-[0.72rem] tracking-[0.12em] text-[var(--brand-sky)] transition enabled:hover:bg-[var(--brand-sky)]/20 disabled:opacity-40"
         >
           SEND
         </button>

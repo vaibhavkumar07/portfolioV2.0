@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local tooling, not part of the app (gitignored):
+    ".claude/**",
+    ".claude-flow/**",
   ]),
 ]);
 

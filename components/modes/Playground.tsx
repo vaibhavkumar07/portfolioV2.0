@@ -33,7 +33,7 @@ function FlowNode({ data }: NodeProps) {
     <div
       className="relative flex items-center gap-3 rounded-2xl border bg-card/90 px-3.5 py-3 backdrop-blur transition-all"
       style={{
-        minWidth: 168,
+        minWidth: "min(168px, 44vw)",
         borderColor: d.active ? c.ring : "var(--border)",
         boxShadow: d.active
           ? `0 0 0 1px ${c.ring}, 0 0 28px -4px ${c.ring}, 0 12px 24px -10px rgba(0,0,0,0.7)`
@@ -152,16 +152,18 @@ export default function Playground() {
   const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
   const after = (ms: number, fn: () => void) => { timers.current.push(setTimeout(fn, ms)); };
 
-  // Rebuild graph when channel changes; reset sim.
-  useEffect(() => {
+  // Rebuild graph and reset the sim when the channel changes (event handler,
+  // not an effect — avoids cascading setState-in-effect renders).
+  const switchMode = useCallback((m: "voice" | "chat") => {
     clearTimers();
-    setNodes(initial.nodes);
-    setEdges(initial.edges);
+    setMode(m);
+    const g = buildGraph(FLOWS[m]);
+    setNodes(g.nodes);
+    setEdges(g.edges);
     setTranscript([]);
     setAwaiting(false);
     setRunning(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  }, [setNodes, setEdges]);
 
   useEffect(() => {
     scriptRef.current?.scrollTo({ top: scriptRef.current.scrollHeight, behavior: "smooth" });
@@ -232,8 +234,10 @@ export default function Playground() {
           {(["voice", "chat"] as const).map((m) => (
             <button
               key={m}
-              onClick={() => setMode(m)}
-              className={`mono flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[0.66rem] tracking-[0.12em] transition ${
+              onClick={() => switchMode(m)}
+              aria-pressed={mode === m}
+              aria-label={`Switch to ${m} flow`}
+              className={`focus-ring mono flex min-h-9 items-center gap-1.5 rounded-md px-3 py-1.5 text-[0.66rem] tracking-[0.12em] transition ${
                 mode === m ? "bg-[var(--brand-sky)]/15 text-[var(--brand-sky)]" : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -246,7 +250,7 @@ export default function Playground() {
 
       <div className="grid gap-3 lg:grid-cols-[1.6fr_1fr]">
         {/* Canvas */}
-        <div className="h-[440px] overflow-hidden rounded-xl border border-border bg-card/30 lg:h-[520px]">
+        <div className="h-[clamp(340px,55vh,440px)] overflow-hidden rounded-xl border border-border bg-card/30 lg:h-[520px]">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -256,6 +260,7 @@ export default function Playground() {
             fitView
             proOptions={{ hideAttribution: true }}
             colorMode="dark"
+            preventScrolling={false}
           >
             <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="#1b3050" />
             <Controls showInteractive={false} />
@@ -263,7 +268,7 @@ export default function Playground() {
         </div>
 
         {/* Live simulator */}
-        <div className="flex h-[440px] flex-col overflow-hidden rounded-xl border border-border bg-card/40 lg:h-[520px]">
+        <div className="flex h-[clamp(340px,55vh,440px)] flex-col overflow-hidden rounded-xl border border-border bg-card/40 lg:h-[520px]">
           <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
             <span className="mono text-[0.64rem] tracking-[0.18em] text-muted-foreground">
               {mode === "voice" ? "LIVE CALL" : "LIVE CHAT"}
@@ -271,7 +276,7 @@ export default function Playground() {
             <button
               onClick={start}
               disabled={running}
-              className="mono rounded-md border border-[var(--brand-orange)]/40 bg-[var(--brand-orange)]/10 px-3 py-1 text-[0.64rem] tracking-[0.12em] text-[var(--brand-orange)] transition enabled:hover:bg-[var(--brand-orange)]/20 disabled:opacity-50"
+              className="focus-ring mono min-h-9 rounded-md border border-[var(--brand-orange)]/40 bg-[var(--brand-orange)]/10 px-3 py-1 text-[0.64rem] tracking-[0.12em] text-[var(--brand-orange)] transition enabled:hover:bg-[var(--brand-orange)]/20 disabled:opacity-50"
             >
               {running ? "RUNNING…" : "▶ RUN"}
             </button>
@@ -295,7 +300,7 @@ export default function Playground() {
                   <button
                     key={b.id}
                     onClick={() => choose(b)}
-                    className="flex w-full items-center gap-3 rounded-lg border border-border bg-white/[0.03] px-3 py-2 text-left transition hover:border-[var(--brand-sky)]/60 hover:bg-white/[0.06]"
+                    className="focus-ring flex min-h-11 w-full items-center gap-3 rounded-lg border border-border bg-white/[0.03] px-3 py-2 text-left transition hover:border-[var(--brand-sky)]/60 hover:bg-white/[0.06]"
                   >
                     <span
                       className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-white"

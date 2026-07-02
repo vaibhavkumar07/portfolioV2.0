@@ -30,6 +30,7 @@ export default function TrustPanel() {
         @keyframes tp-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .tp-marquee { animation: tp-marquee 40s linear infinite; }
         .tp-marquee:hover { animation-play-state: paused; }
+        @media (prefers-reduced-motion: reduce) { .tp-marquee { animation: none; } }
       `}</style>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_1.1fr] lg:items-stretch">

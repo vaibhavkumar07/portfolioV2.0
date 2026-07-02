@@ -25,11 +25,7 @@ export default function CountUp({
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
-    if (!inView) return;
-    if (reduce) {
-      setDisplay(target);
-      return;
-    }
+    if (!inView || reduce) return;
     const controls = animate(0, target, {
       duration: 1.2,
       ease: [0.22, 1, 0.36, 1],
@@ -40,7 +36,7 @@ export default function CountUp({
 
   return (
     <span ref={ref} className={className}>
-      {display}
+      {reduce ? target : display}
       {suffix}
     </span>
   );

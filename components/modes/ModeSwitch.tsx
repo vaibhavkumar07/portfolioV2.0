@@ -24,6 +24,9 @@ export default function ModeSwitch({ children }: { children: React.ReactNode }) 
   // HOME, so the section nav links always resolve.
   useEffect(() => {
     const url = new URLSearchParams(window.location.search).get("view");
+    // Deep-link read must happen post-hydration (SSR always renders HOME),
+    // so this one-shot setState is intentional.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (url === "dashboard" || url === "playground") setMode(url);
   }, []);
 
@@ -64,12 +67,13 @@ export default function ModeSwitch({ children }: { children: React.ReactNode }) 
       <div className="sticky top-[3.25rem] z-30 border-y border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center gap-2 px-5 py-2">
           <span className="mono mr-2 text-[0.6rem] tracking-[0.18em] text-muted-foreground">MODE</span>
-          <div className="flex gap-1 rounded-lg border border-border p-1">
+          <div role="group" aria-label="View mode" className="flex gap-1 rounded-lg border border-border p-1">
             {MODES.map((m) => (
               <button
                 key={m.id}
                 onClick={() => select(m.id)}
-                className={`mono rounded-md px-3 py-1 text-[0.66rem] tracking-[0.12em] transition ${
+                aria-pressed={mode === m.id}
+                className={`focus-ring mono min-h-8 rounded-md px-3 py-1 text-[0.66rem] tracking-[0.12em] transition ${
                   mode === m.id
                     ? "bg-[var(--brand-sky)]/15 text-[var(--brand-sky)]"
                     : "text-muted-foreground hover:text-foreground"
