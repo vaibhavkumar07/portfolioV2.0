@@ -1,10 +1,12 @@
 import type { NextConfig } from "next";
 
 // Content-Security-Policy. 'unsafe-inline' is needed for Next's inline runtime,
-// framer-motion inline styles, and the JSON-LD script; 'unsafe-eval' for dev.
+// framer-motion inline styles, and the JSON-LD script; 'unsafe-eval' only in dev
+// (Next dev runtime needs it — never ship it to production).
+const isDev = process.env.NODE_ENV === "development";
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline' https://api.fontshare.com",
   "font-src 'self' https://cdn.fontshare.com data:",
   "img-src 'self' data: blob:",
