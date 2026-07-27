@@ -4,17 +4,24 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Magnetic from "@/components/fx/Magnetic";
+import { MODES, useMode } from "@/components/modes/ModeProvider";
 
-const NAV = [
-  { id: "work", label: "WORK", key: "1" },
-  { id: "about", label: "ABOUT", key: "2" },
-  { id: "stack", label: "STACK", key: "3" },
-  { id: "contact", label: "CONTACT", key: "4" },
+const SECTIONS = [
+  { id: "work", label: "Work" },
+  { id: "about", label: "About" },
+  { id: "stack", label: "Stack" },
+  { id: "contact", label: "Contact" },
 ];
 
+/**
+ * The single wayfinding surface. Page sections AND the Dashboard/Playground
+ * views both live here — views used to sit behind a separate sticky bar below
+ * the hero that most visitors never scrolled to.
+ */
 export default function SiteNav({ email }: { email: string }) {
   const [open, setOpen] = useState(false);
   const reduce = useReducedMotion();
+  const { mode, select, goToSection } = useMode();
 
   useEffect(() => {
     if (!open) return;
@@ -29,49 +36,77 @@ export default function SiteNav({ email }: { email: string }) {
     };
   }, [open]);
 
+  const onSection = (id: string) => {
+    setOpen(false);
+    goToSection(id);
+  };
+  const onView = (m: (typeof MODES)[number]["id"]) => {
+    setOpen(false);
+    select(m);
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+  };
+
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/70 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-        <Link href="/" className="focus-ring flex items-center gap-2.5 rounded-md">
-          <span className="grid h-7 w-7 place-items-center rounded-md border border-[var(--brand-orange)]/40">
+    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-5">
+      <div className="glass-strong mx-auto flex max-w-6xl items-center justify-between rounded-2xl px-4 py-2.5">
+        <Link
+          href="/"
+          className="focus-ring flex shrink-0 items-center gap-2.5 rounded-xl"
+          onClick={() => select("home")}
+        >
+          <span className="grid h-7 w-7 place-items-center rounded-lg border border-[var(--cyan)]/40">
             <span
-              className="h-2 w-2 rounded-full bg-[var(--brand-orange)]"
-              style={{ boxShadow: "0 0 8px var(--brand-orange)" }}
+              className="h-2 w-2 rounded-full bg-[var(--cyan)]"
+              style={{ boxShadow: "0 0 10px var(--cyan)" }}
             />
           </span>
-          <span className="mono text-xs tracking-[0.16em] text-foreground">V. YADAV</span>
+          <span className="label-sm text-foreground">V. Yadav</span>
         </Link>
 
-        <nav aria-label="Primary" className="hidden items-center gap-6 md:flex">
-          {NAV.map((n) => (
-            <a
-              key={n.id}
-              href={`#${n.id}`}
-              className="focus-ring mono rounded-md text-[0.72rem] tracking-[0.14em] text-muted-foreground transition hover:text-foreground"
+        <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
+          {SECTIONS.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => onSection(s.id)}
+              className="focus-ring label-xs min-h-9 rounded-lg px-2.5 text-muted-foreground transition hover:text-foreground"
             >
-              <span className="text-[var(--brand-sky)]">{n.key}</span> {n.label}
-            </a>
+              {s.label}
+            </button>
+          ))}
+          <span aria-hidden="true" className="mx-2 h-4 w-px bg-border" />
+          {MODES.filter((m) => m.id !== "home").map((m) => (
+            <button
+              key={m.id}
+              onClick={() => onView(m.id)}
+              aria-pressed={mode === m.id}
+              className={`focus-ring label-xs min-h-9 rounded-lg px-2.5 transition ${
+                mode === m.id
+                  ? "bg-[var(--cyan)]/18 text-[var(--cyan)]"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {m.label}
+            </button>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Magnetic>
             <a
               href={`mailto:${email}`}
-              className="focus-ring mono rounded-md border border-[var(--brand-sky)]/40 bg-[var(--brand-sky)]/10 px-3 py-1.5 text-[0.7rem] tracking-[0.12em] text-[var(--brand-sky)] transition hover:bg-[var(--brand-sky)]/20"
+              className="focus-ring label-xs inline-flex min-h-9 items-center rounded-xl bg-[var(--amber)] px-3.5 font-medium text-[oklch(0.16_0.03_84)] transition hover:brightness-110"
             >
-              HIRE ME
+              Hire me
             </a>
           </Magnetic>
 
-          {/* Hamburger — mobile only */}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? "Close menu" : "Open menu"}
-            className="focus-ring grid h-11 w-11 place-items-center rounded-md border border-border md:hidden"
+            className="focus-ring grid h-11 w-11 place-items-center rounded-xl border border-border lg:hidden"
           >
             <span className="relative block h-3 w-5" aria-hidden="true">
               <span
@@ -94,28 +129,36 @@ export default function SiteNav({ email }: { email: string }) {
           <motion.nav
             id="mobile-nav"
             aria-label="Mobile"
-            className="border-t border-border bg-background/95 backdrop-blur-md md:hidden"
+            className="glass-strong mx-auto mt-2 max-w-6xl overflow-hidden rounded-2xl lg:hidden"
             initial={reduce ? { opacity: 0 } : { opacity: 0, height: 0 }}
             animate={reduce ? { opacity: 1 } : { opacity: 1, height: "auto" }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, height: 0 }}
             transition={{ duration: reduce ? 0.1 : 0.25, ease: [0.22, 1, 0.36, 1] }}
           >
-            <ul className="mx-auto max-w-6xl px-5 py-2">
-              {NAV.map((n, i) => (
-                <motion.li
-                  key={n.id}
-                  initial={reduce ? undefined : { opacity: 0, x: -10 }}
-                  animate={reduce ? undefined : { opacity: 1, x: 0 }}
-                  transition={{ delay: 0.04 * i, duration: 0.2 }}
-                >
-                  <a
-                    href={`#${n.id}`}
-                    onClick={() => setOpen(false)}
-                    className="focus-ring mono flex min-h-11 items-center gap-3 rounded-md py-2 text-[0.8rem] tracking-[0.14em] text-muted-foreground transition hover:text-foreground"
+            <ul className="px-3 py-2">
+              {SECTIONS.map((s) => (
+                <li key={s.id}>
+                  <button
+                    onClick={() => onSection(s.id)}
+                    className="focus-ring label-sm flex min-h-12 w-full items-center rounded-xl px-3 text-muted-foreground transition hover:text-foreground"
                   >
-                    <span className="text-[var(--brand-sky)]">{n.key}</span> {n.label}
-                  </a>
-                </motion.li>
+                    {s.label}
+                  </button>
+                </li>
+              ))}
+              <li aria-hidden="true" className="my-1 h-px bg-border" />
+              {MODES.map((m) => (
+                <li key={m.id}>
+                  <button
+                    onClick={() => onView(m.id)}
+                    aria-pressed={mode === m.id}
+                    className={`focus-ring label-sm flex min-h-12 w-full items-center rounded-xl px-3 transition ${
+                      mode === m.id ? "text-[var(--cyan)]" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {m.label}
+                  </button>
+                </li>
               ))}
             </ul>
           </motion.nav>

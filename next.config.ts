@@ -13,7 +13,10 @@ const csp = [
   "font-src 'self' https://cdn.fontshare.com data:",
   "img-src 'self' data: blob:",
   "media-src 'self' blob: data:",
-  "connect-src 'self'",
+  // blob: is required by three.js — GLTFLoader decodes embedded textures via
+  // ImageBitmapLoader, which fetch()es page-created blob: URLs. Same-origin
+  // data the page already holds; no external destination is opened.
+  "connect-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

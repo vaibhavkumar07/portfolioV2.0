@@ -14,6 +14,7 @@ import {
 import { PROFILE, HIGHLIGHTS } from "@/lib/data/kb";
 import { projects } from "@/lib/data/projects";
 import { skills } from "@/lib/data/skills";
+import { THEME } from "@/lib/theme";
 
 // Real portfolio data, spoken-style.
 const TOP_PROJECTS = projects.slice(0, 3).map((p) => p.title).join(", ");
@@ -23,12 +24,12 @@ type Kind = "start" | "prompt" | "menu" | "bot" | "queue" | "end";
 type NodeData = { label: string; sub?: string; kind: Kind; icon: LucideIcon; active?: boolean };
 
 const COLOR: Record<Kind, { from: string; to: string; ring: string }> = {
-  start: { from: "#34d399", to: "#059669", ring: "var(--brand-green)" },
-  prompt: { from: "#38bdf8", to: "#0369a1", ring: "var(--brand-sky)" },
-  menu: { from: "#38bdf8", to: "#0369a1", ring: "var(--brand-sky)" },
-  bot: { from: "#a78bfa", to: "#6d28d9", ring: "#a78bfa" },
-  queue: { from: "#fb923c", to: "#c2410c", ring: "var(--brand-orange)" },
-  end: { from: "#fb923c", to: "#c2410c", ring: "var(--brand-orange)" },
+  start: { from: "#4ade80", to: "#15803d", ring: "var(--live)" },
+  prompt: { from: "#22d3ee", to: "#0e7490", ring: "var(--cyan)" },
+  menu: { from: "#22d3ee", to: "#0e7490", ring: "var(--cyan)" },
+  bot: { from: "#a78bfa", to: "#6d28d9", ring: "var(--violet)" },
+  queue: { from: "#fbbf24", to: "#b45309", ring: "var(--amber)" },
+  end: { from: "#fbbf24", to: "#b45309", ring: "var(--amber)" },
 };
 
 // ── 3D-iconed flow node ──
@@ -124,10 +125,10 @@ function buildGraph(def: FlowDef): { nodes: Node[]; edges: Edge[] } {
   ];
   const e = (id: string, s: string, t: string, label?: string): Edge => ({
     id, source: s, target: t, label,
-    markerEnd: { type: MarkerType.ArrowClosed, color: "#3a5a82" },
-    style: { stroke: "#3a5a82", strokeWidth: 1.5 },
-    labelStyle: { fill: "#9fb3c8", fontSize: 11, fontFamily: "var(--font-mono)" },
-    labelBgStyle: { fill: "#0b1426" },
+    markerEnd: { type: MarkerType.ArrowClosed, color: THEME.grid },
+    style: { stroke: THEME.grid, strokeWidth: 1.5 },
+    labelStyle: { fill: THEME.axis, fontSize: 11, fontFamily: "var(--font-mono)" },
+    labelBgStyle: { fill: THEME.surfaceDeep },
   });
   const edges: Edge[] = [
     e("e1", "start", "welcome"),
@@ -183,7 +184,7 @@ export default function Playground() {
     setEdges((eds) => eds.map((e) => ({
       ...e,
       animated: ids.includes(e.id),
-      style: { ...e.style, stroke: ids.includes(e.id) ? "#ff4f1f" : "#3a5a82" },
+      style: { ...e.style, stroke: ids.includes(e.id) ? THEME.amber : THEME.grid },
     })));
   }, [setEdges]);
 
@@ -229,7 +230,7 @@ export default function Playground() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-10">
-      <div className="mono mb-1 text-[0.66rem] tracking-[0.2em] text-[var(--brand-sky)]">&gt; INTERACTIVE</div>
+      <div className="label-xs mb-1 text-[var(--cyan)]">&gt; INTERACTIVE</div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Build &amp; run a flow</h2>
@@ -248,7 +249,7 @@ export default function Playground() {
               aria-pressed={mode === m}
               aria-label={`Switch to ${m} flow`}
               className={`focus-ring mono flex min-h-9 items-center gap-1.5 rounded-md px-3 py-1.5 text-[0.66rem] tracking-[0.12em] transition ${
-                mode === m ? "bg-[var(--brand-sky)]/15 text-[var(--brand-sky)]" : "text-muted-foreground hover:text-foreground"
+                mode === m ? "bg-[var(--cyan)]/15 text-[var(--cyan)]" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {m === "voice" ? <PhoneCall className="h-3.5 w-3.5" /> : <MessageSquare className="h-3.5 w-3.5" />}
@@ -260,7 +261,7 @@ export default function Playground() {
 
       <div className="grid gap-3 lg:grid-cols-[1.6fr_1fr]">
         {/* Canvas */}
-        <div className="h-[clamp(340px,55vh,440px)] overflow-hidden rounded-xl border border-border bg-card/30 lg:h-[520px]">
+        <div className="h-[clamp(340px,55vh,440px)] overflow-hidden glass rounded-3xl lg:h-[520px]">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -272,21 +273,21 @@ export default function Playground() {
             colorMode="dark"
             preventScrolling={false}
           >
-            <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="#1b3050" />
+            <Background variant={BackgroundVariant.Dots} gap={22} size={1} color={THEME.grid} />
             <Controls showInteractive={false} />
           </ReactFlow>
         </div>
 
         {/* Live simulator */}
-        <div className="flex h-[clamp(340px,55vh,440px)] flex-col overflow-hidden rounded-xl border border-border bg-card/40 lg:h-[520px]">
+        <div className="flex h-[clamp(340px,55vh,440px)] flex-col overflow-hidden glass rounded-3xl lg:h-[520px]">
           <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-            <span className="mono text-[0.64rem] tracking-[0.18em] text-muted-foreground">
+            <span className="label-xs text-muted-foreground">
               {mode === "voice" ? "LIVE CALL" : "LIVE CHAT"}
             </span>
             <button
               onClick={start}
               disabled={running}
-              className="focus-ring mono min-h-9 rounded-md border border-[var(--brand-orange)]/40 bg-[var(--brand-orange)]/10 px-3 py-1 text-[0.64rem] tracking-[0.12em] text-[var(--brand-orange)] transition enabled:hover:bg-[var(--brand-orange)]/20 disabled:opacity-50"
+              className="focus-ring mono min-h-9 rounded-md border border-[var(--amber)]/40 bg-[var(--amber)]/10 px-3 py-1 text-[0.64rem] tracking-[0.12em] text-[var(--amber)] transition enabled:hover:bg-[var(--amber)]/20 disabled:opacity-50"
             >
               {running ? "RUNNING…" : "▶ RUN"}
             </button>
@@ -295,7 +296,7 @@ export default function Playground() {
           <div ref={scriptRef} className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-4">
             {transcript.length === 0 && (
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Press <span className="text-[var(--brand-orange)]">▶ RUN</span> to start a{" "}
+                Press <span className="text-[var(--amber)]">▶ RUN</span> to start a{" "}
                 {mode === "voice" ? "call" : "chat"} and route it yourself.
               </p>
             )}
@@ -310,7 +311,7 @@ export default function Playground() {
                   <button
                     key={b.id}
                     onClick={() => choose(b)}
-                    className="focus-ring flex min-h-11 w-full items-center gap-3 rounded-lg border border-border bg-white/[0.03] px-3 py-2 text-left transition hover:border-[var(--brand-sky)]/60 hover:bg-white/[0.06]"
+                    className="focus-ring flex min-h-11 w-full items-center gap-3 rounded-lg border border-border bg-white/[0.03] px-3 py-2 text-left transition hover:border-[var(--cyan)]/60 hover:bg-white/[0.06]"
                   >
                     <span
                       className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-white"
@@ -319,7 +320,7 @@ export default function Playground() {
                       <b.icon className="h-3.5 w-3.5" />
                     </span>
                     <span className="text-sm font-medium text-foreground">
-                      {mode === "voice" ? <span className="mono mr-1 text-[var(--brand-sky)]">{b.key}</span> : null}
+                      {mode === "voice" ? <span className="mono mr-1 text-[var(--cyan)]">{b.key}</span> : null}
                       {b.label}
                     </span>
                     <span className="mono ml-auto text-[0.6rem] text-muted-foreground">{b.sub}</span>
@@ -345,7 +346,7 @@ function Bubble({ line }: { line: Line }) {
       </span>
       <p
         className={`inline-block max-w-[88%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
-          isBot ? "bg-secondary/60 text-foreground" : "bg-[var(--brand-sky)]/12 text-foreground"
+          isBot ? "bg-secondary/60 text-foreground" : "bg-[var(--cyan)]/12 text-foreground"
         }`}
       >
         {line.text}

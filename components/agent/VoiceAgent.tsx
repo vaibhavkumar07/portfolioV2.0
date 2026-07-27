@@ -20,7 +20,15 @@ type SpeechRec = {
   stop: () => void;
 };
 
-export default function VoiceAgent() {
+export default function VoiceAgent({
+  variant = "panel",
+  analyserRef,
+}: {
+  /** "takeover" hides the photo/waveform row — the 3D avatar stands in for it. */
+  variant?: "panel" | "takeover";
+  /** Receives an AnalyserNode wired to the TTS audio, for avatar lip-sync. */
+  analyserRef?: React.RefObject<AnalyserNode | null>;
+} = {}) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -89,6 +97,34 @@ export default function VoiceAgent() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioQ = useRef<Promise<string | null>[]>([]);
   const workingRef = useRef(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  // Wire an analyser to the TTS <audio> element so the 3D avatar can lip-sync
+  // to real amplitude. createMediaElementSource is one-shot per element, so
+  // this runs exactly once; later calls just resume a suspended context.
+  const ensureAnalyser = useCallback(() => {
+    if (!analyserRef || !audioRef.current) return;
+    if (analyserRef.current) {
+      void audioCtxRef.current?.resume().catch(() => {});
+      return;
+    }
+    try {
+      const ctx = new AudioContext();
+      const src = ctx.createMediaElementSource(audioRef.current);
+      const an = ctx.createAnalyser();
+      an.fftSize = 256;
+      an.smoothingTimeConstant = 0.6;
+      src.connect(an);
+      an.connect(ctx.destination);
+      analyserRef.current = an;
+      audioCtxRef.current = ctx;
+      // A fresh context can start suspended. Once the element is routed
+      // through it, a suspended context means silence — always resume.
+      void ctx.resume().catch(() => {});
+    } catch {
+      /* analyser is an enhancement — audio still plays without it */
+    }
+  }, [analyserRef]);
 
   const fetchTTS = useCallback(async (text: string): Promise<string | null> => {
     try {
@@ -108,6 +144,7 @@ export default function VoiceAgent() {
   const pump = useCallback(async () => {
     if (workingRef.current) return;
     workingRef.current = true;
+    ensureAnalyser();
     setSpeaking(true);
     const a = audioRef.current;
     while (audioQ.current.length) {
@@ -122,7 +159,7 @@ export default function VoiceAgent() {
     }
     workingRef.current = false;
     setSpeaking(false);
-  }, []);
+  }, [ensureAnalyser]);
 
   const speakChunk = useCallback(
     (text: string) => {
@@ -232,16 +269,16 @@ export default function VoiceAgent() {
   };
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card/60 backdrop-blur-sm">
+    <div className="glass relative flex h-full flex-col overflow-hidden rounded-3xl">
       {/* Console header */}
-      <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span
-            className={`h-2 w-2 rounded-full ${speaking ? "bg-[var(--brand-orange)]" : "bg-[var(--brand-green)]"}`}
+            className={`h-2 w-2 rounded-full ${speaking ? "bg-[var(--amber)]" : "bg-[var(--live)]"}`}
             style={{ boxShadow: "0 0 8px currentColor" }}
           />
-          <span className="mono text-[0.68rem] tracking-[0.18em] text-muted-foreground">
-            {speaking ? "AGENT SPEAKING" : busy ? "THINKING…" : "LINE OPEN"}
+          <span className="label-xs text-muted-foreground">
+            {speaking ? "Agent speaking" : busy ? "Thinking…" : "Line open"}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -249,9 +286,9 @@ export default function VoiceAgent() {
             <button
               onClick={stopAudio}
               aria-label="Stop the agent's voice"
-              className="focus-ring mono min-h-8 rounded-md border border-[var(--brand-orange)]/40 px-2 text-[0.62rem] tracking-[0.14em] text-[var(--brand-orange)] transition hover:bg-[var(--brand-orange)]/10"
+              className="focus-ring label-xs min-h-8 rounded-lg border border-[var(--amber)]/40 px-2.5 text-[var(--amber)] transition hover:bg-[var(--amber)]/10"
             >
-              ■ STOP
+              ■ Stop
             </button>
           )}
           <button
@@ -262,26 +299,28 @@ export default function VoiceAgent() {
             }}
             aria-pressed={voiceOn}
             aria-label={voiceOn ? "Turn voice replies off" : "Turn voice replies on"}
-            className="focus-ring mono min-h-8 rounded-md px-1.5 text-[0.68rem] tracking-[0.14em] text-muted-foreground hover:text-foreground"
+            className="focus-ring label-xs min-h-8 rounded-lg px-2 text-muted-foreground hover:text-foreground"
           >
-            VOICE {voiceOn ? "ON" : "OFF"}
+            Voice {voiceOn ? "on" : "off"}
           </button>
         </div>
       </div>
 
-      {/* Avatar + waveform */}
-      <div className="relative flex items-center gap-4 border-b border-border px-4 py-4">
-        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border">
-          <Image src="/profile.jpeg" alt="Vaibhavkumar Yadav" fill className="object-cover" sizes="64px" />
-          <span
-            className={`absolute inset-0 transition-opacity ${speaking ? "opacity-100" : "opacity-0"}`}
-            style={{ boxShadow: "inset 0 0 0 2px var(--brand-orange)" }}
-          />
+      {/* Avatar + waveform — the takeover shows the live 3D avatar instead */}
+      {variant === "panel" && (
+        <div className="relative flex items-center gap-4 border-b border-border px-4 py-4">
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-border">
+            <Image src="/profile.jpeg" alt="Vaibhavkumar Yadav" fill className="object-cover" sizes="64px" />
+            <span
+              className={`absolute inset-0 transition-opacity ${speaking ? "opacity-100" : "opacity-0"}`}
+              style={{ boxShadow: "inset 0 0 0 2px var(--amber)" }}
+            />
+          </div>
+          <div aria-hidden="true" className="min-w-0 flex-1">
+            <Waveform active={speaking || listening} />
+          </div>
         </div>
-        <div aria-hidden="true" className="min-w-0 flex-1">
-          <Waveform active={speaking || listening} />
-        </div>
-      </div>
+      )}
 
       {/* Transcript */}
       <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
@@ -296,7 +335,7 @@ export default function VoiceAgent() {
                 <button
                   key={s}
                   onClick={() => send(s)}
-                  className="focus-ring mono min-h-9 rounded-full border border-border px-3 py-1.5 text-[0.72rem] text-foreground/80 transition hover:border-[var(--brand-sky)] hover:text-foreground"
+                  className="focus-ring mono min-h-9 rounded-full border border-border px-3 py-1.5 text-[0.72rem] text-foreground/80 transition hover:border-[var(--cyan)] hover:text-foreground"
                 >
                   {s}
                 </button>
@@ -318,7 +357,7 @@ export default function VoiceAgent() {
             <p
               className={`inline-block max-w-[85%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
                 m.role === "user"
-                  ? "bg-[var(--brand-sky)]/12 text-foreground"
+                  ? "bg-[var(--cyan)]/12 text-foreground"
                   : "bg-secondary/60 text-foreground"
               }`}
             >
@@ -339,7 +378,7 @@ export default function VoiceAgent() {
               <button
                 key={s}
                 onClick={() => send(s)}
-                className="focus-ring mono rounded-full border border-border/70 px-2.5 py-1 text-[0.64rem] text-muted-foreground transition hover:border-[var(--brand-sky)] hover:text-foreground"
+                className="focus-ring mono rounded-full border border-border/70 px-2.5 py-1 text-[0.64rem] text-muted-foreground transition hover:border-[var(--cyan)] hover:text-foreground"
               >
                 {s}
               </button>
@@ -349,7 +388,7 @@ export default function VoiceAgent() {
       </div>
 
       {note && (
-        <p className="mono border-t border-border px-4 py-1.5 text-[0.66rem] leading-snug text-[var(--brand-orange)]">{note}</p>
+        <p className="mono border-t border-border px-4 py-1.5 text-[0.66rem] leading-snug text-[var(--amber)]">{note}</p>
       )}
 
       {/* Input */}
@@ -358,23 +397,23 @@ export default function VoiceAgent() {
           e.preventDefault();
           send(input);
         }}
-        className="flex items-center gap-2 border-t border-border p-3"
+        className="focus-within:border-[var(--cyan)]/45 m-3 flex items-center gap-2 rounded-2xl border border-border bg-background/40 p-1.5 transition-colors"
       >
         {sttSupported && (
           <button
             type="button"
             onClick={toggleMic}
             aria-label={listening ? "Stop listening" : "Talk"}
-            className={`focus-ring relative grid h-11 w-11 shrink-0 place-items-center rounded-lg border transition ${
+            className={`focus-ring relative grid h-11 w-11 shrink-0 place-items-center rounded-xl border transition ${
               listening
-                ? "border-[var(--brand-orange)] glow-orange text-[var(--brand-orange)]"
+                ? "border-[var(--amber)] glow-amber text-[var(--amber)]"
                 : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
             {listening && (
               <span
                 aria-hidden="true"
-                className="absolute inset-0 animate-ping rounded-lg border border-[var(--brand-orange)]/60 motion-reduce:hidden"
+                className="absolute inset-0 animate-ping rounded-xl border border-[var(--amber)]/60 motion-reduce:hidden"
               />
             )}
             <MicIcon />
@@ -385,12 +424,12 @@ export default function VoiceAgent() {
           onChange={(e) => setInput(e.target.value)}
           placeholder={listening ? "Listening…" : "Ask about my work…"}
           aria-label="Ask the portfolio agent"
-          className="min-w-0 flex-1 bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground"
+          className="focus-ring min-w-0 flex-1 rounded-xl bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
         />
         <button
           type="submit"
           disabled={busy || !input.trim()}
-          className="focus-ring mono min-h-11 shrink-0 rounded-lg border border-[var(--brand-sky)]/40 bg-[var(--brand-sky)]/10 px-3 py-2 text-[0.72rem] tracking-[0.12em] text-[var(--brand-sky)] transition enabled:hover:bg-[var(--brand-sky)]/20 disabled:opacity-40"
+          className="focus-ring label-xs min-h-11 shrink-0 rounded-xl bg-[var(--cyan)] px-4 font-medium text-[var(--primary-foreground)] transition enabled:hover:brightness-110 disabled:opacity-35"
         >
           SEND
         </button>
@@ -408,7 +447,7 @@ function Waveform({ active }: { active: boolean }) {
       {Array.from({ length: bars }).map((_, i) => (
         <span
           key={i}
-          className="wf-bar w-full rounded-full bg-[var(--brand-sky)]/70"
+          className="wf-bar w-full rounded-full bg-[var(--cyan)]/70"
           style={{
             height: active ? undefined : "3px",
             animation: active

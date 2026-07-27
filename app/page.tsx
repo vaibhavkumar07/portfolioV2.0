@@ -1,13 +1,11 @@
 import Link from "next/link";
 import ModeSwitch from "@/components/modes/ModeSwitch";
+import ModeProvider from "@/components/modes/ModeProvider";
 import Reveal, { RevealItem, RevealStagger } from "@/components/fx/Reveal";
-import Hero3D from "@/components/fx/Hero3D";
 import Magnetic from "@/components/fx/Magnetic";
-import TiltCard from "@/components/fx/TiltCard";
-import HeroIntro from "@/components/sections/HeroIntro";
 import SiteNav from "@/components/sections/SiteNav";
 import TrustPanel from "@/components/sections/TrustPanel";
-import VoiceAgent from "@/components/agent/VoiceAgent";
+import HeroExperience from "@/components/agent/HeroExperience";
 import { PROFILE, HIGHLIGHTS } from "@/lib/data/kb";
 import { FAQ } from "@/lib/data/faq";
 import { projects } from "@/lib/data/projects";
@@ -77,53 +75,50 @@ export default function Home() {
   return (
     <div className="relative">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <ModeProvider>
       <SiteNav email={PROFILE.email} />
 
       <main id="main">
-      {/* Hero — statement + live agent */}
+      {/* The hero lives inside ModeSwitch so choosing Dashboard or Playground
+          actually replaces the view, rather than leaving the home hero on top
+          of it. */}
+      <ModeSwitch>
       <section className="relative overflow-hidden">
-        {/* 3D flow-node constellation (WebGL on desktop, CSS fallback elsewhere) */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          <Hero3D />
-        </div>
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:py-24 lg:grid-cols-[1.05fr_0.95fr] xl:py-28">
-          <HeroIntro title={PROFILE.title} experienceYears={PROFILE.experienceYears} />
-
-          {/* Live agent */}
-          <div className="rise h-[26rem] min-w-0 sm:h-[30rem]" style={{ animationDelay: "0.15s" }}>
-            <div className="mono mb-2 flex items-center justify-between text-[0.66rem] tracking-[0.16em] text-muted-foreground">
-              <span>◉ TALK TO MY PORTFOLIO</span>
-              <span className="text-[var(--brand-sky)]">LIVE</span>
-            </div>
-            <TiltCard maxTilt={3} className="h-[calc(100%-1.5rem)]">
-              <VoiceAgent />
-            </TiltCard>
-          </div>
+        {/* The avatar is the hero's 3D element now — the old flow-node
+            constellation competed with it for attention and was removed.
+            Asymmetric split: the avatar stage leads, the statement supports. */}
+        <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-5 py-12 md:py-16 lg:grid-cols-[0.9fr_1.1fr] lg:gap-10">
+          <HeroExperience title={PROFILE.title} experienceYears={PROFILE.experienceYears} />
         </div>
       </section>
 
-      <ModeSwitch>
       <Reveal><TrustPanel /></Reveal>
 
       {/* Work */}
       <Section id="work" num="01" title="Selected work" hint="case studies">
-        <RevealStagger className="grid gap-4 sm:grid-cols-2 lg:gap-6">
-          {projects.map((p) => (
-            <RevealItem key={p.id}>
-              <TiltCard className="h-full rounded-xl">
-                <Link
-                  href={`/work/${slug(p.title)}`}
-                  className="focus-ring group relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card/40 p-5 transition hover:border-[var(--brand-sky)]/50"
-                >
-                  <div className="mono mb-3 flex items-center justify-between text-[0.64rem] tracking-[0.16em] text-muted-foreground">
-                    <span>RESULT-{p.id}</span>
-                    <span className="text-[var(--brand-sky)] opacity-0 transition group-hover:opacity-100">OPEN →</span>
-                  </div>
-                  <h3 className="text-lg font-semibold leading-snug">{p.title}</h3>
-                  <p className="mono mt-1.5 text-[0.7rem] tracking-wide text-[var(--brand-orange)]/90">{p.category}</p>
-                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
-                </Link>
-              </TiltCard>
+        {/* Bento: the flagship leads at full width, the rest pair off — which
+            also removes the orphaned 5th card the old 2-col grid left. */}
+        <RevealStagger className="grid gap-4 sm:grid-cols-2 lg:gap-5">
+          {projects.map((p, i) => (
+            <RevealItem key={p.id} className={i === 0 ? "sm:col-span-2" : ""}>
+              <Link
+                href={`/work/${slug(p.title)}`}
+                className="focus-ring lift glass group relative flex h-full flex-col overflow-hidden rounded-3xl p-5 sm:p-6"
+              >
+                <div className="label-xs mb-3 flex items-center justify-between text-muted-foreground">
+                  <span>Result-{p.id}</span>
+                  {/* Arrow is always present on touch — hover-only affordance
+                      left mobile users with no signal these were links. */}
+                  <span className="text-[var(--cyan)] opacity-60 transition group-hover:opacity-100">Open →</span>
+                </div>
+                <h3 className={i === 0 ? "text-2xl font-semibold leading-snug" : "text-lg font-semibold leading-snug"}>
+                  {p.title}
+                </h3>
+                <p className="label-xs mt-2 text-[var(--violet)]">{p.category}</p>
+                <p className={`mt-3 text-sm leading-relaxed text-muted-foreground ${i === 0 ? "max-w-2xl" : "line-clamp-3"}`}>
+                  {p.description}
+                </p>
+              </Link>
             </RevealItem>
           ))}
         </RevealStagger>
@@ -135,16 +130,16 @@ export default function Home() {
           <ul className="space-y-3">
             {HIGHLIGHTS.map((h) => (
               <li key={h} className="flex gap-3 text-sm leading-relaxed text-foreground/90">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--brand-orange)]" />
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--amber)]" />
                 {h}
               </li>
             ))}
           </ul>
-          <div className="rounded-xl border border-border bg-card/40 p-5">
-            <div className="mono mb-3 text-[0.64rem] tracking-[0.18em] text-muted-foreground">CALLER DETAILS</div>
-            {[["NAME", PROFILE.name], ["ROLE", PROFILE.role], ["LOCATION", PROFILE.location], ["EMAIL", PROFILE.email]].map(([k, v]) => (
-              <div key={k} className="flex justify-between gap-4 border-b border-border py-2 last:border-0">
-                <span className="mono text-[0.66rem] tracking-[0.14em] text-muted-foreground">{k}</span>
+          <div className="glass h-fit rounded-3xl p-6">
+            <div className="label-xs mb-3 text-muted-foreground">Caller details</div>
+            {[["Role", PROFILE.role], ["Location", PROFILE.location], ["Email", PROFILE.email]].map(([k, v]) => (
+              <div key={k} className="flex justify-between gap-4 border-b border-border py-2.5 last:border-0">
+                <span className="label-xs text-muted-foreground">{k}</span>
                 <span className="text-right text-sm text-foreground/90">{v}</span>
               </div>
             ))}
@@ -152,14 +147,39 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* Stack */}
+      {/* Stack — grouped by the category field the flat pill cloud never used,
+          with proficiency encoded visually instead of printed as a raw number */}
       <Section id="stack" num="03" title="Stack" hint="capabilities">
-        <RevealStagger className="flex flex-wrap gap-2" stagger={0.02}>
-          {skills.map((s) => (
-            <RevealItem key={s.name}>
-              <span className="mono rounded-full border border-border bg-card/40 px-3 py-1.5 text-[0.74rem] text-foreground/85">
-                {s.name} <span className="text-[var(--brand-sky)]">{s.level}</span>
-              </span>
+        <RevealStagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" stagger={0.05}>
+          {["Platform", "AI/ML", "Dev", "Integration"].map((cat) => (
+            <RevealItem key={cat}>
+              <div className="glass h-full rounded-3xl p-5">
+                <div className="label-xs mb-4 text-[var(--cyan)]">{cat}</div>
+                <ul className="space-y-3">
+                  {skills
+                    .filter((s) => s.category === cat)
+                    .map((s) => (
+                      <li key={s.name}>
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className="text-sm text-foreground/90">{s.name}</span>
+                        </div>
+                        <div
+                          className="mt-1.5 h-1 overflow-hidden rounded-full bg-secondary"
+                          role="img"
+                          aria-label={`${s.name}: ${s.level} out of 100`}
+                        >
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${s.level}%`,
+                              background: "linear-gradient(90deg, var(--cyan), var(--violet))",
+                            }}
+                          />
+                        </div>
+                      </li>
+                    ))}
+                </ul>
+              </div>
             </RevealItem>
           ))}
         </RevealStagger>
@@ -169,9 +189,9 @@ export default function Home() {
       <Section id="faq" num="04" title="Quick answers" hint="frequently asked">
         <div className="space-y-2">
           {FAQ.map((f) => (
-            <details key={f.q} className="group rounded-xl border border-border bg-card/40 px-5 py-4">
-              <summary className="focus-ring mono cursor-pointer list-none rounded-md text-sm font-medium text-foreground/90 transition hover:text-foreground [&::-webkit-details-marker]:hidden">
-                <span className="mr-2 text-[var(--brand-sky)] transition-transform group-open:rotate-90 inline-block">›</span>
+            <details key={f.q} className="glass group rounded-2xl px-5 py-4">
+              <summary className="focus-ring cursor-pointer list-none rounded-lg text-sm font-medium text-foreground/90 transition hover:text-foreground [&::-webkit-details-marker]:hidden">
+                <span className="mr-2 inline-block text-[var(--cyan)] transition-transform group-open:rotate-90">›</span>
                 {f.q}
               </summary>
               <p className="mt-3 pl-5 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
@@ -182,19 +202,27 @@ export default function Home() {
 
       {/* Contact */}
       <Section id="contact" num="05" title="Transfer the call" hint="press 9 to connect">
-        <div className="rounded-xl border border-border bg-card/40 p-8 text-center">
+        <div className="glass rounded-3xl p-8 text-center sm:p-10">
           <p className="mx-auto max-w-md text-base text-muted-foreground">
-            Building something in CX or voice AI? Ask the agent above, or reach me directly.
+            Building something in CX or voice AI? Ask the agent, or reach me directly.
           </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <Magnetic>
-              <a href={`mailto:${PROFILE.email}`} className="focus-ring mono inline-block rounded-lg border border-[var(--brand-orange)]/40 bg-[var(--brand-orange)]/10 px-5 py-2.5 text-sm tracking-[0.1em] text-[var(--brand-orange)] transition hover:bg-[var(--brand-orange)]/20">
+              <a
+                href={`mailto:${PROFILE.email}`}
+                className="focus-ring inline-flex min-h-12 items-center rounded-2xl bg-[var(--amber)] px-6 text-[0.95rem] font-semibold text-[oklch(0.16_0.03_84)] transition hover:brightness-110"
+              >
                 {PROFILE.email}
               </a>
             </Magnetic>
             <Magnetic>
-              <a href={PROFILE.linkedin} target="_blank" rel="noopener noreferrer" className="focus-ring mono inline-block rounded-lg border border-border px-5 py-2.5 text-sm tracking-[0.1em] text-foreground/85 transition hover:border-[var(--brand-sky)]/50">
-                LINKEDIN ↗
+              <a
+                href={PROFILE.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="focus-ring glass inline-flex min-h-12 items-center rounded-2xl px-5 text-[0.95rem] transition hover:brightness-125"
+              >
+                LinkedIn ↗
               </a>
             </Magnetic>
           </div>
@@ -202,11 +230,16 @@ export default function Home() {
       </Section>
       </ModeSwitch>
       </main>
+      </ModeProvider>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-6 text-center sm:flex-row sm:text-left">
-          <span className="mono text-[0.66rem] tracking-[0.14em] text-muted-foreground">© {new Date().getFullYear()} VAIBHAVKUMAR YADAV · RICHARDSON, TX</span>
-          <span className="mono text-[0.66rem] tracking-[0.14em] text-muted-foreground">BUILT WITH THE STACK I SHIP</span>
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-7 text-center sm:flex-row sm:text-left">
+          <span className="label-xs text-muted-foreground">
+            © {new Date().getFullYear()} Vaibhavkumar Yadav · Richardson, TX
+          </span>
+          <a href={`mailto:${PROFILE.email}`} className="focus-ring label-xs rounded-lg text-muted-foreground transition hover:text-foreground">
+            {PROFILE.email}
+          </a>
         </div>
       </footer>
     </div>
@@ -219,12 +252,13 @@ function Section({
   id: string; num: string; title: string; hint: string; children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="mx-auto max-w-6xl scroll-mt-20 px-5 py-16">
+    /* scroll-mt clears both sticky bars (header + mode bar ≈ 6.75rem) */
+    <section id={id} className="section-y mx-auto max-w-6xl scroll-mt-28 px-5">
       <Reveal>
         <div className="mb-8 flex items-end gap-4">
-          <span aria-hidden="true" className="mono text-5xl font-bold leading-none text-[var(--brand-sky)]/15">{num}</span>
+          <span aria-hidden="true" className="mono text-5xl font-bold leading-none text-[var(--cyan)]/15">{num}</span>
           <div>
-            <span className="mono block text-[0.66rem] tracking-[0.2em] text-muted-foreground">&gt; {hint.toUpperCase()}</span>
+            <span className="label-xs block text-muted-foreground">&gt; {hint}</span>
             <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
           </div>
         </div>

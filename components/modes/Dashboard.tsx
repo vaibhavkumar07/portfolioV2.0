@@ -6,15 +6,19 @@ import {
   Tooltip, XAxis, YAxis,
 } from "recharts";
 import { skills } from "@/lib/data/skills";
+import { THEME } from "@/lib/theme";
 
-const SKY = "#0ea5e9";
-const ORANGE = "#ff4f1f";
-const GREEN = "#22c55e";
+const SKY = THEME.cyan;
+const ORANGE = THEME.violet;
+const GREEN = THEME.live;
 
-// Illustrative 24h traffic for a contact-center command-center view.
+// Illustrative 24h traffic. Deterministic on purpose — Math.random() made the
+// "live" numbers change on every mount, which reads as broken rather than
+// illustrative.
 const traffic = Array.from({ length: 24 }, (_, h) => {
-  const base = 120 + Math.round(140 * Math.sin((h - 6) / 24 * Math.PI * 2) + 140);
-  const calls = Math.max(20, base + Math.round(Math.random() * 30));
+  const base = 120 + Math.round(140 * Math.sin(((h - 6) / 24) * Math.PI * 2) + 140);
+  const jitter = Math.round(15 * (1 + Math.sin(h * 2.3)));
+  const calls = Math.max(20, base + jitter);
   const contained = Math.round(calls * (0.55 + 0.2 * Math.sin(h / 5)));
   return { h: `${String(h).padStart(2, "0")}:00`, calls, contained, agent: calls - contained };
 });
@@ -30,8 +34,8 @@ const KPIS = [
 
 function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-xl border border-border bg-card/40 p-4 ${className}`}>
-      <div className="mono mb-3 text-[0.64rem] tracking-[0.18em] text-muted-foreground">{title}</div>
+    <div className={`glass rounded-3xl p-5 ${className}`}>
+      <div className="label-xs mb-3 text-muted-foreground">{title}</div>
       {children}
     </div>
   );
@@ -67,7 +71,7 @@ function RealStats() {
 
   return (
     <>
-      <div className="mono mb-1 mt-8 text-[0.66rem] tracking-[0.2em] text-[var(--brand-green)]">&gt; REAL · THIS SITE</div>
+      <div className="mono mb-1 mt-8 text-[0.66rem] tracking-[0.2em] text-[var(--live)]">&gt; REAL · THIS SITE</div>
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Panel title="VISITORS">
           <span className="text-2xl font-bold tracking-tight">{val(stats?.visits)}</span>
@@ -83,7 +87,7 @@ function RealStats() {
             {([["HOME", stats?.mode_home], ["DASH", stats?.mode_dashboard], ["PLAY", stats?.mode_playground]] as const).map(([l, n]) => (
               <div key={l} className="text-center">
                 <div className="text-lg font-semibold leading-tight">{val(n)}</div>
-                <div className="mono text-[0.56rem] tracking-[0.12em] text-muted-foreground">{l}</div>
+                <div className="label-xs text-muted-foreground">{l}</div>
               </div>
             ))}
           </div>
@@ -96,7 +100,7 @@ function RealStats() {
 export default function Dashboard() {
   return (
     <div className="mx-auto max-w-6xl px-5 py-10">
-      <div className="mono mb-1 text-[0.66rem] tracking-[0.2em] text-[var(--brand-sky)]">&gt; COMMAND CENTER</div>
+      <div className="label-xs mb-1 text-[var(--cyan)]">&gt; COMMAND CENTER</div>
       <h2 className="mb-6 text-3xl font-bold tracking-tight">CX command center</h2>
       <p className="max-w-xl text-sm text-muted-foreground">
         Live telemetry from this portfolio up top — real visitors, agent conversations,
@@ -106,7 +110,17 @@ export default function Dashboard() {
 
       <RealStats />
 
-      <div className="mono mb-1 text-[0.66rem] tracking-[0.2em] text-[var(--brand-sky)]">&gt; ILLUSTRATIVE · CONTACT CENTER</div>
+      {/* Everything below this line is sample data, labelled unmistakably —
+          invented metrics next to real telemetry is a credibility risk. */}
+      <div className="mt-10 flex flex-wrap items-center gap-2">
+        <span className="label-xs rounded-lg border border-[var(--amber)]/40 bg-[var(--amber)]/10 px-2.5 py-1 text-[var(--amber)]">
+          Sample data
+        </span>
+        <span className="label-xs text-muted-foreground">
+          Contact-center analytics I build on Genesys — figures below are illustrative
+        </span>
+      </div>
+      <div className="mb-5 mt-4" />
 
       {/* KPI row */}
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -114,7 +128,7 @@ export default function Dashboard() {
           <Panel key={k.label} title={k.label}>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-bold tracking-tight">{k.value}</span>
-              <span className="mono text-[0.7rem]" style={{ color: k.color }}>{k.delta}</span>
+              <span className="label-xs" style={{ color: k.color }}>{k.delta}</span>
             </div>
           </Panel>
         ))}
@@ -134,10 +148,10 @@ export default function Dashboard() {
                   <stop offset="100%" stopColor={ORANGE} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="#1b3050" vertical={false} />
-              <XAxis dataKey="h" tick={{ fill: "#6b8ba4", fontSize: 10 }} interval={3} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fill: "#6b8ba4", fontSize: 10 }} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ background: "#0b1426", border: "1px solid #1b3050", borderRadius: 8, fontSize: 12 }} />
+              <CartesianGrid stroke={THEME.grid} vertical={false} />
+              <XAxis dataKey="h" tick={{ fill: THEME.axis, fontSize: 10 }} interval={3} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: THEME.axis, fontSize: 10 }} tickLine={false} axisLine={false} />
+              <Tooltip contentStyle={{ background: THEME.surfaceDeep, border: `1px solid ${THEME.grid}`, borderRadius: 8, fontSize: 12 }} />
               <Area type="monotone" dataKey="contained" stroke={SKY} fill="url(#gC)" strokeWidth={2} name="Contained" />
               <Area type="monotone" dataKey="agent" stroke={ORANGE} fill="url(#gA)" strokeWidth={2} name="To agent" />
             </AreaChart>
@@ -148,8 +162,8 @@ export default function Dashboard() {
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={topSkills} layout="vertical" margin={{ top: 0, right: 12, left: 10, bottom: 0 }}>
               <XAxis type="number" domain={[0, 100]} hide />
-              <YAxis type="category" dataKey="name" tick={{ fill: "#9fb3c8", fontSize: 10 }} width={120} tickLine={false} axisLine={false} />
-              <Tooltip cursor={{ fill: "#13233e" }} contentStyle={{ background: "#0b1426", border: "1px solid #1b3050", borderRadius: 8, fontSize: 12 }} />
+              <YAxis type="category" dataKey="name" tick={{ fill: THEME.axis, fontSize: 10 }} width={120} tickLine={false} axisLine={false} />
+              <Tooltip cursor={{ fill: THEME.surface }} contentStyle={{ background: THEME.surfaceDeep, border: `1px solid ${THEME.grid}`, borderRadius: 8, fontSize: 12 }} />
               <Bar dataKey="level" radius={[0, 4, 4, 0]} barSize={12}>
                 {topSkills.map((_, i) => (
                   <Cell key={i} fill={i % 2 ? ORANGE : SKY} />
@@ -171,11 +185,11 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-lg font-semibold">{r.wait}</div>
-                <div className="mono text-[0.62rem] text-muted-foreground">AVG WAIT</div>
+                <div className="label-xs text-muted-foreground">AVG WAIT</div>
               </div>
               <div className="text-right">
                 <div className="text-lg font-semibold" style={{ color: r.sla > 90 ? GREEN : ORANGE }}>{r.sla}%</div>
-                <div className="mono text-[0.62rem] text-muted-foreground">SLA</div>
+                <div className="label-xs text-muted-foreground">SLA</div>
               </div>
             </div>
             <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary">

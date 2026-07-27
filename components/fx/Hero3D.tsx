@@ -9,17 +9,17 @@ const HeroScene = dynamic(() => import("./HeroScene"), { ssr: false });
 const CHIPS: { label: string; className: string; style: React.CSSProperties }[] = [
   {
     label: "IVR",
-    className: "left-[6%] top-[16%] border-[var(--brand-orange)]/40 text-[var(--brand-orange)]",
+    className: "left-[6%] top-[16%] border-[var(--amber)]/40 text-[var(--amber)]",
     style: { transform: "rotateX(14deg) translateZ(70px)" },
   },
   {
     label: "NLU",
-    className: "right-[8%] top-[32%] border-[var(--brand-sky)]/40 text-[var(--brand-sky)]",
+    className: "right-[8%] top-[32%] border-[var(--cyan)]/40 text-[var(--cyan)]",
     style: { transform: "rotateX(14deg) translateZ(110px)" },
   },
   {
     label: "TTS",
-    className: "bottom-[20%] left-[12%] border-[var(--brand-sky)]/40 text-[var(--brand-sky)]",
+    className: "bottom-[20%] left-[12%] border-[var(--cyan)]/40 text-[var(--cyan)]",
     style: { transform: "rotateX(14deg) translateZ(90px)" },
   },
 ];
