@@ -1,58 +1,17 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import HeroIntro from "@/components/sections/HeroIntro";
 import VoiceAgent from "@/components/agent/VoiceAgent";
-
-const AvatarScene = dynamic(() => import("./AvatarScene"), { ssr: false });
+import AvatarStage from "@/components/agent/AvatarStage";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/** The avatar, or a photo where WebGL isn't available. */
-function Stage({
-  webgl,
-  framing,
-  analyserRef,
-  reduce,
-}: {
-  webgl: boolean;
-  framing: "bust" | "chest";
-  analyserRef?: React.RefObject<AnalyserNode | null>;
-  reduce: boolean;
-}) {
-  if (!webgl) {
-    return (
-      <Image
-        src="/profile.jpeg"
-        alt="Vaibhavkumar Yadav"
-        fill
-        priority
-        className="object-cover"
-        sizes="(max-width: 1024px) 100vw, 560px"
-      />
-    );
-  }
-  return (
-    <AvatarScene
-      framing={framing}
-      analyserRef={analyserRef}
-      reduce={reduce}
-      rimA="#22d3ee"
-      rimB="#a78bfa"
-    />
-  );
-}
-
 /**
- * The hero: statement + primary action on the left, the live avatar as a lit
+ * The hero: statement + primary action on the left, the portrait as a lit
  * stage on the right. "Talk to my portfolio" opens a full-screen takeover
- * where the avatar lip-syncs to the agent's real voice.
- *
- * WebGL is probed (not assumed) and gated to >=768px; everything else gets a
- * photo composition rather than an empty layer.
+ * where the portrait reacts to the agent's real voice.
  */
 export default function HeroExperience({
   title,
@@ -62,28 +21,9 @@ export default function HeroExperience({
   experienceYears: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [webgl, setWebgl] = useState(false);
   const reduce = useReducedMotion();
   const analyserRef = useRef<AnalyserNode | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    // Probe for a real context — headless browsers and old GPUs report a
-    // canvas but fail to create one, which would throw inside the scene.
-    let supported = false;
-    try {
-      const probe = document.createElement("canvas");
-      supported = !!(probe.getContext("webgl2") || probe.getContext("webgl"));
-    } catch {
-      supported = false;
-    }
-    if (!supported) return;
-    const mq = window.matchMedia("(min-width: 768px)");
-    const update = () => setWebgl(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -112,7 +52,7 @@ export default function HeroExperience({
           className="focus-ring lift glass group relative block h-full w-full overflow-hidden rounded-3xl"
         >
           <span className="absolute inset-0" aria-hidden="true">
-            <Stage webgl={webgl} framing="bust" reduce={!!reduce} />
+            <AvatarStage analyserRef={analyserRef} reduce={!!reduce} priority />
           </span>
 
           {/* Depth layer: chips floating in front of the avatar */}
@@ -150,7 +90,9 @@ export default function HeroExperience({
             exit={{ opacity: 0 }}
             transition={{ duration: reduce ? 0.1 : 0.28 }}
           >
-            <div className="absolute inset-0 bg-[var(--background-deep)]/92 backdrop-blur-2xl" />
+            {/* Near-opaque: at 92% the page behind was still legible through
+                the console's own glass and read as visual noise. */}
+            <div className="absolute inset-0 bg-[var(--background-deep)]/[0.97] backdrop-blur-2xl" />
 
             <button
               ref={closeRef}
@@ -169,7 +111,7 @@ export default function HeroExperience({
                 transition={{ duration: reduce ? 0.1 : 0.45, ease: EASE }}
                 className="glass relative min-h-0 overflow-hidden rounded-3xl"
               >
-                <Stage webgl={webgl} framing="chest" analyserRef={analyserRef} reduce={!!reduce} />
+                <AvatarStage analyserRef={analyserRef} reduce={!!reduce} sizes="(max-width: 1024px) 100vw, 720px" />
                 <span className="glass-subtle label-xs absolute left-4 top-4 rounded-xl px-3 py-2 text-muted-foreground">
                   ◉ Live · ask me anything about my work
                 </span>
