@@ -1,12 +1,14 @@
 import Link from "next/link";
+import Image from "next/image";
 import ModeSwitch from "@/components/modes/ModeSwitch";
 import ModeProvider from "@/components/modes/ModeProvider";
 import Reveal, { RevealItem, RevealStagger } from "@/components/fx/Reveal";
 import Magnetic from "@/components/fx/Magnetic";
 import SiteNav from "@/components/sections/SiteNav";
 import TrustPanel from "@/components/sections/TrustPanel";
+import Experience from "@/components/sections/Experience";
 import HeroExperience from "@/components/agent/HeroExperience";
-import { PROFILE, HIGHLIGHTS } from "@/lib/data/kb";
+import { PROFILE, HIGHLIGHTS, CREDENTIAL } from "@/lib/data/kb";
 import { FAQ } from "@/lib/data/faq";
 import { projects } from "@/lib/data/projects";
 import { skills } from "@/lib/data/skills";
@@ -41,6 +43,14 @@ const jsonLd = {
         "CX as Code", "Terraform",
       ],
       worksFor: { "@type": "Organization", name: "Infosys Limited" },
+      hasCredential: {
+        "@type": "EducationalOccupationalCredential",
+        name: CREDENTIAL.name,
+        credentialCategory: "certification",
+        recognizedBy: { "@type": "Organization", name: CREDENTIAL.issuer },
+        dateCreated: CREDENTIAL.issuedISO,
+        expires: CREDENTIAL.expiresISO,
+      },
       description: `${PROFILE.title} with ${PROFILE.experienceYears} years of experience. ${PROFILE.availability}`,
     },
     {
@@ -124,8 +134,14 @@ export default function Home() {
         </RevealStagger>
       </Section>
 
+      {/* Experience — the career history the page never showed; the agent knew
+          it (kb.ts EXPERIENCE) but a recruiter scanning the page did not. */}
+      <Section id="experience" num="02" title="Experience" hint="call history">
+        <Experience />
+      </Section>
+
       {/* About */}
-      <Section id="about" num="02" title="About" hint="caller profile">
+      <Section id="about" num="03" title="About" hint="caller profile">
         <div className="grid gap-6 md:grid-cols-[1fr_0.8fr] md:gap-8">
           <ul className="space-y-3">
             {HIGHLIGHTS.map((h) => (
@@ -135,21 +151,44 @@ export default function Home() {
               </li>
             ))}
           </ul>
-          <div className="glass h-fit rounded-3xl p-6">
-            <div className="label-xs mb-3 text-muted-foreground">Caller details</div>
-            {[["Role", PROFILE.role], ["Location", PROFILE.location], ["Email", PROFILE.email]].map(([k, v]) => (
-              <div key={k} className="flex justify-between gap-4 border-b border-border py-2.5 last:border-0">
-                <span className="label-xs text-muted-foreground">{k}</span>
-                <span className="text-right text-sm text-foreground/90">{v}</span>
+          <div className="space-y-4">
+            <div className="glass h-fit rounded-3xl p-6">
+              <div className="label-xs mb-3 text-muted-foreground">Caller details</div>
+              {[["Role", PROFILE.role], ["Location", PROFILE.location], ["Email", PROFILE.email]].map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4 border-b border-border py-2.5 last:border-0">
+                  <span className="label-xs text-muted-foreground">{k}</span>
+                  <span className="text-right text-sm text-foreground/90">{v}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Vendor credential — the badge a Genesys hiring manager looks for.
+                Kept as its own card so it reads as a credential, not a bullet. */}
+            <div className="glass flex h-fit items-center gap-4 rounded-3xl p-5">
+              {CREDENTIAL.badge && (
+                <Image
+                  src={CREDENTIAL.badge}
+                  alt={`${CREDENTIAL.name} badge`}
+                  width={72}
+                  height={72}
+                  className="h-[72px] w-[72px] shrink-0 object-contain"
+                />
+              )}
+              <div className="min-w-0">
+                <div className="label-xs mb-1 text-[var(--cyan)]">Certified</div>
+                <p className="text-sm font-semibold leading-snug">{CREDENTIAL.name}</p>
+                <p className="label-xs mt-1 text-muted-foreground">
+                  {CREDENTIAL.issuer} · {CREDENTIAL.issued} – {CREDENTIAL.expires}
+                </p>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </Section>
 
       {/* Stack — grouped by the category field the flat pill cloud never used,
           with proficiency encoded visually instead of printed as a raw number */}
-      <Section id="stack" num="03" title="Stack" hint="capabilities">
+      <Section id="stack" num="04" title="Stack" hint="capabilities">
         <RevealStagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" stagger={0.05}>
           {["Platform", "AI/ML", "Dev", "Integration"].map((cat) => (
             <RevealItem key={cat}>
@@ -186,7 +225,7 @@ export default function Home() {
       </Section>
 
       {/* FAQ — visible twin of the FAQPage JSON-LD (answer engines quote this) */}
-      <Section id="faq" num="04" title="Quick answers" hint="frequently asked">
+      <Section id="faq" num="05" title="Quick answers" hint="frequently asked">
         <div className="space-y-2">
           {FAQ.map((f) => (
             <details key={f.q} className="glass group rounded-2xl px-5 py-4">
@@ -201,7 +240,7 @@ export default function Home() {
       </Section>
 
       {/* Contact */}
-      <Section id="contact" num="05" title="Transfer the call" hint="press 9 to connect">
+      <Section id="contact" num="06" title="Transfer the call" hint="press 9 to connect">
         <div className="glass rounded-3xl p-8 text-center sm:p-10">
           <p className="mx-auto max-w-md text-base text-muted-foreground">
             Building something in CX or voice AI? Ask the agent, or reach me directly.

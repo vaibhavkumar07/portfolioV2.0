@@ -8,7 +8,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 const STATS: [string, string][] = [
   ["8+", "years"],
   ["5", "flagship builds"],
-  ["10", "certs"],
+  ["11", "certs"],
   ["1", "IoT patent"],
 ];
 
@@ -72,6 +72,7 @@ export default function HeroIntro({
       <motion.div variants={item} className="mt-8 flex flex-wrap items-center gap-3">
         <button
           type="button"
+          data-agent-entry
           onClick={onTalk}
           className="focus-ring inline-flex min-h-12 items-center gap-2 rounded-2xl bg-[var(--amber)] px-6 text-[0.95rem] font-semibold text-[oklch(0.16_0.03_84)] transition hover:brightness-110"
           style={{ boxShadow: "0 8px 28px oklch(0.837 0.164 84 / 0.32)" }}

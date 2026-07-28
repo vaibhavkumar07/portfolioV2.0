@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import HeroIntro from "@/components/sections/HeroIntro";
 import VoiceAgent from "@/components/agent/VoiceAgent";
 import AvatarStage from "@/components/agent/AvatarStage";
+import HeroGreeting from "@/components/agent/HeroGreeting";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -21,8 +22,14 @@ export default function HeroExperience({
   experienceYears: string;
 }) {
   const [open, setOpen] = useState(false);
+  /* While the greeting caption occupies the bottom bar's slot, the standing
+     call-to-action steps aside instead of stacking two panels. */
+  const [greeting, setGreeting] = useState(false);
   const reduce = useReducedMotion();
   const analyserRef = useRef<AnalyserNode | null>(null);
+  /* The greeting needs its own analyser: createMediaElementSource is one-shot
+     per <audio>, so it cannot share the conversation agent's node. */
+  const greetAnalyserRef = useRef<AnalyserNode | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -47,12 +54,13 @@ export default function HeroExperience({
       <div className="rise relative h-[26rem] min-w-0 sm:h-[32rem]" style={{ animationDelay: "0.15s" }}>
         <button
           type="button"
+          data-agent-entry
           onClick={() => setOpen(true)}
           aria-label="Talk to my portfolio — open the live voice agent"
           className="focus-ring lift glass group relative block h-full w-full overflow-hidden rounded-3xl"
         >
           <span className="absolute inset-0" aria-hidden="true">
-            <AvatarStage analyserRef={analyserRef} reduce={!!reduce} priority />
+            <AvatarStage analysers={[analyserRef, greetAnalyserRef]} reduce={!!reduce} priority />
           </span>
 
           {/* Depth layer: chips floating in front of the avatar */}
@@ -64,7 +72,9 @@ export default function HeroExperience({
           </span>
 
           <span
-            className="glass-strong absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 rounded-2xl px-4 py-3"
+            className={`glass-strong absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 transition-opacity duration-300 motion-reduce:transition-none ${
+              greeting ? "opacity-0" : "opacity-100"
+            }`}
             aria-hidden="true"
           >
             <span className="text-left text-sm text-foreground/90">
@@ -75,6 +85,14 @@ export default function HeroExperience({
             </span>
           </span>
         </button>
+
+        {/* Sibling of the button, not a child: it owns a Stop control, and a
+            button inside a button is invalid markup. */}
+        <HeroGreeting
+          analyserRef={greetAnalyserRef}
+          suppressed={open}
+          onCaptionVisible={setGreeting}
+        />
       </div>
 
       {/* Full-screen takeover */}
@@ -111,7 +129,7 @@ export default function HeroExperience({
                 transition={{ duration: reduce ? 0.1 : 0.45, ease: EASE }}
                 className="glass relative min-h-0 overflow-hidden rounded-3xl"
               >
-                <AvatarStage analyserRef={analyserRef} reduce={!!reduce} sizes="(max-width: 1024px) 100vw, 720px" />
+                <AvatarStage analysers={[analyserRef]} reduce={!!reduce} sizes="(max-width: 1024px) 100vw, 720px" />
                 <span className="glass-subtle label-xs absolute left-4 top-4 rounded-xl px-3 py-2 text-muted-foreground">
                   ◉ Live · ask me anything about my work
                 </span>

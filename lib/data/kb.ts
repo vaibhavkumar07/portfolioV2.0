@@ -11,7 +11,7 @@ export const PROFILE = {
   location: "Richardson, Texas, USA",
   email: "yadavvaibhavkumar7@gmail.com",
   phone: "+1 945-542-0116",
-  linkedin: "https://www.linkedin.com/in/vaibhavkumar-yadav-633552233/",
+  linkedin: "https://www.linkedin.com/in/dvaibhavyadav/",
   experienceYears: "8+",
   availability: "Open to Genesys Cloud / contact-center voice-AI roles globally.",
 };
@@ -21,31 +21,128 @@ export const HIGHLIGHTS = [
   "SME in Genesys Architect, AI Studio, Data Actions, and CX-as-Code (Terraform).",
   "Integrates Azure TTS/STT, OpenAI/ChatGPT, Google Dialogflow, Observe.AI, Moveworks.",
   "Delivered PII/PHI/PCI-compliant flows for healthcare and regulated industries.",
-  "Holder of an IoT patent; 7 Infosys awards including Tech Maestro and RISE MVP.",
-  "10 certifications (Infosys Contact Center suite, Applied Generative AI, eCornell AI Strategy).",
+  "Genesys Cloud: Professional certified (Jun 2026) — the vendor credential for the platform I build on.",
+  "Indian patent IN 405313 (IoT); 8 Infosys awards including Platinum Club, Rise Tech/Domain Maestro and Rise MVP.",
+  "11 certifications (Genesys Cloud, Infosys Contact Center suite, Applied Generative AI, eCornell AI Strategy).",
 ];
 
-export const EXPERIENCE = [
-  { period: "Oct 2025 – Present", role: "Package Consultant 2", org: "Infosys · United States", focus: "Genesys Cloud + Generative AI" },
-  { period: "Jan 2025 – Sep 2025", role: "Consultant", org: "Infosys · United States", focus: "Genesys Cloud" },
-  { period: "May 2023 – Dec 2024", role: "Technology Analyst", org: "Infosys · United States", focus: "Genesys Cloud" },
-  { period: "Oct 2021 – Apr 2023", role: "Technology Analyst", org: "Infosys · Pune, India", focus: "Genesys Cloud" },
-  { period: "Jul 2020 – Sep 2021", role: "Senior System Engineer", org: "Infosys · Bengaluru, India", focus: "Contact center" },
-  { period: "May 2018 – Jun 2020", role: "System Engineer", org: "Infosys · Bengaluru, India", focus: "Enterprise dev" },
+export type Credential = {
+  name: string;
+  issuer: string;
+  /** Display form, e.g. "Jun 2026". Omit when the earn date is unknown. */
+  issued?: string;
+  expires?: string;
+  /** ISO forms, for JSON-LD only. */
+  issuedISO?: string;
+  expiresISO?: string;
+  /** Path under /public. Only the Genesys credential ships with artwork. */
+  badge?: string;
+};
+
+/**
+ * The vendor credential, called out separately because it is the one a Genesys
+ * hiring manager scans for. `badge` is served from /public — the CSP in
+ * next.config.ts blocks third-party image hosts, so it cannot hotlink Credly.
+ */
+export const CREDENTIAL: Credential = {
+  name: "Genesys Cloud: Professional",
+  issuer: "Genesys",
+  issued: "Jun 2026",
+  expires: "Jun 2028",
+  /** The certificate reads 29 JUN 2026 → 29 JUN 2028. */
+  issuedISO: "2026-06-29",
+  expiresISO: "2028-06-29",
+  badge: "/genesys-cloud-certified-professional.png",
+};
+
+export type Award = { name: string; issuer: string; date: string };
+
+type Role = {
+  period: string;
+  role: string;
+  org: string;
+  location: string;
+  focus: string;
+  /** Credentials earned while in this role, shown inline on the timeline. */
+  credentials?: Credential[];
+  /** Recognition received in this role, newest first. */
+  awards?: Award[];
+};
+
+const INFOSYS = "Infosys Limited";
+
+/**
+ * Career history. `org` and `location` are separate fields (not one "Infosys ·
+ * Pune" string) so the Experience section can lay them out in its own columns
+ * without parsing.
+ */
+export const EXPERIENCE: Role[] = [
+  {
+    period: "Oct 2025 – Present", role: "Package Consultant 2", org: "Infosys", location: "United States",
+    focus: "Genesys Cloud + Generative AI",
+    credentials: [CREDENTIAL],
+    awards: [{ name: "Platinum Club", issuer: INFOSYS, date: "Mar 2026" }],
+  },
+  {
+    period: "Jan 2025 – Sep 2025", role: "Consultant", org: "Infosys", location: "United States",
+    focus: "Genesys Cloud",
+    awards: [
+      { name: "Rise — Tech/Domain Maestro", issuer: INFOSYS, date: "May 2025" },
+      { name: "Platinum Club", issuer: INFOSYS, date: "Mar 2025" },
+    ],
+  },
+  {
+    period: "May 2023 – Dec 2024", role: "Technology Analyst", org: "Infosys", location: "United States",
+    focus: "Genesys Cloud",
+    awards: [{ name: "Rise — Most Valuable Player", issuer: INFOSYS, date: "Sep 2024" }],
+  },
+  {
+    period: "Oct 2021 – Apr 2023", role: "Technology Analyst", org: "Infosys", location: "Pune, India",
+    focus: "Genesys Cloud",
+    awards: [{ name: "Insta Award", issuer: INFOSYS, date: "Apr 2022" }],
+  },
+  {
+    period: "Jul 2020 – Sep 2021", role: "Senior System Engineer", org: "Infosys", location: "Bengaluru, India",
+    focus: "Contact center",
+    awards: [{ name: "Insta Award", issuer: INFOSYS, date: "Aug 2021" }],
+  },
+  {
+    period: "May 2018 – Jun 2020", role: "System Engineer", org: "Infosys", location: "Bengaluru, India",
+    focus: "Enterprise dev",
+    awards: [
+      { name: "Pride Award", issuer: INFOSYS, date: "Jun 2020" },
+      { name: "Insta Award", issuer: INFOSYS, date: "May 2019" },
+    ],
+  },
 ];
 
-export const CERTS = [
-  "Infosys Certified Contact Center Platform Professional",
-  "Infosys Certified Contact Center Technology Components & Integrations Professional",
-  "Infosys Certified Contact Center Professional",
-  "Infosys Certified Applied Generative AI Professional",
-  "Infosys Certified AI Consumer",
-  "Infosys Certified IoT Professional",
-  "Infosys Global Agile Developer Certification",
-  "Infosys Certified Python Associate",
-  "Infosys Certified Java SE8 Developer – 101",
-  "AI Strategy Certification — eCornell",
+/**
+ * Every certification, newest first. Single source of truth: the Experience
+ * timeline references these objects, and CERTS below is derived for the agent's
+ * prompt — so a cert can never appear on the page and not in what he says.
+ *
+ * Entries without `issued` have no confirmed earn date yet, which is why they
+ * are not attached to a role on the timeline. Add `issued` and move the object
+ * into that role's `credentials` array.
+ */
+export const CERTIFICATIONS: Credential[] = [
+  CREDENTIAL,
+  { name: "Infosys Certified Contact Center Platform Professional", issuer: "Infosys" },
+  { name: "Infosys Certified Contact Center Technology Components & Integrations Professional", issuer: "Infosys" },
+  { name: "Infosys Certified Contact Center Professional", issuer: "Infosys" },
+  { name: "Infosys Certified Applied Generative AI Professional", issuer: "Infosys" },
+  { name: "Infosys Certified AI Consumer", issuer: "Infosys" },
+  { name: "Infosys Certified IoT Professional", issuer: "Infosys" },
+  { name: "Infosys Global Agile Developer Certification", issuer: "Infosys" },
+  { name: "Infosys Certified Python Associate", issuer: "Infosys" },
+  { name: "Infosys Certified Java SE8 Developer – 101", issuer: "Infosys" },
+  { name: "AI Strategy Certification", issuer: "eCornell" },
 ];
+
+export const CERTS = CERTIFICATIONS.map((c) => {
+  const when = c.issued ? `, ${c.issued}${c.expires ? ` – ${c.expires}` : ""}` : "";
+  return `${c.name} — ${c.issuer}${when}`;
+});
 
 /** Suggested questions surfaced in the UI. */
 export const SUGGESTED = [
@@ -95,12 +192,26 @@ const SECTIONS: { name: string; keywords: string[]; render: () => string }[] = [
       "where", "long", "current",
     ],
     render: () =>
-      `Experience:\n${EXPERIENCE.map((e) => `- ${e.period}: ${e.role}, ${e.org} (${e.focus})`).join("\n")}`,
+      `Experience:\n${EXPERIENCE.map((e) => {
+        // Certs and awards ride along with the role so the agent can answer
+        // "when did you get certified" without a second retrieval pass.
+        const earned = [
+          ...(e.credentials ?? []).map((c) => `${c.name} (${c.issued ?? "date n/a"})`),
+          ...(e.awards ?? []).map((a) => `${a.name} (${a.date})`),
+        ];
+        const tail = earned.length ? ` — earned here: ${earned.join(", ")}` : "";
+        return `- ${e.period}: ${e.role}, ${e.org} · ${e.location} (${e.focus})${tail}`;
+      }).join("\n")}`,
   },
   {
     name: "certs",
     keywords: ["cert", "credential", "qualif", "course", "ecornell", "training", "award", "patent"],
-    render: () => `Certifications: ${CERTS.join("; ")}. Awards: 7 Infosys awards incl. Tech Maestro and RISE MVP; 1 IoT patent.`,
+    render: () => {
+      const awards = EXPERIENCE.flatMap((e) => e.awards ?? []);
+      return `Certifications: ${CERTS.join("; ")}. Awards: ${awards
+        .map((a) => `${a.name} (${a.date})`)
+        .join(", ")}. Patent: Indian patent IN 405313 (IoT).`;
+    },
   },
 ];
 

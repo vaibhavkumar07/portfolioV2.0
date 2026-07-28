@@ -18,13 +18,19 @@ const AVATAR_SRC = "/avatar-hero.jpg";
  * state — per-frame setState would re-render the tree 60×/second.
  */
 export default function AvatarStage({
-  analyserRef,
+  analysers,
   reduce = false,
   priority = false,
   className = "",
   sizes = "(max-width: 1024px) 100vw, 620px",
 }: {
-  analyserRef?: React.RefObject<AnalyserNode | null>;
+  /**
+   * Every audio source that can make him "speak" — the conversation agent and
+   * the arrival greeting each own their own AnalyserNode (a MediaElementSource
+   * can only be created once per <audio>, so they cannot share one). The loudest
+   * wins, which is correct: only one of them is ever playing.
+   */
+  analysers?: React.RefObject<AnalyserNode | null>[];
   reduce?: boolean;
   priority?: boolean;
   className?: string;
@@ -55,17 +61,18 @@ export default function AvatarStage({
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
 
-      // Live speech amplitude → 0..1
+      // Live speech amplitude → 0..1, loudest source wins
       let target = 0;
-      const an = analyserRef?.current;
-      if (an) {
+      for (const ref of analysers ?? []) {
+        const an = ref.current;
+        if (!an) continue;
         an.getByteTimeDomainData(buf);
         let sum = 0;
         for (let i = 0; i < buf.length; i++) {
           const d = (buf[i] - 128) / 128;
           sum += d * d;
         }
-        target = Math.min(1, Math.sqrt(sum / buf.length) * 4.5);
+        target = Math.max(target, Math.min(1, Math.sqrt(sum / buf.length) * 4.5));
       }
       level += (target - level) * Math.min(1, dt * 12);
 
@@ -86,7 +93,7 @@ export default function AvatarStage({
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
     };
-  }, [analyserRef, reduce]);
+  }, [analysers, reduce]);
 
   return (
     <div
