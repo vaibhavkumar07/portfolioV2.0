@@ -45,6 +45,16 @@ function getUpstash(limit: number, windowSec: number): Ratelimit | null {
   return rl;
 }
 
+/**
+ * True when a durable, cross-instance limiter is available.
+ *
+ * The in-memory fallback is per serverless instance, so under scale-out the
+ * real ceiling is `limit × instance count` — unbounded in practice. Routes
+ * that spend money upstream check this and fail closed in production rather
+ * than pretending they are rate limited.
+ */
+export const durableLimiting = Boolean(env.upstashUrl && env.upstashToken);
+
 /** Returns true if the key is OVER the limit (should be blocked). */
 export async function limited(key: string, limit: number, windowMs: number): Promise<boolean> {
   const rl = getUpstash(limit, Math.ceil(windowMs / 1000));
@@ -59,19 +69,34 @@ export async function limited(key: string, limit: number, windowMs: number): Pro
   return memLimited(key, limit, windowMs);
 }
 
+/**
+ * Identify the caller for rate-limiting purposes.
+ *
+ * Order matters: `x-forwarded-for` is client-supplied and only meaningful
+ * after a trusted proxy rewrites it, so it comes last. Leading with it let a
+ * caller rotate the header per request and mint an unlimited quota — the
+ * limiter counts distinct strings, not distinct clients.
+ */
 export function clientKey(req: Request): string {
   return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-vercel-forwarded-for") ||
     req.headers.get("x-real-ip") ||
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     "local"
   );
 }
 
-/** Reject cross-site POSTs (CSRF / off-site abuse). Allows same-origin and
- *  direct tools with no Origin header. */
+/**
+ * Reject cross-site and non-browser POSTs (CSRF / off-site abuse).
+ *
+ * Fails closed on a missing Origin. Per the Fetch spec browsers set Origin on
+ * every non-GET/HEAD request — including same-origin `fetch()` and
+ * `navigator.sendBeacon` — so nothing legitimate is turned away, while
+ * `curl` with no Origin (the cheapest way to burn the upstream key) is.
+ */
 export function sameOrigin(req: Request): boolean {
   const origin = req.headers.get("origin");
-  if (!origin) return true;
+  if (!origin) return false;
   try {
     return new URL(origin).host === req.headers.get("host");
   } catch {

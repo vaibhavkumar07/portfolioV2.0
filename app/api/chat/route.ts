@@ -1,5 +1,5 @@
 import { buildSystemPrompt } from "@/lib/data/kb";
-import { limited, clientKey, sameOrigin } from "@/lib/server/ratelimit";
+import { limited, clientKey, sameOrigin, durableLimiting } from "@/lib/server/ratelimit";
 import { env } from "@/lib/server/env";
 import { bump } from "@/lib/server/stats";
 
@@ -13,12 +13,19 @@ const MAX_TURNS = 10;        // history turns sent upstream
 const MAX_CONTENT = 1500;    // chars per message
 const RL_LIMIT = 20;         // requests
 const RL_WINDOW = 60_000;    // per minute
+const UPSTREAM_TIMEOUT = 20_000; // ms — must stay under maxDuration
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 export async function POST(req: Request) {
   const key = env.nvidiaChatKey;
   if (!key) return new Response("Agent unavailable", { status: 503 });
+
+  // This is the one route that spends real money upstream. The in-memory
+  // limiter is per-instance and therefore no limit at all under scale-out, so
+  // in production an unmetered agent is refused rather than served.
+  if (env.isProduction && !durableLimiting)
+    return new Response("Agent unavailable", { status: 503 });
 
   if (!sameOrigin(req)) return new Response("Forbidden", { status: 403 });
   if (await limited(clientKey(req), RL_LIMIT, RL_WINDOW))
@@ -61,6 +68,9 @@ export async function POST(req: Request) {
   try {
     upstream = await fetch(NIM_URL, {
       method: "POST",
+      // Without this a hung upstream pins the function for the full
+      // maxDuration, which is cheap amplification for whoever hangs it.
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT),
       headers: {
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",

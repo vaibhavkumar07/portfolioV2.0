@@ -13,9 +13,16 @@ export const env = {
   /** Microsoft Edge neural TTS voice (free, no key). */
   ttsVoice: process.env.TTS_VOICE || "en-US-GuyNeural",
 
-  /** Upstash Redis — optional durable rate limiting (falls back to in-memory). */
+  /**
+   * Upstash Redis — durable rate limiting and counters. Optional in dev; in
+   * production its absence makes /api/chat refuse to serve, because the
+   * in-memory fallback is per-instance and so no real limit at all.
+   */
   upstashUrl: process.env.UPSTASH_REDIS_REST_URL ?? "",
   upstashToken: process.env.UPSTASH_REDIS_REST_TOKEN ?? "",
+
+  /** Kept here so no other module has to reach for process.env. */
+  isProduction: process.env.NODE_ENV === "production",
 } as const;
 
 export const hasUpstash = Boolean(env.upstashUrl && env.upstashToken);
