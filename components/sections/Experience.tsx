@@ -15,7 +15,10 @@ import { RevealItem, RevealStagger } from "@/components/fx/Reveal";
  */
 export default function Experience() {
   return (
-    <RevealStagger className="glass overflow-hidden rounded-3xl" stagger={0.06}>
+    /* No glass wrapper: this section flips to the paper surface, where a
+       translucent navy panel would fight the background. Rows carry their own
+       dividers, so the rail works on any surface. */
+    <RevealStagger className="border-t border-border" stagger={0.06}>
       {EXPERIENCE.map((e, i) => (
         <RevealItem key={e.period}>
           <Row {...e} index={EXPERIENCE.length - i} current={i === 0} />
@@ -41,7 +44,7 @@ function Row({
   return (
     /* Top-aligned on desktop so the PERIOD / LOCATION / FOCUS labels share one
        baseline across all three columns; centering pushed them out of line. */
-    <div className="group relative grid grid-cols-1 gap-5 border-b border-border px-5 py-7 last:border-0 md:grid-cols-12 md:items-start md:gap-8 md:px-8 md:py-7">
+    <div className="group relative grid grid-cols-1 gap-5 border-b border-border py-7 md:grid-cols-12 md:items-start md:gap-8 md:py-8">
       {/* Hover wash — decorative, sits under the content. Opacity-only so it
           costs nothing on reduced-motion. */}
       <span
@@ -61,7 +64,9 @@ function Row({
       {/* Role + employer */}
       <div className="relative z-10 md:col-span-5">
         <div className="label-xs mb-2 flex items-center gap-2 text-muted-foreground">
-          <span aria-hidden="true" className="text-[var(--cyan)]/40">
+          {/* Plain muted rather than a cyan opacity variant: at 40% alpha the
+              index vanished against the paper surface. */}
+          <span aria-hidden="true" className="text-muted-foreground">
             {String(index).padStart(2, "0")}
           </span>
           {current && (
@@ -74,8 +79,8 @@ function Row({
             </span>
           )}
         </div>
-        <h3 className="text-xl font-semibold leading-snug sm:text-2xl">{role}</h3>
-        <p className="mt-1.5 text-sm text-muted-foreground">{org}</p>
+        <h3 className="t-title">{role}</h3>
+        <p className="mt-2 text-sm text-muted-foreground">{org}</p>
       </div>
 
       {/* Meta — mirrors the "Caller details" key/value rhythm in the About card */}
@@ -95,7 +100,7 @@ function Row({
       {/* Credentials earned in this role — spans the full row so they read as
           events on the timeline rather than a fourth column of metadata. */}
       {credentials && credentials.length > 0 && (
-        <div className="relative z-10 rounded-2xl border border-[var(--cyan)]/25 bg-[var(--cyan)]/[0.06] px-3 py-2.5 md:col-span-12">
+        <div className="band-cert relative z-10 rounded-2xl px-3 py-2.5 md:col-span-12">
           <span className="label-xs mb-2 block text-[var(--cyan)]">Certified in this role</span>
           <ul className="space-y-2">
             {credentials.map((c) => (
@@ -142,7 +147,7 @@ function Row({
             {awards.map((a) => (
               <li
                 key={`${a.name}-${a.date}`}
-                className="rounded-xl border border-[var(--amber)]/30 bg-[var(--amber)]/[0.07] px-3 py-1.5 text-sm text-foreground/90"
+                className="band-award rounded-xl px-3 py-1.5 text-sm text-foreground/90"
               >
                 {a.name}
                 <span className="text-muted-foreground"> · {a.date}</span>

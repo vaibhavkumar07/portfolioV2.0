@@ -17,6 +17,3 @@ export const THEME = {
   axis: "#8794ae",
   foreground: "#e9edf7",
 } as const;
-
-/** Ordered series colours for multi-series charts. */
-export const SERIES = [THEME.cyan, THEME.violet, THEME.amber, THEME.live] as const;

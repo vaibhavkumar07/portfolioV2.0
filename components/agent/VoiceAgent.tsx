@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { SUGGESTED } from "@/lib/data/kb";
+import { GREETING, SUGGESTED } from "@/lib/data/kb";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -24,8 +24,12 @@ export default function VoiceAgent({
   variant = "panel",
   analyserRef,
 }: {
-  /** "takeover" hides the photo/waveform row — the 3D avatar stands in for it. */
-  variant?: "panel" | "takeover";
+  /**
+   * "takeover" and "rail" both hide the photo/waveform row — the live portrait
+   * stands in for it. "rail" additionally drops the panel chrome, because in
+   * the split layout the agent *is* the column, not a card sitting in one.
+   */
+  variant?: "panel" | "takeover" | "rail";
   /** Receives an AnalyserNode wired to the TTS audio, for avatar lip-sync. */
   analyserRef?: React.RefObject<AnalyserNode | null>;
 } = {}) {
@@ -268,18 +272,32 @@ export default function VoiceAgent({
     }
   };
 
+  const rail = variant === "rail";
+
   return (
-    <div className="glass relative flex h-full flex-col overflow-hidden rounded-3xl">
-      {/* Console header */}
+    <div
+      className={
+        rail
+          ? "relative flex h-full min-h-0 flex-col overflow-hidden"
+          : "glass relative flex h-full flex-col overflow-hidden rounded-3xl"
+      }
+    >
+      {/* Console header. In the rail the portrait above already carries a
+          "Line open" badge and the call timer, so the idle state says nothing
+          here — only the transient states (speaking / thinking) earn the row. */}
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
-          <span
-            className={`h-2 w-2 rounded-full ${speaking ? "bg-[var(--amber)]" : "bg-[var(--live)]"}`}
-            style={{ boxShadow: "0 0 8px currentColor" }}
-          />
-          <span className="label-xs text-muted-foreground">
-            {speaking ? "Agent speaking" : busy ? "Thinking…" : "Line open"}
-          </span>
+          {!(rail && !speaking && !busy) && (
+            <>
+              <span
+                className={`h-2 w-2 rounded-full ${speaking ? "bg-[var(--amber)]" : "bg-[var(--live)]"}`}
+                style={{ boxShadow: "0 0 8px currentColor" }}
+              />
+              <span className="label-xs text-muted-foreground">
+                {speaking ? "Agent speaking" : busy ? "Thinking…" : "Line open"}
+              </span>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {speaking && (
@@ -326,9 +344,11 @@ export default function VoiceAgent({
       <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
         {messages.length === 0 && (
           <div className="space-y-3">
+            {/* The same words the greeting speaks — hearing one thing and
+                reading another made the agent feel broken. */}
+            <p className="text-sm leading-relaxed text-foreground/90">{GREETING}</p>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Ask me anything about my work — IVR, voice AI, projects, or whether I&apos;m
-              open to hire. Tap the mic and talk, or type below.
+              Tap the mic and talk, or type below.
             </p>
             <div className="flex flex-wrap gap-2">
               {SUGGESTED.map((s) => (

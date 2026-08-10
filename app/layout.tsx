@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Backdrop from "@/components/fx/Backdrop";
 import TrackVisit from "@/components/fx/TrackVisit";
+import SmoothScroll from "@/components/fx/SmoothScroll";
 import "./globals.css";
 
 const mono = JetBrains_Mono({
@@ -76,6 +77,7 @@ export default function RootLayout({
         </a>
         <Backdrop />
         <TrackVisit />
+        <SmoothScroll />
         {children}
         <Analytics />
         <SpeedInsights />

@@ -37,6 +37,10 @@
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
+  --color-void: var(--void);
+  --color-paper: var(--paper);
+  --color-paper-foreground: var(--paper-foreground);
+  --color-paper-muted: var(--paper-muted);
 }
 
 /*
@@ -78,6 +82,29 @@
   --input: oklch(0.789 0.134 205 / 24%);
   --ring: var(--cyan);
 
+  /* ──────────────────────────────────────────────────────────────
+   * Contrast range. The page used to live entirely between L=0.12
+   * and L=0.26 — every surface within one value band, which is why
+   * nothing could be emphasised. These are the two poles that give
+   * the page somewhere to go: a true black void and a paper-white
+   * surface that a whole section can flip to.
+   * ────────────────────────────────────────────────────────────── */
+  --void: oklch(0.04 0.008 267);
+  --paper: oklch(0.945 0.006 250);
+  --paper-foreground: oklch(0.17 0.021 267);
+  --paper-muted: oklch(0.46 0.02 267);
+  --paper-border: oklch(0.17 0.021 267 / 14%);
+
+  /* ──────────────────────────────────────────────────────────────
+   * Display type scale. Ratio ~1.7 between steps, topping out an
+   * order of magnitude above body text. Every step is fluid, so the
+   * hierarchy survives from 390px to 2560px without breakpoints.
+   * ────────────────────────────────────────────────────────────── */
+  --text-mega: clamp(4rem, 15vw, 13rem);
+  --text-display: clamp(2.75rem, 8.5vw, 7rem);
+  --text-title: clamp(2rem, 4.6vw, 3.4rem);
+  --text-lead: clamp(1.125rem, 1.7vw, 1.5rem);
+
   /* Data viz — every chart colour resolves through these, never a raw hex */
   --chart-1: var(--cyan);
   --chart-2: var(--violet);
@@ -90,7 +117,6 @@
   /* Spatial surfaces */
   --glass-blur: 40px;
   --glass-saturate: 180%;
-  --depth-1: 0 4px 16px oklch(0 0 0 / 0.35);
   --depth-2: 0 8px 32px oklch(0 0 0 / 0.45);
   --depth-3: 0 20px 56px oklch(0 0 0 / 0.55);
   --sheen: inset 0 1px 0 oklch(1 0 0 / 0.07);
@@ -131,8 +157,8 @@
 @layer utilities {
   /* ──────────────────────────────────────────────────────────────
    * Spatial surfaces. Depth comes from translucency + blur + shadow,
-   * never from a flat fill. Three weights: chrome that must stay
-   * readable (strong), standard panels (glass), decorative (subtle).
+   * never from a flat fill. Two weights: chrome that must stay readable
+   * (strong) and standard panels (glass).
    * ────────────────────────────────────────────────────────────── */
   .glass {
     background: color-mix(in oklch, var(--card) 55%, transparent);
@@ -147,24 +173,6 @@
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
     border: 1px solid var(--border);
     box-shadow: var(--depth-3), var(--sheen);
-  }
-  .glass-subtle {
-    background: color-mix(in oklch, var(--card) 38%, transparent);
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border: 1px solid var(--border);
-    box-shadow: var(--depth-1), var(--sheen);
-  }
-  /* Lift on hover — the spatial equivalent of a hover state */
-  .lift {
-    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-                box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
-                border-color 220ms ease;
-  }
-  .lift:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--depth-3), var(--sheen);
-    border-color: color-mix(in oklch, var(--cyan) 45%, transparent);
   }
 
   /* ──────────────────────────────────────────────────────────────
@@ -187,6 +195,94 @@
   /* Section rhythm — one scale, one responsive step */
   .section-y { padding-block: 4.5rem; }
   @media (min-width: 768px) { .section-y { padding-block: 6.5rem; } }
+
+  /* ──────────────────────────────────────────────────────────────
+   * Display type. Use .t-mega for the one number or word per screen
+   * that should dominate; .t-display for section statements. Tight
+   * tracking and leading below 1 are what make large type read as
+   * designed rather than merely big.
+   * ────────────────────────────────────────────────────────────── */
+  .t-mega {
+    font-family: var(--font-heading);
+    font-size: var(--text-mega);
+    line-height: 0.82;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+  }
+  .t-display {
+    font-family: var(--font-heading);
+    font-size: var(--text-display);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
+  .t-title {
+    font-family: var(--font-heading);
+    font-size: var(--text-title);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    font-weight: 600;
+  }
+  .t-lead {
+    font-size: var(--text-lead);
+    line-height: 1.5;
+  }
+
+  /* Outlined display type — a second voice for large numerals so the
+     page can shout twice without shouting the same way. */
+  .t-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px color-mix(in oklch, var(--cyan) 45%, transparent);
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+   * The paper surface. An entire section inverts to this — the one
+   * move that breaks the navy monotony. Descendants inherit readable
+   * colours so section content needs no per-element overrides.
+   * ────────────────────────────────────────────────────────────── */
+  .surface-paper {
+    background: var(--paper);
+    color: var(--paper-foreground);
+  }
+  .surface-paper .text-muted-foreground { color: var(--paper-muted); }
+  .surface-paper .border-border { border-color: var(--paper-border); }
+  .surface-paper .t-outline { -webkit-text-stroke-color: color-mix(in oklch, var(--paper-foreground) 30%, transparent); }
+  .surface-void { background: var(--void); }
+
+  /* Credential / recognition bands. Defined as classes rather than inline
+     utilities because they have to survive the paper-surface flip, where a
+     6%-opacity cyan wash on navy becomes invisible on white. */
+  .band-cert {
+    border: 1px solid color-mix(in oklch, var(--cyan) 25%, transparent);
+    background: color-mix(in oklch, var(--cyan) 6%, transparent);
+  }
+  .band-award {
+    border: 1px solid color-mix(in oklch, var(--amber) 30%, transparent);
+    background: color-mix(in oklch, var(--amber) 7%, transparent);
+  }
+  .surface-paper .band-cert {
+    border-color: color-mix(in oklch, var(--paper-foreground) 18%, transparent);
+    background: color-mix(in oklch, var(--paper-foreground) 4%, transparent);
+  }
+  .surface-paper .band-award {
+    border-color: oklch(0.62 0.14 70 / 45%);
+    background: oklch(0.62 0.14 70 / 8%);
+  }
+  .surface-paper .text-cyan,
+  .surface-paper .text-\[var\(--cyan\)\] { color: oklch(0.52 0.1 220); }
+  .surface-paper .text-\[var\(--amber\)\] { color: oklch(0.52 0.13 62); }
+  .surface-paper .text-foreground\/90 { color: color-mix(in oklch, var(--paper-foreground) 90%, transparent); }
+
+  /* Horizontal scroll rail — momentum on touch, snap per card. */
+  .rail {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail > * { scroll-snap-align: start; flex: 0 0 auto; }
 
   /* ── Backdrop atmosphere ── */
   .backdrop-fade {
@@ -218,16 +314,7 @@
   }
 
   .text-cyan { color: var(--cyan); }
-  .text-violet { color: var(--violet); }
-  .text-amber { color: var(--amber); }
-  .glow-cyan { box-shadow: 0 0 0 1px oklch(0.789 0.134 205 / 0.3), 0 0 32px oklch(0.789 0.134 205 / 0.22); }
   .glow-amber { box-shadow: 0 0 0 1px oklch(0.837 0.164 84 / 0.3), 0 0 32px oklch(0.837 0.164 84 / 0.22); }
-
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(14px); }
-    to { opacity: 1; transform: none; }
-  }
-  .rise { animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
   /* keyboard focus ring — apply to every interactive element */
   .focus-ring { outline: none; }
@@ -239,9 +326,6 @@
 
   @media (prefers-reduced-motion: reduce) {
     .aurora-1, .aurora-2, .aurora-3 { animation: none; }
-    .rise { animation: none; }
-    .lift { transition: none; }
-    .lift:hover { transform: none; }
     html { scroll-behavior: auto; }
   }
 }

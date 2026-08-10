@@ -21,9 +21,9 @@ export const HIGHLIGHTS = [
   "SME in Genesys Architect, AI Studio, Data Actions, and CX-as-Code (Terraform).",
   "Integrates Azure TTS/STT, OpenAI/ChatGPT, Google Dialogflow, Observe.AI, Moveworks.",
   "Delivered PII/PHI/PCI-compliant flows for healthcare and regulated industries.",
-  "Genesys Cloud: Professional certified (Jun 2026) — the vendor credential for the platform I build on.",
+  "Genesys-certified twice over: Cloud CX Professional (Jun 2026) and Cloud CX Developer (Aug 2026).",
   "Indian patent IN 405313 (IoT); 8 Infosys awards including Platinum Club, Rise Tech/Domain Maestro and Rise MVP.",
-  "11 certifications (Genesys Cloud, Infosys Contact Center suite, Applied Generative AI, eCornell AI Strategy).",
+  "12 certifications (2 Genesys, Infosys Contact Center suite, Applied Generative AI, eCornell AI Strategy).",
 ];
 
 export type Credential = {
@@ -45,7 +45,7 @@ export type Credential = {
  * next.config.ts blocks third-party image hosts, so it cannot hotlink Credly.
  */
 export const CREDENTIAL: Credential = {
-  name: "Genesys Cloud: Professional",
+  name: "Genesys Cloud CX: Professional",
   issuer: "Genesys",
   issued: "Jun 2026",
   expires: "Jun 2028",
@@ -54,6 +54,19 @@ export const CREDENTIAL: Credential = {
   expiresISO: "2028-06-29",
   badge: "/genesys-cloud-certified-professional.png",
 };
+
+export const CREDENTIAL_DEVELOPER: Credential = {
+  name: "Genesys Cloud CX: Developer",
+  issuer: "Genesys",
+  issued: "Aug 2026",
+  expires: "Aug 2028",
+  issuedISO: "2026-08-01",
+  expiresISO: "2028-08-01",
+  badge: "/genesys-cloud-cx-developer-certification.png",
+};
+
+/** Both vendor badges, newest first. Shown together in About. */
+export const VENDOR_CREDENTIALS: Credential[] = [CREDENTIAL, CREDENTIAL_DEVELOPER];
 
 export type Award = { name: string; issuer: string; date: string };
 
@@ -80,7 +93,8 @@ export const EXPERIENCE: Role[] = [
   {
     period: "Oct 2025 – Present", role: "Package Consultant 2", org: "Infosys", location: "United States",
     focus: "Genesys Cloud + Generative AI",
-    credentials: [CREDENTIAL],
+    /* Both Genesys credentials were earned in this role — Jun and Aug 2026. */
+    credentials: [CREDENTIAL_DEVELOPER, CREDENTIAL],
     awards: [{ name: "Platinum Club", issuer: INFOSYS, date: "Mar 2026" }],
   },
   {
@@ -125,8 +139,9 @@ export const EXPERIENCE: Role[] = [
  * are not attached to a role on the timeline. Add `issued` and move the object
  * into that role's `credentials` array.
  */
-export const CERTIFICATIONS: Credential[] = [
+const CERTIFICATIONS: Credential[] = [
   CREDENTIAL,
+  CREDENTIAL_DEVELOPER,
   { name: "Infosys Certified Contact Center Platform Professional", issuer: "Infosys" },
   { name: "Infosys Certified Contact Center Technology Components & Integrations Professional", issuer: "Infosys" },
   { name: "Infosys Certified Contact Center Professional", issuer: "Infosys" },
@@ -143,6 +158,14 @@ export const CERTS = CERTIFICATIONS.map((c) => {
   const when = c.issued ? `, ${c.issued}${c.expires ? ` – ${c.expires}` : ""}` : "";
   return `${c.name} — ${c.issuer}${when}`;
 });
+
+/**
+ * What the agent says on arrival, and the same words the console shows before
+ * the first question. One constant, because a bot whose caption and voice say
+ * different things reads as broken rather than as two nice touches.
+ */
+export const GREETING =
+  "Hey — I'm Vaibhav. I build the voice behind enterprise phone calls. Ask me anything about my work.";
 
 /** Suggested questions surfaced in the UI. */
 export const SUGGESTED = [
