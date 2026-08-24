@@ -12,7 +12,7 @@ export const MODES: { id: Mode; label: string }[] = [
   { id: "playground", label: "Playground" },
 ];
 
-const SECTIONS = ["work", "about", "stack", "faq", "contact"];
+const SECTIONS = ["work", "experience", "about", "stack", "faq", "contact"];
 
 type Ctx = {
   mode: Mode;
@@ -70,37 +70,50 @@ export default function ModeProvider({ children }: { children: React.ReactNode }
     window.history.replaceState(null, "", u);
   }, []);
 
+  const openSection = useCallback(
+    (id: string) => {
+      if (!SECTIONS.includes(id)) return;
+      if (modeRef.current !== "home") {
+        pendingScroll.current = id;
+        select("home");
+        return;
+      }
+      requestAnimationFrame(() =>
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+    },
+    [select],
+  );
+
   // Section links must work from inside a mode. Driving this directly (rather
   // than relying on `hashchange`) also fixes the silent dead link you hit when
   // the URL hash already matched the section you clicked.
   const goToSection = useCallback(
     (id: string) => {
-      const scroll = () =>
-        requestAnimationFrame(() =>
-          document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }),
-        );
-      if (modeRef.current !== "home") {
-        pendingScroll.current = id;
-        select("home");
-      } else {
-        scroll();
+      const next = `#${id}`;
+      if (window.location.hash !== next) {
+        const u = new URL(window.location.href);
+        u.hash = id;
+        window.history.pushState(null, "", u);
       }
+      openSection(id);
     },
-    [select],
+    [openSection],
   );
 
-  // Browser back/forward and manual hash edits.
+  // Browser back/forward, rail <a href="#…">, and manual hash edits.
   useEffect(() => {
     const onHash = () => {
       const id = decodeURIComponent(window.location.hash.slice(1));
-      if (SECTIONS.includes(id) && modeRef.current !== "home") {
-        pendingScroll.current = id;
-        select("home");
-      }
+      openSection(id);
     };
     window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, [select]);
+    window.addEventListener("popstate", onHash);
+    return () => {
+      window.removeEventListener("hashchange", onHash);
+      window.removeEventListener("popstate", onHash);
+    };
+  }, [openSection]);
 
   // After returning to HOME, scroll to whatever was requested.
   useEffect(() => {

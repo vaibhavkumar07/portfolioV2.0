@@ -42,58 +42,59 @@ export async function POST(req: Request) {
 
   const safeText = escapeXml(pronounce(text));
 
-  try {
-    const work = (async () => {
-      const tts = new MsEdgeTTS();
-      await tts.setMetadata(
-        VOICE,
-        OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3,
-        wantMarks ? { wordBoundaryEnabled: true, sentenceBoundaryEnabled: false } : undefined,
-      );
-      const { audioStream, metadataStream } = tts.toStream(safeText);
+  const work = (async () => {
+    const tts = new MsEdgeTTS();
+    await tts.setMetadata(
+      VOICE,
+      OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3,
+      wantMarks ? { wordBoundaryEnabled: true, sentenceBoundaryEnabled: false } : undefined,
+    );
+    const { audioStream, metadataStream } = tts.toStream(safeText);
 
-      const chunks: Buffer[] = [];
-      const marks: { t: number; word: string }[] = [];
+    const chunks: Buffer[] = [];
+    const marks: { t: number; word: string }[] = [];
 
-      const audioDone = new Promise<void>((resolve, reject) => {
-        audioStream.on("data", (c: Buffer) => chunks.push(c));
-        audioStream.on("end", resolve);
-        audioStream.on("close", resolve);
-        audioStream.on("error", reject);
-      });
+    const audioDone = new Promise<void>((resolve, reject) => {
+      audioStream.on("data", (c: Buffer) => chunks.push(c));
+      audioStream.on("end", resolve);
+      audioStream.on("close", resolve);
+      audioStream.on("error", reject);
+    });
 
-      const marksDone =
-        wantMarks && metadataStream
-          ? new Promise<void>((resolve) => {
-              metadataStream.on("data", (c: Buffer) => {
-                try {
-                  const parsed = JSON.parse(c.toString());
-                  for (const m of parsed?.Metadata ?? []) {
-                    if (m?.Type !== "WordBoundary") continue;
-                    marks.push({
-                      t: (m.Data?.Offset ?? 0) / 10_000_000,
-                      word: String(m.Data?.text?.Text ?? ""),
-                    });
-                  }
-                } catch {
-                  /* ignore malformed envelopes */
+    const marksDone =
+      wantMarks && metadataStream
+        ? new Promise<void>((resolve) => {
+            metadataStream.on("data", (c: Buffer) => {
+              try {
+                const parsed = JSON.parse(c.toString());
+                for (const m of parsed?.Metadata ?? []) {
+                  if (m?.Type !== "WordBoundary") continue;
+                  marks.push({
+                    t: (m.Data?.Offset ?? 0) / 10_000_000,
+                    word: String(m.Data?.text?.Text ?? ""),
+                  });
                 }
-              });
-              metadataStream.on("end", resolve);
-              metadataStream.on("close", resolve);
-              metadataStream.on("error", () => resolve());
-            })
-          : Promise.resolve();
+              } catch {
+                /* ignore malformed envelopes */
+              }
+            });
+            metadataStream.on("end", resolve);
+            metadataStream.on("close", resolve);
+            metadataStream.on("error", () => resolve());
+          })
+        : Promise.resolve();
 
-      await Promise.all([audioDone, marksDone]);
-      return { audio: Buffer.concat(chunks), marks };
-    })();
+    await Promise.all([audioDone, marksDone]);
+    return { audio: Buffer.concat(chunks), marks };
+  })();
 
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
     const { audio, marks } = await Promise.race([
       work,
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("TTS timeout")), TTS_TIMEOUT),
-      ),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error("TTS timeout")), TTS_TIMEOUT);
+      }),
     ]);
 
     if (wantMarks) {
@@ -111,6 +112,10 @@ export async function POST(req: Request) {
       },
     });
   } catch {
+    // Timeout won: swallow a later `work` rejection so it isn't unhandled.
+    void work.catch(() => {});
     return new Response("TTS failed", { status: 502 });
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
   }
 }

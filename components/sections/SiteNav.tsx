@@ -9,8 +9,8 @@ import { MODES, useMode } from "@/components/modes/ModeProvider";
 const SECTIONS = [
   { id: "stack", label: "Expertise" },
   { id: "work", label: "Work" },
-  { id: "about", label: "Certifications" },
-  { id: "experience", label: "About" },
+  { id: "experience", label: "Experience" },
+  { id: "about", label: "About" },
   { id: "faq", label: "Insights" },
 ];
 
