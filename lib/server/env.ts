@@ -24,5 +24,3 @@ export const env = {
   /** Kept here so no other module has to reach for process.env. */
   isProduction: process.env.NODE_ENV === "production",
 } as const;
-
-export const hasUpstash = Boolean(env.upstashUrl && env.upstashToken);

@@ -3,6 +3,7 @@ import { JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Backdrop from "@/components/fx/Backdrop";
+import ScrollProgress from "@/components/fx/ScrollProgress";
 import TrackVisit from "@/components/fx/TrackVisit";
 import SmoothScroll from "@/components/fx/SmoothScroll";
 import "./globals.css";
@@ -76,6 +77,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <Backdrop />
+        <ScrollProgress />
         <TrackVisit />
         <SmoothScroll />
         {children}

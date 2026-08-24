@@ -22,16 +22,9 @@ type SpeechRec = {
 
 export default function VoiceAgent({
   variant = "panel",
-  analyserRef,
 }: {
-  /**
-   * "takeover" and "rail" both hide the photo/waveform row — the live portrait
-   * stands in for it. "rail" additionally drops the panel chrome, because in
-   * the split layout the agent *is* the column, not a card sitting in one.
-   */
-  variant?: "panel" | "takeover" | "rail";
-  /** Receives an AnalyserNode wired to the TTS audio, for avatar lip-sync. */
-  analyserRef?: React.RefObject<AnalyserNode | null>;
+  /** "takeover" hides the photo/waveform row (modal chat). */
+  variant?: "panel" | "takeover";
 } = {}) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -101,34 +94,6 @@ export default function VoiceAgent({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioQ = useRef<Promise<string | null>[]>([]);
   const workingRef = useRef(false);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-
-  // Wire an analyser to the TTS <audio> element so the 3D avatar can lip-sync
-  // to real amplitude. createMediaElementSource is one-shot per element, so
-  // this runs exactly once; later calls just resume a suspended context.
-  const ensureAnalyser = useCallback(() => {
-    if (!analyserRef || !audioRef.current) return;
-    if (analyserRef.current) {
-      void audioCtxRef.current?.resume().catch(() => {});
-      return;
-    }
-    try {
-      const ctx = new AudioContext();
-      const src = ctx.createMediaElementSource(audioRef.current);
-      const an = ctx.createAnalyser();
-      an.fftSize = 256;
-      an.smoothingTimeConstant = 0.6;
-      src.connect(an);
-      an.connect(ctx.destination);
-      analyserRef.current = an;
-      audioCtxRef.current = ctx;
-      // A fresh context can start suspended. Once the element is routed
-      // through it, a suspended context means silence — always resume.
-      void ctx.resume().catch(() => {});
-    } catch {
-      /* analyser is an enhancement — audio still plays without it */
-    }
-  }, [analyserRef]);
 
   const fetchTTS = useCallback(async (text: string): Promise<string | null> => {
     try {
@@ -148,7 +113,6 @@ export default function VoiceAgent({
   const pump = useCallback(async () => {
     if (workingRef.current) return;
     workingRef.current = true;
-    ensureAnalyser();
     setSpeaking(true);
     const a = audioRef.current;
     while (audioQ.current.length) {
@@ -163,7 +127,7 @@ export default function VoiceAgent({
     }
     workingRef.current = false;
     setSpeaking(false);
-  }, [ensureAnalyser]);
+  }, []);
 
   const speakChunk = useCallback(
     (text: string) => {
@@ -272,32 +236,17 @@ export default function VoiceAgent({
     }
   };
 
-  const rail = variant === "rail";
-
   return (
-    <div
-      className={
-        rail
-          ? "relative flex h-full min-h-0 flex-col overflow-hidden"
-          : "glass relative flex h-full flex-col overflow-hidden rounded-3xl"
-      }
-    >
-      {/* Console header. In the rail the portrait above already carries a
-          "Line open" badge and the call timer, so the idle state says nothing
-          here — only the transient states (speaking / thinking) earn the row. */}
+    <div className="glass relative flex h-full flex-col overflow-hidden rounded-3xl">
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
-          {!(rail && !speaking && !busy) && (
-            <>
-              <span
-                className={`h-2 w-2 rounded-full ${speaking ? "bg-[var(--amber)]" : "bg-[var(--live)]"}`}
-                style={{ boxShadow: "0 0 8px currentColor" }}
-              />
-              <span className="label-xs text-muted-foreground">
-                {speaking ? "Agent speaking" : busy ? "Thinking…" : "Line open"}
-              </span>
-            </>
-          )}
+          <span
+            className={`h-2 w-2 rounded-full ${speaking ? "bg-[var(--amber)]" : "bg-[var(--live)]"}`}
+            style={{ boxShadow: "0 0 8px currentColor" }}
+          />
+          <span className="label-xs text-muted-foreground">
+            {speaking ? "Agent speaking" : busy ? "Thinking…" : "Line open"}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           {speaking && (
@@ -324,11 +273,11 @@ export default function VoiceAgent({
         </div>
       </div>
 
-      {/* Avatar + waveform — the takeover shows the live 3D avatar instead */}
+      {/* Avatar + waveform (panel layout only) */}
       {variant === "panel" && (
         <div className="relative flex items-center gap-4 border-b border-border px-4 py-4">
           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-border">
-            <Image src="/profile.jpeg" alt="Vaibhavkumar Yadav" fill className="object-cover" sizes="64px" />
+            <Image src="/profile1.jpeg" alt="Vaibhavkumar Yadav" fill className="object-cover object-[50%_18%]" sizes="64px" />
             <span
               className={`absolute inset-0 transition-opacity ${speaking ? "opacity-100" : "opacity-0"}`}
               style={{ boxShadow: "inset 0 0 0 2px var(--amber)" }}
@@ -344,8 +293,6 @@ export default function VoiceAgent({
       <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
         {messages.length === 0 && (
           <div className="space-y-3">
-            {/* The same words the greeting speaks — hearing one thing and
-                reading another made the agent feel broken. */}
             <p className="text-sm leading-relaxed text-foreground/90">{GREETING}</p>
             <p className="text-sm leading-relaxed text-muted-foreground">
               Tap the mic and talk, or type below.

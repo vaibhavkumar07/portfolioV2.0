@@ -1,61 +1,55 @@
+"use client";
+
 import {
-  Headset, Cloud, Bot, MessageSquare, PhoneCall, Cpu, Workflow, Sparkles,
+  Bot,
+  Cloud,
+  Cpu,
+  Headset,
+  MessageSquare,
+  PhoneCall,
+  Sparkles,
+  Workflow,
 } from "lucide-react";
 
-// Platforms actually shipped on — the trust band's single job. Stats live in
-// the hero; duplicating them here made the second copy read as a bug.
 const STACK = [
-  { name: "Genesys Cloud", icon: Cloud },
-  { name: "Azure Speech", icon: Headset },
-  { name: "OpenAI", icon: Sparkles },
-  { name: "Dialogflow", icon: Bot },
-  { name: "Cisco PCCE", icon: PhoneCall },
-  { name: "Power Automate", icon: Workflow },
-  { name: "Observe.AI", icon: MessageSquare },
-  { name: "AI Studio", icon: Cpu },
+  { name: "Genesys Cloud", icon: Cloud, blurb: "IVR · Architect · CX" },
+  { name: "Azure Speech", icon: Headset, blurb: "TTS · STT" },
+  { name: "OpenAI", icon: Sparkles, blurb: "Agent assist · summaries" },
+  { name: "Dialogflow", icon: Bot, blurb: "Conversational NLU" },
+  { name: "Cisco PCCE", icon: PhoneCall, blurb: "Contact center" },
+  { name: "Power Automate", icon: Workflow, blurb: "Orchestration" },
+  { name: "Observe.AI", icon: MessageSquare, blurb: "QA · coaching" },
+  { name: "AI Studio", icon: Cpu, blurb: "Genesys bots" },
 ];
 
+/** Platforms band — static grid (no marquee), matches console aesthetic. */
 export default function TrustPanel() {
   return (
-    <section className="mx-auto max-w-6xl px-5 py-10">
-      <style>{`
-        @keyframes tp-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .tp-marquee { animation: tp-marquee 42s linear infinite; }
-        .tp-marquee:hover, .tp-marquee:focus-within { animation-play-state: paused; }
-        @media (prefers-reduced-motion: reduce) { .tp-marquee { animation: none; } }
-      `}</style>
-
-      <div className="glass overflow-hidden rounded-3xl py-7">
-        <h2 className="label-xs mb-5 px-7 text-muted-foreground">
-          &gt; Platforms &amp; AI I ship with
-        </h2>
-
-        {/* The scrolling row is decoration; the real list is exposed to
-            assistive tech below so the content isn't motion-dependent. */}
-        <div
-          aria-hidden="true"
-          className="relative flex overflow-hidden"
-          style={{
-            maskImage: "linear-gradient(to right, transparent, black 14%, black 86%, transparent)",
-            WebkitMaskImage: "linear-gradient(to right, transparent, black 14%, black 86%, transparent)",
-          }}
-        >
-          <div className="tp-marquee flex shrink-0 gap-10 whitespace-nowrap px-5">
-            {[...STACK, ...STACK].map((s, i) => (
-              <div key={i} className="flex items-center gap-2.5 text-foreground/60">
-                <s.icon className="h-5 w-5 text-[var(--cyan)]" />
-                <span className="text-base font-medium tracking-tight">{s.name}</span>
-              </div>
-            ))}
-          </div>
+    <section className="mx-auto max-w-6xl px-5 py-12 sm:px-8">
+      <div className="mb-6 flex items-end justify-between gap-4">
+        <div>
+          <p className="label-xs text-[var(--cyan)]">&gt; Platforms &amp; AI I ship with</p>
+          <h2 className="mt-1 font-[family-name:var(--font-heading)] text-xl font-semibold tracking-tight text-white sm:text-2xl">
+            Production stack
+          </h2>
         </div>
-
-        <ul className="sr-only">
-          {STACK.map((s) => (
-            <li key={s.name}>{s.name}</li>
-          ))}
-        </ul>
       </div>
+
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {STACK.map((s) => (
+          <li
+            key={s.name}
+            className="group rounded-2xl border border-[var(--cyan)]/20 bg-white/[0.03] p-4 transition hover:border-[var(--cyan)]/45 hover:bg-white/[0.05]"
+          >
+            <s.icon
+              className="h-5 w-5 text-[var(--cyan)] transition group-hover:scale-110"
+              aria-hidden="true"
+            />
+            <p className="mt-3 text-sm font-medium text-white">{s.name}</p>
+            <p className="mt-1 text-[0.7rem] text-white/40">{s.blurb}</p>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

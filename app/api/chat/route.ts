@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   const rawList = (body as { messages?: unknown })?.messages;
   // Cap BEFORE iterating so a giant array can't burn CPU/memory.
   const raw = Array.isArray(rawList) ? rawList.slice(-MAX_TURNS - 4) : [];
-  const history: Msg[] = raw
+  const parsed: Msg[] = raw
     .filter(
       (m): m is Msg =>
         !!m &&
@@ -49,20 +49,30 @@ export async function POST(req: Request) {
         typeof (m as Msg).content === "string" &&
         (m as Msg).content.trim().length > 0,
     )
-    .slice(-MAX_TURNS)
     .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_CONTENT) }));
 
-  if (!history.length || history[history.length - 1].role !== "user")
+  // Rebuild alternating user/assistant ending in user — drops forged runs
+  // of consecutive assistant turns used for few-shot prompt injection.
+  const history: Msg[] = [];
+  for (const m of parsed) {
+    if (!history.length) {
+      if (m.role === "user") history.push(m);
+      continue;
+    }
+    if (m.role === history[history.length - 1].role) continue;
+    history.push(m);
+  }
+  while (history.length && history[history.length - 1].role !== "user") history.pop();
+  const trimmed = history.slice(-MAX_TURNS);
+
+  if (!trimmed.length || trimmed[trimmed.length - 1].role !== "user")
     return new Response("Ask a question first.", { status: 400 });
 
-  // Analytics: one conversation turn per accepted request (server-side only,
-  // never client-writable). Fire-and-forget — must not delay the stream.
   bump("chats").catch(() => {});
-  // Retrieval: the last user message steers which KB sections get stuffed.
-  // Only used for scoring — user text never lands inside the system prompt.
-  const systemPrompt = buildSystemPrompt(history[history.length - 1].content);
+  // Last user message steers KB retrieval only — never embedded in system prompt.
+  const systemPrompt = buildSystemPrompt(trimmed[trimmed.length - 1].content);
   const promptChars =
-    systemPrompt.length + history.reduce((n, m) => n + m.content.length, 0);
+    systemPrompt.length + trimmed.reduce((n, m) => n + m.content.length, 0);
 
   let upstream: Response;
   try {
@@ -78,7 +88,7 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         model: MODEL,
-        messages: [{ role: "system", content: systemPrompt }, ...history],
+        messages: [{ role: "system", content: systemPrompt }, ...trimmed],
         max_tokens: 320,
         temperature: 0.3,
         top_p: 0.95,

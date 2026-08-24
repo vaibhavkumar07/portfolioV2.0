@@ -1,71 +1,53 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import {
+  AudioLines,
+  Box,
+  Network,
+  Phone,
+  Shield,
+  Terminal,
+  User,
+} from "lucide-react";
 import VoiceAgent from "@/components/agent/VoiceAgent";
-import HeroGreeting from "@/components/agent/HeroGreeting";
 
-const VoiceField = dynamic(() => import("@/components/three/VoiceField"), { ssr: false });
+const ICONS = [
+  { Icon: AudioLines, label: "Voice", href: "#main" },
+  { Icon: User, label: "About", href: "#about" },
+  { Icon: Network, label: "Experience", href: "#experience" },
+  { Icon: Box, label: "Work", href: "#work" },
+  { Icon: Shield, label: "Stack", href: "#stack" },
+  { Icon: Terminal, label: "Contact", href: "#contact" },
+] as const;
 
-/* Same probe as before: the scene is worth it on a desktop rail, never on a
-   phone where the rail collapses to a 56px bar. */
-let webglCapable: boolean | null = null;
+const emptySubscribe = () => () => {};
 
-function detectWebgl() {
-  if (webglCapable !== null) return webglCapable;
-  try {
-    const c = document.createElement("canvas");
-    const ok = !!(c.getContext("webgl2") || c.getContext("webgl"));
-    const saveData =
-      (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
-    const small = window.matchMedia("(max-width: 1023px)").matches;
-    webglCapable = ok && !saveData && !small;
-  } catch {
-    webglCapable = false;
-  }
-  return webglCapable;
-}
-
-const noopSubscribe = () => () => {};
-
-/** Session timer. A call that has been open for 2 minutes reads as a call. */
 function CallTimer() {
   const [secs, setSecs] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setSecs((s) => s + 1), 1000);
     return () => clearInterval(id);
   }, []);
-  const mm = String(Math.floor(secs / 60)).padStart(2, "0");
-  const ss = String(secs % 60).padStart(2, "0");
   return (
     <span className="tabular-nums" suppressHydrationWarning>
-      {mm}:{ss}
+      {String(Math.floor(secs / 60)).padStart(2, "0")}:{String(secs % 60).padStart(2, "0")}
     </span>
   );
 }
 
 /**
- * The agent as a permanent fixture rather than a destination.
- *
- * On desktop this is a full-height column: live portrait on top, line status
- * and running timer, transcript and mic below. It never scrolls away, so the
- * one thing no other portfolio has is on screen for the whole visit.
- *
- * Below lg the column would eat the viewport, so it collapses to a sticky bar
- * that opens the same conversation full-screen.
+ * Desktop = mock 2-panel console. Chat portals to document.body so fixed
+ * overlay is not trapped inside the sticky aside.
  */
 export default function AgentRail() {
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  /* createMediaElementSource is one-shot per <audio>, so the greeting cannot
-     share the conversation's node. */
-  const greetAnalyserRef = useRef<AnalyserNode | null>(null);
   const reduce = useReducedMotion();
-  const webgl = useSyncExternalStore(noopSubscribe, detectWebgl, () => false);
-
   const [open, setOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
   useEffect(() => {
     if (!open) return;
@@ -81,111 +63,179 @@ export default function AgentRail() {
     };
   }, [open]);
 
-  const analysers = [analyserRef, greetAnalyserRef];
-
   return (
     <>
-      {/* ── Desktop rail ─────────────────────────────────────────── */}
-      <div className="hidden h-screen flex-col border-r border-border bg-[var(--background-deep)] lg:flex">
-        <div className="relative h-[46%] shrink-0 overflow-hidden">
-          {webgl && !reduce ? (
-            <VoiceField analysers={analysers} className="h-full w-full" />
-          ) : (
-            <Image
-              src="/avatar-hero.jpg"
-              alt="Vaibhavkumar Yadav"
-              fill
-              priority
-              sizes="420px"
-              className="object-cover object-[50%_20%]"
-            />
-          )}
-
-          <div
+      <div className="hidden h-screen lg:flex">
+        <nav
+          aria-label="Section jump"
+          className="flex w-14 shrink-0 flex-col items-center border-r border-white/[0.06] bg-[#03050c] py-5"
+        >
+          <div className="flex flex-1 flex-col items-center gap-3.5 pt-2">
+            {ICONS.map(({ Icon, label, href }, i) => (
+              <a
+                key={label}
+                href={href}
+                aria-label={label}
+                className={`focus-ring grid h-9 w-9 place-items-center rounded-xl transition ${
+                  i === 0
+                    ? "bg-[var(--cyan)]/20 text-[var(--cyan)] shadow-[0_0_16px_oklch(0.789_0.134_205_/_0.35)]"
+                    : "text-white/40 hover:bg-white/5 hover:text-[var(--cyan)]"
+                }`}
+              >
+                <Icon className="h-4 w-4" strokeWidth={1.5} />
+              </a>
+            ))}
+          </div>
+          <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-24"
-            style={{ background: "linear-gradient(to top, var(--background-deep), transparent)" }}
-          />
+            className="mb-2 grid h-10 w-10 place-items-center rounded-full border border-[var(--cyan)]/30"
+            style={{
+              boxShadow:
+                "inset 0 0 16px oklch(0.789 0.134 205 / 0.45), 0 0 20px oklch(0.789 0.134 205 / 0.25)",
+            }}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--cyan)]" style={{ boxShadow: "0 0 8px var(--cyan)" }} />
+          </span>
+        </nav>
 
-          {/* Line status — the call metaphor, stated once and left running. */}
-          <div className="absolute inset-x-3 top-3 flex items-center gap-2 rounded-xl border border-[var(--live)]/30 bg-[var(--background-deep)]/70 px-3 py-2 backdrop-blur">
-            <span
-              className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--live)]"
-              style={{ boxShadow: "0 0 8px var(--live)" }}
-            />
-            <span className="label-xs text-[var(--live)]">Line open</span>
-            <span className="label-xs ml-auto text-muted-foreground">
-              <CallTimer />
+        <div className="relative flex w-[22rem] shrink-0 flex-col overflow-hidden border-r border-white/[0.08] bg-[#05070f] xl:w-[24rem]">
+          <div className="relative z-20 shrink-0 border-b border-white/[0.06] bg-[#05070f] px-5 pb-3 pt-5">
+            <p className="text-[0.65rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.22em] text-white/55">
+              Voice agent console
+            </p>
+            <span className="mt-2.5 flex h-4 items-end gap-[2px]" aria-hidden="true">
+              {[3, 7, 4, 11, 6, 13, 5, 10, 4, 12, 7, 9, 5].map((h, i) => (
+                <span
+                  key={i}
+                  className="agent-wave-bar w-[2px] rounded-full bg-[var(--cyan)]"
+                  style={{ height: h, animationDelay: `${i * 0.06}s` }}
+                />
+              ))}
             </span>
           </div>
 
-          <HeroGreeting
-            analyserRef={greetAnalyserRef}
-            suppressed={false}
-            className="absolute inset-x-3 bottom-3 z-10"
-          />
-        </div>
+          <div className="relative min-h-0 flex-1">
+            <Image
+              src="/profile1.jpeg"
+              alt="Vaibhavkumar Yadav"
+              fill
+              priority
+              sizes="384px"
+              className="object-cover object-[50%_18%]"
+            />
+            {/* Navy/cyan wash so outdoor photo matches console tokens */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(to bottom, oklch(0.14 0.03 250 / 0.35) 0%, transparent 28%), linear-gradient(to top, #05070f 6%, oklch(0.14 0.03 250 / 0.55) 38%, transparent 72%), radial-gradient(ellipse 90% 55% at 50% 100%, oklch(0.55 0.14 205 / 0.28), transparent 60%)",
+              }}
+            />
 
-        {/* Transcript + mic fill the rest of the column. */}
-        <div className="min-h-0 flex-1">
-          <VoiceAgent variant="rail" analyserRef={analyserRef} />
+            <div
+              className="absolute inset-x-4 top-3 z-20 flex items-center gap-2 rounded-full border border-[var(--live)]/55 bg-black/70 px-3.5 py-2 backdrop-blur-md"
+              style={{ boxShadow: "0 0 24px oklch(0.78 0.17 152 / 0.2)" }}
+            >
+              <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--live)]" style={{ boxShadow: "0 0 10px var(--live)" }} />
+              <span className="text-[0.65rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.14em] text-[var(--live)]">
+                Line open
+              </span>
+              <span className="ml-auto text-[0.65rem] font-[family-name:var(--font-mono)] text-[var(--live)]/85">
+                <CallTimer />
+              </span>
+            </div>
+          </div>
+
+          <div className="relative z-20 shrink-0 border-t border-white/[0.06] bg-[#05070f] px-5 pb-5 pt-4">
+            <dl className="space-y-2.5">
+              {[
+                ["Agent", "V. Yadav"],
+                ["Role", "Voice Architect"],
+                ["Specialty", "Genesys Cloud / Voice AI"],
+                ["Status", "Open to Genesys Cloud / voice-AI roles"],
+              ].map(([k, v]) => (
+                <div key={k} className="grid grid-cols-[5.75rem_minmax(0,1fr)] gap-x-2 text-[0.7rem] leading-snug">
+                  <dt className="font-[family-name:var(--font-mono)] uppercase tracking-[0.12em] text-white/35">
+                    {k}
+                  </dt>
+                  <dd className="text-white/90">{v}</dd>
+                </div>
+              ))}
+            </dl>
+            <button
+              type="button"
+              data-agent-entry
+              onClick={() => setOpen(true)}
+              className="focus-ring mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-[oklch(0.86_0.14_84)] to-[oklch(0.72_0.16_55)] text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[oklch(0.16_0.03_84)]"
+              style={{ boxShadow: "0 0 28px oklch(0.837 0.164 84 / 0.35)" }}
+            >
+              <Phone className="h-3.5 w-3.5" aria-hidden="true" />
+              Talk to me
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ── Mobile bar ───────────────────────────────────────────────
-          Fixed, not sticky: the rail is the first element in document flow, so
-          a sticky bar would scroll away with it instead of holding the bottom
-          of the viewport. The content column reserves space with pb-20. */}
-      <div className="glass-strong fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border px-3 py-2.5 lg:hidden">
-        <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-border">
-          <Image src="/profile.jpeg" alt="" fill sizes="40px" className="object-cover" />
+      <div className="fixed inset-x-3 bottom-3 z-40 flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-[#080b12]/95 px-3 py-2.5 shadow-[0_16px_48px_oklch(0_0_0_/_0.55)] backdrop-blur-xl lg:hidden">
+        <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-white/15">
+          <Image src="/profile1.jpeg" alt="" fill sizes="44px" className="object-cover object-[50%_18%]" />
+          <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#080b12] bg-[var(--live)]" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="label-xs flex items-center gap-1.5 text-[var(--live)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--live)]" /> Line open
-          </span>
-          <span className="block truncate text-sm text-muted-foreground">
-            Ask about my work or availability
+          <span className="block text-[0.6rem] uppercase tracking-[0.14em] text-white/40">Agent status</span>
+          <span className="mt-0.5 flex items-center gap-1.5 text-[0.7rem] font-medium text-[var(--live)]">
+            <AudioLines className="h-3 w-3" aria-hidden="true" />
+            Line open
           </span>
         </span>
         <button
           type="button"
           data-agent-entry
           onClick={() => setOpen(true)}
-          className="focus-ring label-xs min-h-11 shrink-0 rounded-xl bg-[var(--amber)] px-4 font-medium text-[oklch(0.16_0.03_84)]"
+          className="focus-ring inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-[oklch(0.86_0.14_84)] to-[oklch(0.72_0.16_55)] px-4 text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-[oklch(0.16_0.03_84)]"
+          style={{ boxShadow: "0 0 24px oklch(0.837 0.164 84 / 0.35)" }}
         >
-          ◉ Talk
+          <Phone className="h-3.5 w-3.5" aria-hidden="true" />
+          Talk to me
         </button>
       </div>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Talk to my portfolio"
-            className="fixed inset-0 z-50 lg:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: reduce ? 0.1 : 0.24 }}
-          >
-            <div className="absolute inset-0 bg-[var(--background-deep)]/[0.97] backdrop-blur-2xl" />
-            <button
-              ref={closeRef}
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close the voice agent"
-              className="focus-ring glass absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-2xl text-lg text-muted-foreground"
-            >
-              ✕
-            </button>
-            <div className="relative h-full p-4 pt-20">
-              <VoiceAgent variant="takeover" analyserRef={analyserRef} />
-            </div>
-          </motion.div>
+      {isClient &&
+        createPortal(
+          <AnimatePresence>
+            {open ? (
+              <motion.div
+                key="talk"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Talk to my portfolio"
+                className="fixed inset-0 z-[200] flex flex-col"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: reduce ? 0.1 : 0.2 }}
+              >
+                <div className="absolute inset-0 bg-[#05070f]" />
+                <button
+                  ref={closeRef}
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  aria-label="Close"
+                  className="focus-ring absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-2xl border border-white/15 bg-white/10 text-lg text-white"
+                >
+                  ✕
+                </button>
+                <div className="relative z-[1] mx-auto h-full w-full max-w-2xl p-4 pt-20">
+                  <div className="h-full overflow-hidden rounded-2xl border border-white/10 bg-[#0a0d18]">
+                    <VoiceAgent variant="takeover" />
+                  </div>
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </>
   );
 }

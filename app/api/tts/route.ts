@@ -1,15 +1,29 @@
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import { pronounce } from "@/lib/pronounce";
-import { limited, clientKey, sameOrigin } from "@/lib/server/ratelimit";
+import { limited, clientKey, sameOrigin, durableLimiting } from "@/lib/server/ratelimit";
 import { env } from "@/lib/server/env";
 
 export const runtime = "nodejs";
 export const maxDuration = 20;
 
-// Free Microsoft Edge neural voice (no key). Natural male US voice.
-const VOICE = env.ttsVoice;
+const TTS_TIMEOUT = 15_000;
+const VOICE_RE = /^[a-zA-Z]{2}-[a-zA-Z]{2}-[A-Za-z0-9]+Neural$/;
+const VOICE = VOICE_RE.test(env.ttsVoice) ? env.ttsVoice : "en-US-GuyNeural";
+
+/** Escape so user text cannot inject SSML into msedge-tts templates. */
+function escapeXml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
 
 export async function POST(req: Request) {
+  if (env.isProduction && !durableLimiting)
+    return new Response("TTS unavailable", { status: 503 });
+
   if (!sameOrigin(req)) return new Response("Forbidden", { status: 403 });
   if (await limited(`tts:${clientKey(req)}`, 60, 60_000))
     return new Response("Too many requests", { status: 429 });
@@ -26,55 +40,61 @@ export async function POST(req: Request) {
   text = String(text || "").slice(0, 800).trim();
   if (!text) return new Response("Empty", { status: 400 });
 
+  const safeText = escapeXml(pronounce(text));
+
   try {
-    const tts = new MsEdgeTTS();
-    await tts.setMetadata(
-      VOICE,
-      OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3,
-      // Word boundaries are what let a caption highlight the word actually
-      // being spoken. Requested only when the caller will use them, since
-      // enabling them makes the service emit a second stream.
-      wantMarks ? { wordBoundaryEnabled: true, sentenceBoundaryEnabled: false } : undefined,
-    );
-    const { audioStream, metadataStream } = tts.toStream(pronounce(text));
+    const work = (async () => {
+      const tts = new MsEdgeTTS();
+      await tts.setMetadata(
+        VOICE,
+        OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3,
+        wantMarks ? { wordBoundaryEnabled: true, sentenceBoundaryEnabled: false } : undefined,
+      );
+      const { audioStream, metadataStream } = tts.toStream(safeText);
 
-    const chunks: Buffer[] = [];
-    const marks: { t: number; word: string }[] = [];
+      const chunks: Buffer[] = [];
+      const marks: { t: number; word: string }[] = [];
 
-    const audioDone = new Promise<void>((resolve, reject) => {
-      audioStream.on("data", (c: Buffer) => chunks.push(c));
-      audioStream.on("end", resolve);
-      audioStream.on("close", resolve);
-      audioStream.on("error", reject);
-    });
+      const audioDone = new Promise<void>((resolve, reject) => {
+        audioStream.on("data", (c: Buffer) => chunks.push(c));
+        audioStream.on("end", resolve);
+        audioStream.on("close", resolve);
+        audioStream.on("error", reject);
+      });
 
-    const marksDone =
-      wantMarks && metadataStream
-        ? new Promise<void>((resolve) => {
-            metadataStream.on("data", (c: Buffer) => {
-              // Each chunk is a JSON envelope of boundary events. Offsets are
-              // in 100-nanosecond ticks; the client wants seconds.
-              try {
-                const parsed = JSON.parse(c.toString());
-                for (const m of parsed?.Metadata ?? []) {
-                  if (m?.Type !== "WordBoundary") continue;
-                  marks.push({
-                    t: (m.Data?.Offset ?? 0) / 10_000_000,
-                    word: String(m.Data?.text?.Text ?? ""),
-                  });
+      const marksDone =
+        wantMarks && metadataStream
+          ? new Promise<void>((resolve) => {
+              metadataStream.on("data", (c: Buffer) => {
+                try {
+                  const parsed = JSON.parse(c.toString());
+                  for (const m of parsed?.Metadata ?? []) {
+                    if (m?.Type !== "WordBoundary") continue;
+                    marks.push({
+                      t: (m.Data?.Offset ?? 0) / 10_000_000,
+                      word: String(m.Data?.text?.Text ?? ""),
+                    });
+                  }
+                } catch {
+                  /* ignore malformed envelopes */
                 }
-              } catch {
-                /* a malformed envelope costs sync, never the audio */
-              }
-            });
-            metadataStream.on("end", resolve);
-            metadataStream.on("close", resolve);
-            metadataStream.on("error", () => resolve());
-          })
-        : Promise.resolve();
+              });
+              metadataStream.on("end", resolve);
+              metadataStream.on("close", resolve);
+              metadataStream.on("error", () => resolve());
+            })
+          : Promise.resolve();
 
-    await Promise.all([audioDone, marksDone]);
-    const audio = Buffer.concat(chunks);
+      await Promise.all([audioDone, marksDone]);
+      return { audio: Buffer.concat(chunks), marks };
+    })();
+
+    const { audio, marks } = await Promise.race([
+      work,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("TTS timeout")), TTS_TIMEOUT),
+      ),
+    ]);
 
     if (wantMarks) {
       return Response.json(

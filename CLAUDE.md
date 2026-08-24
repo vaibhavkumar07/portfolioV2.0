@@ -30,11 +30,10 @@ app/
   api/track/route.ts     counter increments (no PII)
   api/stats/route.ts     counter read-back for the Dashboard
 components/
-  agent/                 AgentRail (desktop rail + mobile takeover), VoiceAgent, HeroGreeting
-  three/                 VoiceField (audio-reactive WebGL portrait), shaders
-  sections/              SiteNav, HeroCopy, TrustPanel, Experience
-  modes/                 ModeProvider, ModeSwitch, Dashboard (recharts), Playground (@xyflow/react)
-  fx/                    Backdrop, Reveal, SplitText, CountUp, Magnetic, SmoothScroll, TrackVisit
+  agent/                 AgentRail (desktop rail + mobile), VoiceAgent
+  sections/              SiteNav, HeroCopy, TrustPanel, Experience, WorkRail, …
+  modes/                 ModeProvider, ModeSwitch, Dashboard, Playground
+  fx/                    Backdrop, Reveal, SplitText, CountUp, Magnetic, SmoothScroll, TrackVisit, …
 lib/
   server/env.ts          typed server-only env access — the ONLY place reading process.env
   server/ratelimit.ts    Upstash Redis or in-memory rate limiting, same-origin guard

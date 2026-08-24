@@ -1,6 +1,5 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import Link from "next/link";
 import Image from "next/image";
 import ModeSwitch from "@/components/modes/ModeSwitch";
 import ModeProvider from "@/components/modes/ModeProvider";
@@ -11,11 +10,13 @@ import TrustPanel from "@/components/sections/TrustPanel";
 import Experience from "@/components/sections/Experience";
 import AgentRail from "@/components/agent/AgentRail";
 import HeroCopy from "@/components/sections/HeroCopy";
+import WorkRail from "@/components/sections/WorkRail";
+import FaqList from "@/components/sections/FaqList";
+import AnimatedBar from "@/components/fx/AnimatedBar";
 import { PROFILE, HIGHLIGHTS, VENDOR_CREDENTIALS } from "@/lib/data/kb";
 import { FAQ } from "@/lib/data/faq";
 import { projects } from "@/lib/data/projects";
 import { skills } from "@/lib/data/skills";
-import { slug } from "@/lib/slug";
 
 const SITE = "https://vaibhavkumarcx.dev";
 
@@ -100,101 +101,33 @@ const hasResume = existsSync(join(process.cwd(), "public", RESUME_FILE));
 
 export default function Home() {
   return (
-    <div className="relative lg:grid lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] xl:lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
+    <div className="relative lg:flex">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
-      {/* The agent is a fixture, not a destination: it holds the left column for
-          the whole visit and never scrolls away. Below lg it becomes the sticky
-          bar at the bottom of the viewport. */}
+      {/* Mock console: icon rail + portrait panel (self-sizing) */}
       <aside className="lg:sticky lg:top-0 lg:h-screen lg:self-start">
         <AgentRail />
       </aside>
 
-      {/* pb-20 clears the fixed mobile agent bar so the footer stays reachable. */}
-      <div className="min-w-0 pb-20 lg:pb-0">
+      {/* Main content frame */}
+      <div className="min-w-0 flex-1 border-white/[0.04] pb-24 lg:border-l lg:pb-0">
       <ModeProvider>
       <SiteNav email={PROFILE.email} />
 
       <main id="main">
-      {/* The hero lives inside ModeSwitch so choosing Dashboard or Playground
-          actually replaces the view, rather than leaving the home hero on top
-          of it. */}
       <ModeSwitch>
       <HeroCopy resumeHref={hasResume ? `/${RESUME_FILE}` : undefined} />
 
       <Reveal><TrustPanel /></Reveal>
 
-      {/* Work */}
-      {/* Work — a rail you drag through, not a grid you scan. Cards are tall
-          and near-full-height so each project gets the screen to itself on
-          mobile, and the row runs past the right edge to signal more. */}
       <Section id="work" num="01" title="Selected work" hint="case studies" bleed>
-        {/* Padding matches the max-w-6xl container's gutter so the first card
-            lines up with the section heading, while the row still runs to the
-            true viewport edge on the right.
-
-            scroll-padding has to repeat the value: scroll-snap-align aligns to
-            the scrollport edge, not the padding edge, so without it the snap
-            engine scrolls the gutter away and the first card sits flush left. */}
-        <div
-          className="rail gap-4 pb-4 sm:gap-5"
-          style={{
-            paddingInline: "max(1.25rem, calc((100vw - 72rem) / 2 + 2rem))",
-            scrollPaddingInline: "max(1.25rem, calc((100vw - 72rem) / 2 + 2rem))",
-          }}
-        >
-          {projects.map((p, i) => (
-            <Link
-              key={p.id}
-              href={`/work/${slug(p.title)}`}
-              className="focus-ring group relative flex h-[24rem] w-[min(85vw,26rem)] flex-col justify-between overflow-hidden rounded-[1.75rem] border border-border p-6 transition-colors duration-300 hover:border-[var(--cyan)]/60 sm:h-[27rem] sm:p-7"
-              style={{
-                background:
-                  "linear-gradient(160deg, color-mix(in oklch, var(--card) 62%, transparent), color-mix(in oklch, var(--void) 88%, transparent))",
-              }}
-            >
-              {/* Oversized index — the second type voice, and the thing that
-                  makes the rail read as a sequence. */}
-              <span
-                aria-hidden="true"
-                className="t-mega t-outline pointer-events-none absolute -right-2 -top-6 leading-none opacity-25 transition-opacity duration-500 group-hover:opacity-60"
-              >
-                {String(i + 1).padStart(2, "0")}
-              </span>
-
-              <span className="label-xs relative text-[var(--violet)]">{p.category}</span>
-
-              <span className="relative">
-                <h3 className="t-title max-w-[14ch]">{p.title}</h3>
-                <p className="mt-4 line-clamp-4 max-w-[42ch] text-sm leading-relaxed text-muted-foreground">
-                  {p.description}
-                </p>
-                <span className="label-xs mt-6 inline-flex items-center gap-2 text-[var(--cyan)]">
-                  Open case study
-                  <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-                </span>
-              </span>
-            </Link>
-          ))}
-
-          {/* Trailing spacer so the last card can snap clear of the edge. */}
-          <span aria-hidden="true" className="w-1 shrink-0" />
-        </div>
-        <p
-          className="label-xs mt-5 text-muted-foreground"
-          style={{ paddingInline: "max(1.25rem, calc((100vw - 72rem) / 2 + 2rem))" }}
-        >
-          Drag or scroll sideways — {projects.length} case studies
-        </p>
+        <WorkRail projects={projects} />
       </Section>
 
-      {/* Experience — the career history the page never showed; the agent knew
-          it (kb.ts EXPERIENCE) but a recruiter scanning the page did not. */}
-      <Section id="experience" num="02" title="Experience" hint="call history" surface="paper">
+      <Section id="experience" num="02" title="Experience" hint="call history">
         <Experience />
       </Section>
 
-      {/* About */}
       <Section id="about" num="03" title="About" hint="caller profile">
         <div className="grid gap-6 md:grid-cols-[1fr_0.8fr] md:gap-8">
           <ul className="space-y-3">
@@ -263,19 +196,7 @@ export default function Home() {
                         <div className="flex items-baseline justify-between gap-2">
                           <span className="text-sm text-foreground/90">{s.name}</span>
                         </div>
-                        <div
-                          className="mt-1.5 h-1 overflow-hidden rounded-full bg-secondary"
-                          role="img"
-                          aria-label={`${s.name}: ${s.level} out of 100`}
-                        >
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${s.level}%`,
-                              background: "linear-gradient(90deg, var(--cyan), var(--violet))",
-                            }}
-                          />
-                        </div>
+                        <AnimatedBar level={s.level} label={s.name} />
                       </li>
                     ))}
                 </ul>
@@ -287,22 +208,10 @@ export default function Home() {
 
       {/* FAQ — visible twin of the FAQPage JSON-LD (answer engines quote this) */}
       <Section id="faq" num="05" title="Quick answers" hint="frequently asked">
-        <div className="space-y-2">
-          {FAQ.map((f) => (
-            <details key={f.q} className="glass group rounded-2xl px-5 py-4">
-              <summary className="focus-ring cursor-pointer list-none rounded-lg text-sm font-medium text-foreground/90 transition hover:text-foreground [&::-webkit-details-marker]:hidden">
-                <span className="mr-2 inline-block text-[var(--cyan)] transition-transform group-open:rotate-90">›</span>
-                {f.q}
-              </summary>
-              <p className="mt-3 pl-5 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
-            </details>
-          ))}
-        </div>
+        <FaqList items={FAQ} />
       </Section>
 
       {/* Contact */}
-      {/* Contact on the void surface — the page ends darker than it started,
-          and the address is set at display scale instead of hiding in a pill. */}
       <Section id="contact" num="06" title="Transfer the call" hint="press 9 to connect" surface="void">
         <Reveal>
           <p className="t-lead max-w-lg text-muted-foreground">
@@ -314,8 +223,6 @@ export default function Home() {
               href={`mailto:${PROFILE.email}`}
               className="focus-ring group mt-10 block w-fit max-w-full"
             >
-              {/* Sized to its own length rather than the shared display step:
-                  a 29-character address at --text-display runs off the page. */}
               <span
                 className="block break-words font-[family-name:var(--font-heading)] font-semibold leading-[0.95] tracking-[-0.03em] text-foreground transition-colors duration-300 group-hover:text-[var(--amber)]"
                 style={{ fontSize: "clamp(1.35rem, 5vw, 4rem)" }}

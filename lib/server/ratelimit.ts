@@ -2,14 +2,6 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { env } from "@/lib/server/env";
 
-/**
- * Durable rate limiting via Upstash Redis (sliding window, global across
- * serverless instances) when UPSTASH_REDIS_REST_URL + _TOKEN are set.
- * Falls back to a best-effort in-memory limiter otherwise (local dev / no
- * Upstash) so the routes always work.
- */
-
-// ── In-memory fallback ──
 const buckets = new Map<string, { n: number; t: number }>();
 function memLimited(key: string, limit: number, windowMs: number): boolean {
   const now = Date.now();
@@ -25,7 +17,6 @@ function memLimited(key: string, limit: number, windowMs: number): boolean {
   return rec.n > limit;
 }
 
-// ── Upstash (cached per limit/window config) ──
 const limiters = new Map<string, Ratelimit>();
 function getUpstash(limit: number, windowSec: number): Ratelimit | null {
   const url = env.upstashUrl;
@@ -45,14 +36,7 @@ function getUpstash(limit: number, windowSec: number): Ratelimit | null {
   return rl;
 }
 
-/**
- * True when a durable, cross-instance limiter is available.
- *
- * The in-memory fallback is per serverless instance, so under scale-out the
- * real ceiling is `limit × instance count` — unbounded in practice. Routes
- * that spend money upstream check this and fail closed in production rather
- * than pretending they are rate limited.
- */
+/** True when Upstash env is configured (cross-instance limiter available). */
 export const durableLimiting = Boolean(env.upstashUrl && env.upstashToken);
 
 /** Returns true if the key is OVER the limit (should be blocked). */
@@ -63,19 +47,16 @@ export async function limited(key: string, limit: number, windowMs: number): Pro
       const r = await rl.limit(key);
       return !r.success;
     } catch {
-      // Upstash unreachable → don't fail open silently; use memory fallback.
+      // Redis down in production → fail closed (treat as limited).
+      if (env.isProduction) return true;
     }
   }
   return memLimited(key, limit, windowMs);
 }
 
 /**
- * Identify the caller for rate-limiting purposes.
- *
- * Order matters: `x-forwarded-for` is client-supplied and only meaningful
- * after a trusted proxy rewrites it, so it comes last. Leading with it let a
- * caller rotate the header per request and mint an unlimited quota — the
- * limiter counts distinct strings, not distinct clients.
+ * Prefer platform-set client IP. x-forwarded-for is last (spoofable).
+ * On Vercel, x-vercel-forwarded-for is authoritative.
  */
 export function clientKey(req: Request): string {
   return (
@@ -87,19 +68,19 @@ export function clientKey(req: Request): string {
 }
 
 /**
- * Reject cross-site and non-browser POSTs (CSRF / off-site abuse).
- *
- * Fails closed on a missing Origin. Per the Fetch spec browsers set Origin on
- * every non-GET/HEAD request — including same-origin `fetch()` and
- * `navigator.sendBeacon` — so nothing legitimate is turned away, while
- * `curl` with no Origin (the cheapest way to burn the upstream key) is.
+ * Reject cross-site and non-browser POSTs.
+ * Fails closed on missing Origin. When Sec-Fetch-Site is present, require
+ * same-origin (or none) so a forged Origin alone is not enough.
  */
 export function sameOrigin(req: Request): boolean {
   const origin = req.headers.get("origin");
   if (!origin) return false;
   try {
-    return new URL(origin).host === req.headers.get("host");
+    if (new URL(origin).host !== req.headers.get("host")) return false;
   } catch {
     return false;
   }
+  const site = req.headers.get("sec-fetch-site");
+  if (site && site !== "same-origin" && site !== "none") return false;
+  return true;
 }

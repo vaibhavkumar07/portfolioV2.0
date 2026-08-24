@@ -23,10 +23,7 @@ const csp = [
   "font-src 'self' https://cdn.fontshare.com data:",
   "img-src 'self' data: blob:",
   "media-src 'self' blob: data:",
-  // blob: is required by three.js — ImageBitmapLoader fetch()es page-created
-  // blob: URLs when decoding textures. Same-origin data the page already
-  // holds; no external destination is opened. Shaders are inline GLSL strings
-  // compiled by the GPU driver, not JS eval, so script-src is unaffected.
+  // blob: for TTS audio object URLs and image decode paths.
   "connect-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",

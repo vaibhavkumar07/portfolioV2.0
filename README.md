@@ -28,7 +28,7 @@ voice.
 ## Stack
 
 Next.js 16 (App Router, Turbopack) · React 19 · TypeScript (strict) ·
-Tailwind CSS 4 · framer-motion · three.js / @react-three/fiber · recharts ·
+Tailwind CSS 4 · framer-motion · recharts ·
 @xyflow/react · lenis.
 
 **Agent** — `meta/llama-3.1-8b-instruct` via NVIDIA NIM (chat) · free Microsoft
@@ -52,11 +52,10 @@ app/
   api/stats/route.ts      counter read-back for the Dashboard
 
 components/
-  agent/       AgentRail (desktop rail + mobile takeover), VoiceAgent, HeroGreeting
-  three/       VoiceField (audio-reactive WebGL portrait), shaders
-  sections/    SiteNav, HeroCopy, TrustPanel, Experience
+  agent/       AgentRail (desktop rail + mobile), VoiceAgent
+  sections/    SiteNav, HeroCopy, TrustPanel, Experience, WorkRail, …
   modes/       ModeProvider, ModeSwitch, Dashboard, Playground
-  fx/          Backdrop, Reveal, SplitText, CountUp, Magnetic, SmoothScroll, TrackVisit
+  fx/          Backdrop, Reveal, SplitText, CountUp, Magnetic, SmoothScroll, TrackVisit, …
 
 lib/
   data/        kb (agent knowledge base), projects, skills, work, faq, types

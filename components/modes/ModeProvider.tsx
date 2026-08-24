@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { track } from "@/lib/track";
 
 export type Mode = "home" | "dashboard" | "playground";
@@ -22,31 +23,25 @@ type Ctx = {
 
 const ModeCtx = createContext<Ctx | null>(null);
 
-/**
- * Falls back to plain navigation when there's no provider, so the shared nav
- * can also be used on case-study pages (which have no modes of their own).
- */
+/** Falls back to router navigation when used outside ModeProvider (case studies). */
 export function useMode(): Ctx {
   const ctx = useContext(ModeCtx);
+  const router = useRouter();
   if (ctx) return ctx;
   return {
     mode: "home",
     select: (m) => {
-      window.location.href = m === "home" ? "/" : `/?view=${m}`;
+      router.push(m === "home" ? "/" : `/?view=${m}`);
     },
     goToSection: (id) => {
-      window.location.href = `/#${id}`;
+      router.push(`/#${id}`);
     },
   };
 }
 
 /**
- * Owns which view is showing so BOTH the site nav and the mode bar can drive
- * it. Previously the mode bar held this state privately and sat below the
- * hero, which made Dashboard and Playground effectively undiscoverable.
- *
- * State lives in `?view=` (no localStorage) so a fresh visit always lands on
- * HOME and section anchors always resolve.
+ * Owns which view is showing so the site nav and mode bar share one source of
+ * truth. State lives in `?view=` (no localStorage) so a fresh visit lands on HOME.
  */
 export default function ModeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<Mode>("home");
