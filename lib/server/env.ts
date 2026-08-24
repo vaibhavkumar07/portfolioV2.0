@@ -23,4 +23,10 @@ export const env = {
 
   /** Kept here so no other module has to reach for process.env. */
   isProduction: process.env.NODE_ENV === "production",
+
+  /**
+   * Google Search Console HTML-tag token. Empty in dev; set in Vercel after
+   * the property is added. Rendered only as a meta verification tag.
+   */
+  googleSiteVerification: process.env.GOOGLE_SITE_VERIFICATION ?? "",
 } as const;

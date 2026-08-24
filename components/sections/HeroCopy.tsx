@@ -41,6 +41,10 @@ export default function HeroCopy({ resumeHref }: { resumeHref?: string }) {
         <Sparkles className="h-3 w-3 opacity-70" aria-hidden="true" />
       </p>
 
+      <p className="relative mb-4 font-[family-name:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.16em] text-white/55">
+        {PROFILE.name} · Genesys Cloud IVR · Richardson, TX (DFW)
+      </p>
+
       <h1 className="relative max-w-[16ch] font-[family-name:var(--font-heading)] text-[clamp(2.6rem,7.5vw,5.5rem)] font-semibold leading-[0.92] tracking-[-0.04em] text-white">
         <SplitText text="I build the voice" />
         <br />

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE } from "@/lib/site";
 
 /**
  * Everyone welcome — including AI/answer-engine crawlers, listed explicitly so
@@ -23,6 +24,6 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "*", allow: "/", disallow: "/api/" },
       ...AI_CRAWLERS.map((userAgent) => ({ userAgent, allow: "/" as const, disallow: "/api/" })),
     ],
-    sitemap: "https://vaibhavkumarcx.dev/sitemap.xml",
+    sitemap: `${SITE}/sitemap.xml`,
   };
 }

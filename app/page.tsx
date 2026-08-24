@@ -17,8 +17,7 @@ import { PROFILE, HIGHLIGHTS, VENDOR_CREDENTIALS } from "@/lib/data/kb";
 import { FAQ } from "@/lib/data/faq";
 import { projects } from "@/lib/data/projects";
 import { skills } from "@/lib/data/skills";
-
-const SITE = "https://vaibhavkumarcx.dev";
+import { OG_IMAGE, SITE } from "@/lib/site";
 
 // Entity graph for search + answer engines (Google AI Overviews, ChatGPT,
 // Perplexity): Person with geo anchoring, WebSite, ProfilePage with speakable
@@ -33,6 +32,7 @@ const jsonLd = {
       jobTitle: PROFILE.title,
       email: `mailto:${PROFILE.email}`,
       url: SITE,
+      image: `${SITE}${OG_IMAGE}`,
       sameAs: [PROFILE.linkedin],
       address: { "@type": "PostalAddress", addressLocality: "Richardson", addressRegion: "TX", addressCountry: "US" },
       homeLocation: {

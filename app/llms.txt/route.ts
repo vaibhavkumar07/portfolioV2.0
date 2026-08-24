@@ -3,8 +3,7 @@ import { FAQ } from "@/lib/data/faq";
 import { projects } from "@/lib/data/projects";
 import { skills } from "@/lib/data/skills";
 import { caseStudies } from "@/lib/data/work";
-
-const SITE = "https://vaibhavkumarcx.dev";
+import { SITE } from "@/lib/site";
 
 /**
  * /llms.txt — the emerging convention for describing a site to LLM crawlers

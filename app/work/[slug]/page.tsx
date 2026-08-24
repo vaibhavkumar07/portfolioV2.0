@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { caseStudies, getCaseStudy } from "@/lib/data/work";
 import { PROFILE } from "@/lib/data/kb";
 import SiteNav from "@/components/sections/SiteNav";
+import { OG_IMAGE, SITE } from "@/lib/site";
 
 export function generateStaticParams() {
   return caseStudies.map((c) => ({ slug: c.slug }));
@@ -17,10 +18,18 @@ export async function generateMetadata({
   const { slug } = await params;
   const c = getCaseStudy(slug);
   if (!c) return {};
+  const title = `${c.title} | Genesys Cloud IVR | ${PROFILE.name}`;
   return {
-    title: c.title,
+    title: { absolute: title },
     description: c.summary,
-    openGraph: { title: c.title, description: c.summary, type: "article" },
+    openGraph: {
+      title,
+      description: c.summary,
+      type: "article",
+      url: `${SITE}/work/${c.slug}`,
+      images: [{ url: OG_IMAGE, alt: PROFILE.name }],
+    },
+    twitter: { card: "summary_large_image", title, description: c.summary, images: [OG_IMAGE] },
     alternates: { canonical: `/work/${c.slug}` },
   };
 }
@@ -34,7 +43,6 @@ export default async function CaseStudyPage({
   const c = getCaseStudy(slug);
   if (!c) notFound();
 
-  const SITE = "https://vaibhavkumarcx.dev";
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -45,6 +53,8 @@ export default async function CaseStudyPage({
         author: { "@type": "Person", name: PROFILE.name, jobTitle: PROFILE.title, url: SITE, "@id": `${SITE}/#person` },
         description: c.summary,
         keywords: c.stack.join(", "),
+        image: `${SITE}${OG_IMAGE}`,
+        url: `${SITE}/work/${c.slug}`,
         mainEntityOfPage: `${SITE}/work/${c.slug}`,
         inLanguage: "en-US",
       },

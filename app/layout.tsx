@@ -6,6 +6,8 @@ import Backdrop from "@/components/fx/Backdrop";
 import ScrollProgress from "@/components/fx/ScrollProgress";
 import TrackVisit from "@/components/fx/TrackVisit";
 import SmoothScroll from "@/components/fx/SmoothScroll";
+import { env } from "@/lib/server/env";
+import { HOME_DESCRIPTION, HOME_TITLE, OG_IMAGE, SITE } from "@/lib/site";
 import "./globals.css";
 
 const mono = JetBrains_Mono({
@@ -14,26 +16,24 @@ const mono = JetBrains_Mono({
   weight: ["400", "500", "700"],
 });
 
-const SITE = "https://vaibhavkumarcx.dev";
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "Vaibhavkumar Yadav — Genesys IVR & Voice-AI Developer",
+    default: HOME_TITLE,
     template: "%s · Vaibhavkumar Yadav",
   },
-  description:
-    "Genesys Cloud IVR developer and contact-center voice-AI engineer. 8+ years building enterprise IVR, bot flows, and AI-assisted CX for healthcare, automotive, and e-commerce. Talk to my portfolio.",
+  description: HOME_DESCRIPTION,
   keywords: [
+    "Vaibhavkumar Yadav",
     "Genesys Cloud", "IVR developer", "contact center", "voice AI",
     "Genesys Architect", "AI Studio", "Dialogflow", "conversational AI",
-    "Vaibhavkumar Yadav", "CX engineer",
-    // Geo targeting: DFW metro + national reach
+    "CX engineer",
     "Genesys developer Dallas", "IVR developer Texas", "Genesys Cloud consultant USA",
     "contact center engineer Richardson TX", "voice AI engineer Dallas Fort Worth",
     "remote Genesys Cloud developer",
   ],
-  authors: [{ name: "Vaibhavkumar Yadav" }],
+  authors: [{ name: "Vaibhavkumar Yadav", url: SITE }],
+  alternates: { canonical: "/" },
   // Classic geo meta tags — still read by local/AI crawlers.
   other: {
     "geo.region": "US-TX",
@@ -44,17 +44,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: SITE,
-    title: "Vaibhavkumar Yadav — Genesys IVR & Voice-AI Developer",
-    description:
-      "Talk to my portfolio — a live voice agent built on the same stack I ship for enterprise contact centers.",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
     siteName: "Vaibhavkumar Yadav",
+    locale: "en_US",
+    images: [{ url: OG_IMAGE, alt: "Vaibhavkumar Yadav" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vaibhavkumar Yadav — Genesys IVR & Voice-AI Developer",
-    description: "Talk to my portfolio — a live contact-center voice agent.",
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    images: [OG_IMAGE],
   },
   robots: { index: true, follow: true },
+  ...(env.googleSiteVerification
+    ? { verification: { google: env.googleSiteVerification } }
+    : {}),
 };
 
 export default function RootLayout({
