@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -13,7 +14,27 @@ import {
   Terminal,
   User,
 } from "lucide-react";
-import VoiceAgent from "@/components/agent/VoiceAgent";
+
+const VoiceAgent = dynamic(() => import("@/components/agent/VoiceAgent"), {
+  ssr: false,
+  loading: () => <ChatSkeleton />,
+});
+
+function ChatSkeleton() {
+  return (
+    <div className="flex h-full flex-col" aria-busy="true" aria-label="Opening chat">
+      <div className="border-b border-white/10 px-4 py-3">
+        <span className="text-[0.65rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.14em] text-white/45">
+          Opening the line…
+        </span>
+      </div>
+      <div className="flex-1 space-y-3 p-4">
+        <div className="h-16 animate-pulse rounded-lg bg-white/5 motion-reduce:animate-none" />
+        <div className="h-10 w-2/3 animate-pulse rounded-lg bg-white/5 motion-reduce:animate-none" />
+      </div>
+    </div>
+  );
+}
 
 const ICONS = [
   { Icon: AudioLines, label: "Voice", href: "#main" },
@@ -48,6 +69,12 @@ export default function AgentRail() {
   const [open, setOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
   const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
+
+  useEffect(() => {
+    void import("@/components/agent/VoiceAgent");
+  }, []);
+
+  const openChat = () => setOpen(true);
 
   useEffect(() => {
     if (!open) return;
@@ -119,7 +146,6 @@ export default function AgentRail() {
               src="/profile1.jpeg"
               alt="Vaibhavkumar Yadav"
               fill
-              priority
               sizes="384px"
               className="object-cover object-[50%_18%]"
             />
@@ -166,7 +192,10 @@ export default function AgentRail() {
             <button
               type="button"
               data-agent-entry
-              onClick={() => setOpen(true)}
+              onPointerDown={() => {
+                void import("@/components/agent/VoiceAgent");
+              }}
+              onClick={openChat}
               className="focus-ring mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-[oklch(0.86_0.14_84)] to-[oklch(0.72_0.16_55)] text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[oklch(0.16_0.03_84)]"
               style={{ boxShadow: "0 0 28px oklch(0.837 0.164 84 / 0.35)" }}
             >
@@ -177,12 +206,12 @@ export default function AgentRail() {
         </div>
       </div>
 
-      <div className="fixed inset-x-3 bottom-3 z-40 flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-[#080b12]/95 px-3 py-2.5 shadow-[0_16px_48px_oklch(0_0_0_/_0.55)] backdrop-blur-xl lg:hidden">
+      <div className="fixed inset-x-3 z-40 flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-[#080b12]/95 px-3 py-2.5 shadow-[0_16px_48px_oklch(0_0_0_/_0.55)] backdrop-blur-xl lg:hidden bottom-[max(0.75rem,env(safe-area-inset-bottom))]">
         <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-white/15">
           <Image src="/profile1.jpeg" alt="" fill sizes="44px" className="object-cover object-[50%_18%]" />
           <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#080b12] bg-[var(--live)]" />
         </span>
-        <span className="min-w-0 flex-1">
+        <span className="hidden min-w-0 flex-1 min-[360px]:block">
           <span className="block text-[0.6rem] uppercase tracking-[0.14em] text-white/40">Agent status</span>
           <span className="mt-0.5 flex items-center gap-1.5 text-[0.7rem] font-medium text-[var(--live)]">
             <AudioLines className="h-3 w-3" aria-hidden="true" />
@@ -192,8 +221,11 @@ export default function AgentRail() {
         <button
           type="button"
           data-agent-entry
-          onClick={() => setOpen(true)}
-          className="focus-ring inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-[oklch(0.86_0.14_84)] to-[oklch(0.72_0.16_55)] px-4 text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-[oklch(0.16_0.03_84)]"
+          onPointerDown={() => {
+            void import("@/components/agent/VoiceAgent");
+          }}
+          onClick={openChat}
+          className="focus-ring inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-br from-[oklch(0.86_0.14_84)] to-[oklch(0.72_0.16_55)] px-3 text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-[oklch(0.16_0.03_84)] min-[400px]:px-4 min-[400px]:text-[0.7rem] min-[400px]:tracking-[0.1em]"
           style={{ boxShadow: "0 0 24px oklch(0.837 0.164 84 / 0.35)" }}
         >
           <Phone className="h-3.5 w-3.5" aria-hidden="true" />
@@ -214,7 +246,7 @@ export default function AgentRail() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: reduce ? 0.1 : 0.2 }}
+                transition={{ duration: reduce ? 0.08 : 0.12 }}
               >
                 <div className="absolute inset-0 bg-[#05070f]" />
                 <button

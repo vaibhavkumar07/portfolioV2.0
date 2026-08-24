@@ -6,13 +6,11 @@ import {
   Download,
   ExternalLink,
   FileBadge,
-  Headset,
   Layers,
   Mail,
   MapPin,
   ShieldCheck,
   Sparkles,
-  Zap,
 } from "lucide-react";
 import SplitText from "@/components/fx/SplitText";
 import CountUp from "@/components/fx/CountUp";
@@ -42,11 +40,11 @@ export default function HeroCopy({ resumeHref }: { resumeHref?: string }) {
         <Sparkles className="h-3 w-3 opacity-70" aria-hidden="true" />
       </p>
 
-      <p className="relative mb-4 font-[family-name:var(--font-mono)] text-[0.7rem] uppercase tracking-[0.16em] text-white/55">
+      <p className="relative mb-4 max-w-full font-[family-name:var(--font-mono)] text-[0.62rem] uppercase leading-relaxed tracking-[0.1em] text-white/55 sm:text-[0.7rem] sm:tracking-[0.16em]">
         {PROFILE.name} · Genesys Cloud IVR · Richardson, TX (DFW)
       </p>
 
-      <h1 className="relative max-w-[18ch] font-[family-name:var(--font-heading)] text-[clamp(2.6rem,7.5vw,5.5rem)] font-semibold leading-[0.92] tracking-[-0.04em] text-white">
+      <h1 className="relative max-w-[22ch] pl-[0.12em] -ml-[0.12em] font-[family-name:var(--font-heading)] text-[clamp(2.05rem,7.6vw,5.5rem)] font-semibold leading-[1.02] tracking-[-0.02em] text-white sm:max-w-[18ch] sm:leading-[0.92] sm:tracking-[-0.04em]">
         <SplitText text="I build the voice" />
         <br />
         <SplitText text="behind the " delay={0.12} />
@@ -113,8 +111,8 @@ export default function HeroCopy({ resumeHref }: { resumeHref?: string }) {
         ))}
       </div>
 
-      {/* Stats — desktop 4-up (mock), mobile 3-up real facts */}
-      <div className="relative mt-4 hidden grid-cols-4 gap-3 lg:grid">
+      {/* Stats — 2×2 on phones (includes patent), 4-up from lg */}
+      <div className="relative mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           { n: "8+", l: "Years experience", d: "Voice & contact-center technology", Icon: Sparkles, c: "var(--cyan)" },
           { n: "12", l: "Certifications", d: "Genesys, Infosys CX suite & AI", Icon: Award, c: "var(--violet)" },
@@ -123,34 +121,17 @@ export default function HeroCopy({ resumeHref }: { resumeHref?: string }) {
         ].map(({ n, l, d, Icon, c }) => (
           <div
             key={l}
-            className="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
+            className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5"
             style={{ boxShadow: `inset 0 0 0 1px color-mix(in oklch, ${c} 18%, transparent)` }}
           >
             <Icon className="mb-3 h-4 w-4" style={{ color: c }} aria-hidden="true" />
             <div style={{ color: c }}>
-              <CountUp value={n} className="block font-[family-name:var(--font-heading)] text-[2.4rem] font-semibold leading-none tracking-tight" />
+              <CountUp value={n} className="block font-[family-name:var(--font-heading)] text-[1.85rem] font-semibold leading-none tracking-tight sm:text-[2.4rem]" />
             </div>
-            <p className="mt-2 text-[0.65rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.14em] text-white/80">
+            <p className="mt-2 text-[0.58rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.12em] text-white/80 sm:text-[0.65rem] sm:tracking-[0.14em]">
               {l}
             </p>
-            <p className="mt-1 text-[0.7rem] leading-snug text-white/40">{d}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Mobile stats strip — real numbers, mock 3-col layout */}
-      <div className="relative mt-8 grid grid-cols-3 divide-x divide-white/10 border-y border-white/10 lg:hidden">
-        {[
-          { n: "8+", l: "Years", Icon: Headset },
-          { n: "12", l: "Certs", Icon: Zap },
-          { n: "5", l: "Builds", Icon: Layers },
-        ].map(({ n, l, Icon }) => (
-          <div key={l} className="px-2 py-5 text-center">
-            <Icon className="mx-auto mb-2 h-4 w-4 text-[var(--cyan)]" aria-hidden="true" />
-            <CountUp value={n} className="block font-[family-name:var(--font-heading)] text-2xl font-semibold text-white" />
-            <p className="mt-1 text-[0.55rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.14em] text-white/45">
-              {l}
-            </p>
+            <p className="mt-1 text-[0.65rem] leading-snug text-white/40 sm:text-[0.7rem]">{d}</p>
           </div>
         ))}
       </div>

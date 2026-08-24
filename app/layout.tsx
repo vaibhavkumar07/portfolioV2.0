@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -15,6 +15,13 @@ const mono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#080b12",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),

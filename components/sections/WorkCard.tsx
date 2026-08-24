@@ -21,7 +21,7 @@ export default function WorkCard({
 }) {
   const num = String(index + 1).padStart(2, "0");
   return (
-    <TiltCard className="group relative h-[26rem] w-[min(82vw,22rem)] shrink-0 sm:h-[28rem] sm:w-[24rem]">
+    <TiltCard className="group relative h-[24rem] w-[min(calc(100vw-2.5rem),22rem)] shrink-0 sm:h-[28rem] sm:w-[24rem]">
       <Link
         href={href}
         className="focus-ring relative flex h-full w-full flex-col justify-between overflow-hidden rounded-2xl border p-6 sm:p-7"

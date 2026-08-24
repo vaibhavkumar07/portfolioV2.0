@@ -36,6 +36,7 @@ export default function VoiceAgent({
   const [note, setNote] = useState("");
 
   const recRef = useRef<SpeechRec | null>(null);
+  const recCtorRef = useRef<(new () => SpeechRec) | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
 
@@ -46,43 +47,12 @@ export default function VoiceAgent({
     };
     const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
     if (Ctor) {
+      recCtorRef.current = Ctor;
       // Browser capability detection must run post-hydration (SSR renders
       // without the mic button), so a one-shot setState here is intentional.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSttSupported(true);
-      const rec = new Ctor();
-      rec.lang = "en-US";
-      rec.interimResults = true; // live words as you speak (less "no-speech")
-      rec.continuous = false;
-      rec.onstart = () => { setListening(true); setNote(""); };
-      rec.onresult = (e) => {
-        let interim = "";
-        let final = "";
-        for (let i = 0; i < e.results.length; i++) {
-          const r = e.results[i];
-          if (r.isFinal) final += r[0].transcript;
-          else interim += r[0].transcript;
-        }
-        if (interim) setInput(interim);
-        if (final) { setInput(""); setNote(""); sendRef.current(final); }
-      };
-      rec.onend = () => setListening(false);
-      rec.onerror = (e) => {
-        setListening(false);
-        const code = e?.error || "unknown";
-        if (code === "aborted") return;
-        if (code === "no-speech") setNote("Didn't hear anything — tap the mic and speak right away.");
-        else if (code === "not-allowed" || code === "service-not-allowed")
-          setNote("Mic blocked for this site — click the camera/lock icon in the address bar → allow microphone, then retry.");
-        else if (code === "network")
-          setNote("Speech service unreachable. Chrome routes voice to Google — check your network/VPN, or just type.");
-        else if (code === "audio-capture")
-          setNote("No microphone found — check your input device, or just type.");
-        else setNote(`Voice input error (${code}) — you can type instead.`);
-      };
-      recRef.current = rec;
     }
-     
   }, []);
 
   useEffect(() => {
@@ -218,8 +188,46 @@ export default function VoiceAgent({
   const askedSet = new Set(messages.filter((m) => m.role === "user").map((m) => m.content));
   const remaining = SUGGESTED.filter((s) => !askedSet.has(s));
 
+  const ensureRec = (): SpeechRec | null => {
+    if (recRef.current) return recRef.current;
+    const Ctor = recCtorRef.current;
+    if (!Ctor) return null;
+    const rec = new Ctor();
+    rec.lang = "en-US";
+    rec.interimResults = true;
+    rec.continuous = false;
+    rec.onstart = () => { setListening(true); setNote(""); };
+    rec.onresult = (e) => {
+      let interim = "";
+      let final = "";
+      for (let i = 0; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) final += r[0].transcript;
+        else interim += r[0].transcript;
+      }
+      if (interim) setInput(interim);
+      if (final) { setInput(""); setNote(""); sendRef.current(final); }
+    };
+    rec.onend = () => setListening(false);
+    rec.onerror = (e) => {
+      setListening(false);
+      const code = e?.error || "unknown";
+      if (code === "aborted") return;
+      if (code === "no-speech") setNote("Didn't hear anything — tap the mic and speak right away.");
+      else if (code === "not-allowed" || code === "service-not-allowed")
+        setNote("Mic blocked for this site — click the camera/lock icon in the address bar → allow microphone, then retry.");
+      else if (code === "network")
+        setNote("Speech service unreachable. Chrome routes voice to Google — check your network/VPN, or just type.");
+      else if (code === "audio-capture")
+        setNote("No microphone found — check your input device, or just type.");
+      else setNote(`Voice input error (${code}) — you can type instead.`);
+    };
+    recRef.current = rec;
+    return rec;
+  };
+
   const toggleMic = () => {
-    const rec = recRef.current;
+    const rec = ensureRec();
     if (!rec) return;
     if (listening) {
       rec.stop();

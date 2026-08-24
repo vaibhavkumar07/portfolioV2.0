@@ -25,7 +25,7 @@ export default function WorkRail({ projects }: { projects: Project[] }) {
     setActive(i);
     cardRefs.current[i]?.scrollIntoView({
       behavior: "smooth",
-      inline: "center",
+      inline: "start",
       block: "nearest",
     });
   }, [total]);
@@ -64,7 +64,7 @@ export default function WorkRail({ projects }: { projects: Project[] }) {
           type="button"
           aria-label="Previous"
           onClick={() => goTo(active - 1)}
-          className="focus-ring grid h-8 w-8 place-items-center rounded-md border border-white/20 text-white/60 hover:border-[var(--cyan)] hover:text-[var(--cyan)]"
+          className="focus-ring grid h-11 w-11 place-items-center rounded-md border border-white/20 text-white/60 hover:border-[var(--cyan)] hover:text-[var(--cyan)] lg:h-8 lg:w-8"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -75,7 +75,7 @@ export default function WorkRail({ projects }: { projects: Project[] }) {
           type="button"
           aria-label="Next"
           onClick={() => goTo(active + 1)}
-          className="focus-ring grid h-8 w-8 place-items-center rounded-md border border-white/20 text-white/60 hover:border-[var(--cyan)] hover:text-[var(--cyan)]"
+          className="focus-ring grid h-11 w-11 place-items-center rounded-md border border-white/20 text-white/60 hover:border-[var(--cyan)] hover:text-[var(--cyan)] lg:h-8 lg:w-8"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
@@ -84,7 +84,7 @@ export default function WorkRail({ projects }: { projects: Project[] }) {
       <div
         ref={railRef}
         className="rail gap-5 pb-8 pt-2"
-        style={{ paddingInline: pad, scrollPaddingInline: "50%" }}
+        style={{ paddingInline: pad, scrollPaddingInline: pad }}
       >
         {projects.map((p, i) => (
           <div
@@ -92,13 +92,11 @@ export default function WorkRail({ projects }: { projects: Project[] }) {
             ref={(el) => {
               cardRefs.current[i] = el;
             }}
-            className="shrink-0 transition-all duration-500 motion-reduce:transition-none"
-            style={{
-              transform: i === active ? "scale(1.04)" : "scale(0.92)",
-              opacity: i === active ? 1 : 0.45,
-              zIndex: i === active ? 2 : 1,
-              position: "relative",
-            }}
+            className={`relative shrink-0 transition-all duration-500 motion-reduce:transition-none motion-reduce:lg:scale-100 ${
+              i === active
+                ? "z-[2] opacity-100 lg:scale-[1.04]"
+                : "z-[1] opacity-100 lg:scale-[0.92] lg:opacity-45"
+            }`}
           >
             <WorkCard
               href={`/work/${slug(p.title)}`}
@@ -110,8 +108,8 @@ export default function WorkRail({ projects }: { projects: Project[] }) {
             />
           </div>
         ))}
-        {/* Wide spacer so the last card can center in the viewport */}
-        <span aria-hidden="true" className="w-[min(40vw,12rem)] shrink-0" />
+        {/* Desktop spacer so the last card can center; phones snap to start */}
+        <span aria-hidden="true" className="hidden w-[min(40vw,12rem)] shrink-0 lg:block" />
       </div>
 
       <div className="mt-4 flex items-center gap-4" style={{ paddingInline: pad }}>

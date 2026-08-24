@@ -110,7 +110,7 @@ export default function Home() {
       </aside>
 
       {/* Main content frame */}
-      <div className="min-w-0 flex-1 border-white/[0.04] pb-24 lg:border-l lg:pb-0">
+      <div className="min-w-0 flex-1 border-white/[0.04] pb-[calc(6.75rem+env(safe-area-inset-bottom,0px))] lg:border-l lg:pb-0">
       <ModeProvider>
       <SiteNav email={PROFILE.email} />
 

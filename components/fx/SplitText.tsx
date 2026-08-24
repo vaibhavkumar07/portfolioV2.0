@@ -1,15 +1,27 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+
+function subscribeNarrow(onStoreChange: () => void) {
+  const mq = window.matchMedia("(max-width: 767px)");
+  mq.addEventListener("change", onStoreChange);
+  return () => mq.removeEventListener("change", onStoreChange);
+}
+const getNarrow = () => window.matchMedia("(max-width: 767px)").matches;
+const getServerNarrow = () => true;
 
 /**
  * Per-character reveal for display type. Characters rise on a stagger, which
  * reads as typography being set rather than a block being faded in.
  *
+ * Each glyph is clipped in its own box so a wrapping line cannot hide the
+ * first letter (the old single overflow-hidden wrapper + whileInView margin
+ * ate the “b” in “behind” on phones). Below 768px we skip the split entirely —
+ * faster paint, no clip risk, full sentence stays readable.
+ *
  * The phrase is carried by aria-label on the wrapper, with the split characters
- * aria-hidden beneath it. An earlier version added a visually-hidden duplicate
- * instead, which put the headline in the DOM twice — bad for copy/paste, and
- * worse for the answer engines this site is built to be parsed by.
+ * aria-hidden beneath it.
  */
 export default function SplitText({
   text,
@@ -23,28 +35,36 @@ export default function SplitText({
   stagger?: number;
 }) {
   const reduce = useReducedMotion();
+  const narrow = useSyncExternalStore(subscribeNarrow, getNarrow, getServerNarrow);
 
-  if (reduce) return <span className={className}>{text}</span>;
+  if (reduce || narrow) return <span className={className}>{text}</span>;
 
   return (
     <span className={className} aria-label={text}>
-      <span aria-hidden="true" className="inline-block overflow-hidden pb-[0.12em] align-bottom">
-        {text.split("").map((ch, i) => (
-          <motion.span
-            key={`${ch}-${i}`}
-            className="inline-block will-change-transform"
-            initial={{ y: "108%" }}
-            whileInView={{ y: 0 }}
-            viewport={{ once: true, margin: "-12%" }}
-            transition={{
-              duration: 0.75,
-              delay: delay + i * stagger,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
-            {ch === " " ? " " : ch}
-          </motion.span>
-        ))}
+      <span aria-hidden="true" className="whitespace-pre-wrap">
+        {text.split("").map((ch, i) =>
+          ch === " " ? (
+            <span key={`sp-${i}`}> </span>
+          ) : (
+            <span
+              key={`${ch}-${i}`}
+              className="inline-block overflow-hidden pb-[0.14em] align-bottom"
+            >
+              <motion.span
+                className="inline-block"
+                initial={{ y: "108%" }}
+                animate={{ y: 0 }}
+                transition={{
+                  duration: 0.75,
+                  delay: delay + i * stagger,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+              >
+                {ch}
+              </motion.span>
+            </span>
+          ),
+        )}
       </span>
     </span>
   );

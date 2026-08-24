@@ -34,7 +34,7 @@ export default function SiteNav({ email }: { email: string }) {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-40">
+    <header className="sticky top-0 z-50">
       {/* Gradient top rule — mock */}
       <div
         aria-hidden="true"
@@ -62,7 +62,7 @@ export default function SiteNav({ email }: { email: string }) {
             >
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--cyan)]" />
             </span>
-            <span className="text-[0.6rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.18em] text-white/50">
+            <span className="hidden min-[380px]:inline text-[0.6rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.18em] text-white/50">
               Operator console
             </span>
           </span>
@@ -110,7 +110,7 @@ export default function SiteNav({ email }: { email: string }) {
           </button>
           <a
             href={`mailto:${email}`}
-            className="focus-ring relative inline-flex min-h-9 items-center gap-1.5 rounded-xl border border-[var(--amber)]/60 bg-[var(--amber)]/10 px-3.5 text-[0.7rem] font-medium text-[var(--amber)] transition hover:bg-[var(--amber)]/20"
+            className="focus-ring relative inline-flex min-h-9 shrink-0 items-center gap-1 rounded-xl border border-[var(--amber)]/60 bg-[var(--amber)]/10 px-2.5 text-[0.65rem] font-medium text-[var(--amber)] transition hover:bg-[var(--amber)]/20 sm:gap-1.5 sm:px-3.5 sm:text-[0.7rem]"
             style={{ boxShadow: "0 0 20px oklch(0.837 0.164 84 / 0.22)" }}
           >
             Hire me
@@ -127,7 +127,7 @@ export default function SiteNav({ email }: { email: string }) {
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? "Close menu" : "Open menu"}
-            className="focus-ring grid h-10 w-10 place-items-center rounded-xl border border-white/10 lg:hidden"
+            className="focus-ring grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/10 lg:hidden"
           >
             <span className="relative block h-3 w-4" aria-hidden="true">
               <span className={`absolute inset-x-0 top-0 h-px bg-white transition ${open ? "translate-y-[5px] rotate-45" : ""}`} />
@@ -142,12 +142,12 @@ export default function SiteNav({ email }: { email: string }) {
           <motion.nav
             id="mobile-nav"
             aria-label="Mobile"
-            className="border-b border-white/10 bg-[#080b12] lg:hidden"
+            className="overflow-hidden border-b border-white/10 bg-[#080b12] lg:hidden"
             initial={reduce ? { opacity: 0 } : { opacity: 0, height: 0 }}
             animate={reduce ? { opacity: 1 } : { opacity: 1, height: "auto" }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, height: 0 }}
           >
-            <ul className="px-3 py-2">
+            <ul className="max-h-[min(70vh,28rem)] overflow-y-auto px-3 py-2">
               {SECTIONS.map((s) => (
                 <li key={s.id}>
                   <button
@@ -159,6 +159,40 @@ export default function SiteNav({ email }: { email: string }) {
                     className="focus-ring flex min-h-11 w-full items-center rounded-lg px-3 text-sm text-white/60"
                   >
                     {s.label}
+                  </button>
+                </li>
+              ))}
+              <li aria-hidden="true" className="mx-3 my-2 h-px bg-white/10" />
+              {mode !== "home" && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      select("home");
+                      window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+                    }}
+                    className="focus-ring flex min-h-11 w-full items-center rounded-lg px-3 text-sm text-white/60"
+                  >
+                    Home
+                  </button>
+                </li>
+              )}
+              {MODES.filter((m) => m.id !== "home").map((m) => (
+                <li key={m.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      select(m.id);
+                      window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+                    }}
+                    aria-pressed={mode === m.id}
+                    className={`focus-ring flex min-h-11 w-full items-center rounded-lg px-3 text-sm ${
+                      mode === m.id ? "text-[var(--cyan)]" : "text-white/60"
+                    }`}
+                  >
+                    {m.label}
                   </button>
                 </li>
               ))}
