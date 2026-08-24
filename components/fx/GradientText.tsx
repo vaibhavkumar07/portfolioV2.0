@@ -12,7 +12,7 @@ export default function GradientText({
 }) {
   const reduce = useReducedMotion();
   return (
-    <span className={`${reduce ? "text-cyan" : "gradient-text-animated"} ${className}`}>
+    <span className={`${reduce ? "text-[var(--cyan)]" : "gradient-text-animated"} ${className}`}>
       {children}
     </span>
   );

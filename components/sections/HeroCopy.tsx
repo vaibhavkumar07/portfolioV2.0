@@ -26,9 +26,10 @@ import { PROFILE } from "@/lib/data/kb";
  */
 export default function HeroCopy({ resumeHref }: { resumeHref?: string }) {
   return (
-    <section className="relative overflow-hidden px-5 pb-14 pt-10 sm:px-8 sm:pt-12 lg:px-10 lg:pb-16 lg:pt-14">
-      {/* Ambient orbs — mock nebula */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+    <section className="relative px-5 pb-14 pt-10 sm:px-8 sm:pt-12 lg:px-10 lg:pb-16 lg:pt-14">
+      {/* Ambient orbs — mock nebula. Clip here, not on the section:
+          overflow-hidden + filter (gradient-text drop-shadow) hides “call.” */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <span className="absolute -right-20 top-10 h-72 w-72 rounded-full bg-[var(--violet)]/25 blur-[100px]" />
         <span className="absolute bottom-10 right-1/4 h-56 w-56 rounded-full bg-[var(--cyan)]/20 blur-[90px]" />
         <span className="absolute left-10 top-1/3 h-40 w-40 rounded-full bg-[var(--amber)]/10 blur-[80px]" />
@@ -45,13 +46,13 @@ export default function HeroCopy({ resumeHref }: { resumeHref?: string }) {
         {PROFILE.name} · Genesys Cloud IVR · Richardson, TX (DFW)
       </p>
 
-      <h1 className="relative max-w-[16ch] font-[family-name:var(--font-heading)] text-[clamp(2.6rem,7.5vw,5.5rem)] font-semibold leading-[0.92] tracking-[-0.04em] text-white">
+      <h1 className="relative max-w-[18ch] font-[family-name:var(--font-heading)] text-[clamp(2.6rem,7.5vw,5.5rem)] font-semibold leading-[0.92] tracking-[-0.04em] text-white">
         <SplitText text="I build the voice" />
         <br />
         <SplitText text="behind the " delay={0.12} />
-        <GradientText>
-          <SplitText text="call." delay={0.24} />
-        </GradientText>
+        {/* Gradient + per-letter split do not mix: background-clip:text
+            cannot paint through the split's inline-block children. */}
+        <GradientText className="inline-block whitespace-nowrap">call.</GradientText>
       </h1>
 
       <p className="relative mt-7 max-w-xl text-[1.05rem] leading-relaxed text-white/65 sm:text-[1.125rem]">
