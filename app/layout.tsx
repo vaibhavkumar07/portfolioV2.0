@@ -6,6 +6,7 @@ import Backdrop from "@/components/fx/Backdrop";
 import ScrollProgress from "@/components/fx/ScrollProgress";
 import TrackVisit from "@/components/fx/TrackVisit";
 import SmoothScroll from "@/components/fx/SmoothScroll";
+import AppShell from "@/components/shell/AppShell";
 import { env } from "@/lib/server/env";
 import { HOME_DESCRIPTION, HOME_TITLE, OG_IMAGE, SITE } from "@/lib/site";
 import "./globals.css";
@@ -92,7 +93,7 @@ export default function RootLayout({
         <ScrollProgress />
         <TrackVisit />
         <SmoothScroll />
-        {children}
+        <AppShell>{children}</AppShell>
         <Analytics />
         <SpeedInsights />
       </body>

@@ -26,16 +26,16 @@ const traffic = Array.from({ length: 24 }, (_, h) => {
 const topSkills = [...skills].sort((a, b) => b.level - a.level).slice(0, 8);
 
 const KPIS = [
-  { label: "CALLS / DAY", value: "4,820", delta: "+12%", color: SKY },
-  { label: "SELF-SERVICE CONTAINMENT", value: "63%", delta: "+8 pts", color: GREEN },
-  { label: "AVG HANDLE TIME", value: "3m 41s", delta: "-14%", color: ORANGE },
+  { label: "Calls / day", value: "4,820", delta: "+12%", color: SKY },
+  { label: "Self-service containment", value: "63%", delta: "+8 pts", color: GREEN },
+  { label: "Avg handle time", value: "3m 41s", delta: "-14%", color: ORANGE },
   { label: "CSAT", value: "4.6 / 5", delta: "+0.3", color: SKY },
 ];
 
 function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
     <div className={`glass rounded-3xl p-5 ${className}`}>
-      <div className="label-xs mb-3 text-muted-foreground">{title}</div>
+      <div className="mb-3 font-[family-name:var(--font-mono)] text-xs text-muted-foreground">{title}</div>
       {children}
     </div>
   );
@@ -71,23 +71,23 @@ function RealStats() {
 
   return (
     <>
-      <div className="mono mb-1 mt-8 text-[0.66rem] tracking-[0.2em] text-[var(--live)]">&gt; REAL · THIS SITE</div>
+      <div className="mb-1 mt-8 font-[family-name:var(--font-mono)] text-xs text-[var(--live)]">&gt; Real · this site</div>
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Panel title="VISITORS">
+        <Panel title="Visitors">
           <span className="text-2xl font-bold tracking-tight">{val(stats?.visits)}</span>
         </Panel>
-        <Panel title="TALKED TO MY PORTFOLIO">
+        <Panel title="Talked to my portfolio">
           <span className="text-2xl font-bold tracking-tight">{val(stats?.chats)}</span>
         </Panel>
-        <Panel title="TOKENS USED (EST.)">
+        <Panel title="Tokens used (est.)">
           <span className="text-2xl font-bold tracking-tight">{val(stats?.tokens)}</span>
         </Panel>
-        <Panel title="MODE VIEWS">
+        <Panel title="Mode views">
           <div className="flex items-end justify-between gap-2">
-            {([["HOME", stats?.mode_home], ["DASH", stats?.mode_dashboard], ["PLAY", stats?.mode_playground]] as const).map(([l, n]) => (
+            {([["Home", stats?.mode_home], ["Dash", stats?.mode_dashboard], ["Play", stats?.mode_playground]] as const).map(([l, n]) => (
               <div key={l} className="text-center">
                 <div className="text-lg font-semibold leading-tight">{val(n)}</div>
-                <div className="label-xs text-muted-foreground">{l}</div>
+                <div className="text-xs text-muted-foreground">{l}</div>
               </div>
             ))}
           </div>
@@ -100,7 +100,7 @@ function RealStats() {
 export default function Dashboard() {
   return (
     <div className="mx-auto max-w-6xl px-5 py-10">
-      <div className="label-xs mb-1 text-[var(--cyan)]">&gt; COMMAND CENTER</div>
+      <div className="mb-1 font-[family-name:var(--font-mono)] text-xs text-[var(--cyan)]">&gt; Command center</div>
       <h2 className="mb-6 text-3xl font-bold tracking-tight">CX command center</h2>
       <p className="max-w-xl text-sm text-muted-foreground">
         Live telemetry from this portfolio up top — real visitors, agent conversations,
@@ -116,7 +116,7 @@ export default function Dashboard() {
         <span className="label-xs rounded-lg border border-[var(--amber)]/40 bg-[var(--amber)]/10 px-2.5 py-1 text-[var(--amber)]">
           Sample data
         </span>
-        <span className="label-xs text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           Contact-center analytics I build on Genesys — figures below are illustrative
         </span>
       </div>
@@ -135,7 +135,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
-        <Panel title="CALL VOLUME · 24H (contained vs agent)">
+        <Panel title="Call volume · 24h (contained vs agent)">
           <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={traffic} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
               <defs>
@@ -158,7 +158,7 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </Panel>
 
-        <Panel title="SKILL PROFICIENCY (real)">
+        <Panel title="Skill proficiency (real)">
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={topSkills} layout="vertical" margin={{ top: 0, right: 12, left: 10, bottom: 0 }}>
               <XAxis type="number" domain={[0, 100]} hide />
@@ -181,15 +181,15 @@ export default function Dashboard() {
           { q: "Tech Support", wait: "0:42", sla: 88 },
           { q: "Sales", wait: "0:09", sla: 99 },
         ].map((r) => (
-          <Panel key={r.q} title={`QUEUE · ${r.q.toUpperCase()}`}>
+          <Panel key={r.q} title={`Queue · ${r.q}`}>
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-lg font-semibold">{r.wait}</div>
-                <div className="label-xs text-muted-foreground">AVG WAIT</div>
+                <div className="text-xs text-muted-foreground">Avg wait</div>
               </div>
               <div className="text-right">
                 <div className="text-lg font-semibold" style={{ color: r.sla > 90 ? GREEN : ORANGE }}>{r.sla}%</div>
-                <div className="label-xs text-muted-foreground">SLA</div>
+                <div className="text-xs text-muted-foreground">SLA</div>
               </div>
             </div>
             <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary">

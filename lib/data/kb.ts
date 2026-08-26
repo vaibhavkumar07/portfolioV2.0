@@ -65,7 +65,7 @@ export const CREDENTIAL_DEVELOPER: Credential = {
   badge: "/genesys-cloud-cx-developer-certification.png",
 };
 
-/** Both vendor badges, newest first. Shown together in About. */
+/** Both vendor badges, newest first. Shown on Experience rows; JSON-LD too. */
 export const VENDOR_CREDENTIALS: Credential[] = [CREDENTIAL, CREDENTIAL_DEVELOPER];
 
 export type Award = { name: string; issuer: string; date: string };

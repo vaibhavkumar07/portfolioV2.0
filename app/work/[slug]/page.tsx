@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { caseStudies, getCaseStudy } from "@/lib/data/work";
 import { PROFILE } from "@/lib/data/kb";
-import SiteNav from "@/components/sections/SiteNav";
+import TalkToAgentButton from "@/components/agent/TalkToAgentButton";
 import { OG_IMAGE, SITE } from "@/lib/site";
 
 export function generateStaticParams() {
@@ -71,17 +71,15 @@ export default async function CaseStudyPage({
 
   return (
     <>
-      {/* These are the SEO landing pages — a visitor arriving from Google used
-          to get a bare article with one small back-link and no other route. */}
-      <SiteNav email={PROFILE.email} />
+      <main id="main">
       <article className="mx-auto max-w-3xl px-5 py-14">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
-      <Link href="/#work" className="focus-ring label-xs rounded-lg text-muted-foreground transition hover:text-foreground">
+      <Link href="/#work" className="focus-ring rounded-lg text-xs text-muted-foreground transition hover:text-foreground">
         ← Back to work
       </Link>
 
-      <div className="label-xs mt-8 flex items-center gap-3 text-muted-foreground">
+      <div className="mt-8 flex items-center gap-3 font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
         <span>Result-{c.id}</span>
         <span className="text-[var(--violet)]">{c.category}</span>
       </div>
@@ -90,18 +88,18 @@ export default async function CaseStudyPage({
 
       <div className="mt-6 flex flex-wrap gap-2">
         {c.stack.map((t) => (
-          <span key={t} className="mono rounded-full border border-border bg-card/40 px-2.5 py-1 text-[0.7rem] text-foreground/80">
+          <span key={t} className="mono rounded-full border border-border bg-card/40 px-2.5 py-1 text-xs text-foreground/80">
             {t}
           </span>
         ))}
       </div>
 
-      <Block label="THE PROBLEM">
+      <Block label="The problem">
         <p className="text-base leading-relaxed text-foreground/90">{c.problem}</p>
       </Block>
 
       {c.approach.length > 0 && (
-        <Block label="WHAT I BUILT">
+        <Block label="What I built">
           <ul className="space-y-3">
             {c.approach.map((a) => (
               <li key={a} className="flex gap-3 text-base leading-relaxed text-foreground/90">
@@ -114,7 +112,7 @@ export default async function CaseStudyPage({
       )}
 
       {c.impact.length > 0 && (
-        <Block label="IMPACT">
+        <Block label="Impact">
           <ul className="space-y-3">
             {c.impact.map((a) => (
               <li key={a} className="flex gap-3 text-base leading-relaxed text-foreground/90">
@@ -128,31 +126,31 @@ export default async function CaseStudyPage({
 
       <div className="glass mt-14 rounded-3xl p-8 text-center">
         <p className="text-muted-foreground">
-          Want the deeper story? Ask the agent on the home page, or reach me directly.
+          Want the deeper story? Ask the agent, or reach me directly.
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <a
             href={`mailto:${PROFILE.email}`}
-            className="focus-ring inline-flex min-h-12 items-center rounded-2xl bg-[var(--amber)] px-6 text-[0.95rem] font-semibold text-[oklch(0.16_0.03_84)] transition hover:brightness-110"
+            className="focus-ring inline-flex min-h-12 max-w-full items-center rounded-xl bg-[var(--amber)] px-5 text-sm font-semibold text-[oklch(0.16_0.03_84)] transition hover:brightness-110 sm:px-6 sm:text-[0.95rem]"
           >
             {PROFILE.email}
           </a>
-          <Link
-            href="/"
-            className="focus-ring glass inline-flex min-h-12 items-center rounded-2xl px-5 text-[0.95rem] transition hover:brightness-125"
+          <TalkToAgentButton
+            className="focus-ring glass inline-flex min-h-12 items-center rounded-xl px-5 text-[0.95rem] transition hover:brightness-125"
           >
-            ◉ Talk to the agent
-          </Link>
+            Talk to the agent
+          </TalkToAgentButton>
         </div>
       </div>
       </article>
+      </main>
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-7 text-center sm:flex-row sm:text-left">
-          <span className="label-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Vaibhavkumar Yadav · Richardson, TX
           </span>
-          <Link href="/#work" className="focus-ring label-xs rounded-lg text-muted-foreground transition hover:text-foreground">
+          <Link href="/#work" className="focus-ring rounded-lg text-xs text-muted-foreground transition hover:text-foreground">
             More work →
           </Link>
         </div>
@@ -164,7 +162,7 @@ export default async function CaseStudyPage({
 function Block({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <section className="mt-12">
-      <h2 className="label-xs mb-4 text-[var(--cyan)]">&gt; {label}</h2>
+      <h2 className="mb-4 font-[family-name:var(--font-mono)] text-xs text-[var(--cyan)]">&gt; {label}</h2>
       {children}
     </section>
   );

@@ -9,6 +9,7 @@ import {
   Layers,
   Mail,
   MapPin,
+  Phone,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -24,7 +25,7 @@ import { PROFILE } from "@/lib/data/kb";
  */
 export default function HeroCopy({ resumeHref }: { resumeHref?: string }) {
   return (
-    <section className="relative px-5 pb-14 pt-10 sm:px-8 sm:pt-12 lg:px-10 lg:pb-16 lg:pt-14">
+    <section className="relative px-5 pb-8 pt-10 sm:px-8 sm:pt-12 lg:px-10 lg:pb-10 lg:pt-14">
       {/* Ambient orbs — mock nebula. Clip here, not on the section:
           overflow-hidden + filter (gradient-text drop-shadow) hides “call.” */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -33,14 +34,14 @@ export default function HeroCopy({ resumeHref }: { resumeHref?: string }) {
         <span className="absolute left-10 top-1/3 h-40 w-40 rounded-full bg-[var(--amber)]/10 blur-[80px]" />
       </div>
 
-      <p className="relative mb-7 inline-flex items-center gap-2 rounded-full border border-[var(--live)]/50 bg-[var(--live)]/10 px-3.5 py-1.5 text-[0.65rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.14em] text-[var(--live)]">
+      <p className="relative mb-7 inline-flex items-center gap-2 rounded-full border border-[var(--live)]/50 bg-[var(--live)]/10 px-3.5 py-1.5 text-xs font-[family-name:var(--font-mono)] tracking-wide text-[var(--live)]">
         <span className="h-1.5 w-1.5 rounded-full bg-[var(--live)]" style={{ boxShadow: "0 0 8px var(--live)" }} />
         <span className="hidden sm:inline">Open to Genesys Cloud / voice-AI roles</span>
         <span className="inline sm:hidden">Live · Available</span>
         <Sparkles className="h-3 w-3 opacity-70" aria-hidden="true" />
       </p>
 
-      <p className="relative mb-4 max-w-full font-[family-name:var(--font-mono)] text-[0.62rem] uppercase leading-relaxed tracking-[0.1em] text-white/55 sm:text-[0.7rem] sm:tracking-[0.16em]">
+      <p className="relative mb-4 max-w-full font-[family-name:var(--font-mono)] text-xs leading-relaxed text-white/55">
         {PROFILE.name} · Genesys Cloud IVR · Richardson, TX (DFW)
       </p>
 
@@ -64,7 +65,7 @@ export default function HeroCopy({ resumeHref }: { resumeHref?: string }) {
             <a
               href={resumeHref}
               download
-              className="btn-shimmer focus-ring inline-flex min-h-12 items-center gap-2.5 rounded-full bg-gradient-to-br from-[oklch(0.88_0.14_84)] to-[oklch(0.7_0.17_55)] px-7 text-[0.9rem] font-semibold text-[oklch(0.16_0.03_84)]"
+              className="btn-shimmer focus-ring inline-flex min-h-12 items-center gap-2.5 rounded-xl bg-gradient-to-br from-[oklch(0.88_0.14_84)] to-[oklch(0.7_0.17_55)] px-7 text-[0.9rem] font-semibold text-[oklch(0.16_0.03_84)]"
               style={{ boxShadow: "0 8px 32px oklch(0.837 0.164 84 / 0.4)" }}
             >
               <Download className="h-4 w-4" aria-hidden="true" />
@@ -74,18 +75,28 @@ export default function HeroCopy({ resumeHref }: { resumeHref?: string }) {
         )}
         <a
           href={`mailto:${PROFILE.email}`}
-          className="focus-ring inline-flex min-h-12 items-center gap-2 rounded-full border border-[var(--cyan)]/40 bg-white/[0.03] px-6 text-[0.9rem] text-white/90 transition hover:border-[var(--cyan)] hover:bg-white/[0.06]"
+          className="focus-ring inline-flex min-h-12 items-center gap-2 rounded-xl px-3 text-[0.9rem] text-white/70 transition hover:text-white"
         >
-          <Mail className="h-4 w-4 text-[var(--cyan)]" aria-hidden="true" />
+          <Mail className="h-4 w-4" aria-hidden="true" />
           Email me
         </a>
+        <button
+          type="button"
+          onClick={() => {
+            document.querySelector<HTMLButtonElement>("[data-agent-entry]")?.click();
+          }}
+          className="focus-ring inline-flex min-h-12 items-center gap-2 rounded-xl border border-[var(--amber)]/60 bg-[var(--amber)]/10 px-6 text-[0.9rem] font-semibold text-[var(--amber)] transition hover:bg-[var(--amber)]/20"
+        >
+          <Phone className="h-4 w-4" aria-hidden="true" />
+          Talk to me
+        </button>
         <a
           href={PROFILE.linkedin}
           target="_blank"
           rel="noopener noreferrer"
-          className="focus-ring inline-flex min-h-12 items-center gap-2 rounded-full border border-[var(--cyan)]/40 bg-white/[0.03] px-6 text-[0.9rem] text-white/90 transition hover:border-[var(--cyan)] hover:bg-white/[0.06]"
+          className="focus-ring inline-flex min-h-12 items-center gap-2 rounded-xl px-3 text-[0.9rem] text-white/70 transition hover:text-white"
         >
-          <ExternalLink className="h-4 w-4 text-[var(--cyan)]" aria-hidden="true" />
+          <ExternalLink className="h-4 w-4" aria-hidden="true" />
           LinkedIn
         </a>
       </div>
@@ -128,10 +139,10 @@ export default function HeroCopy({ resumeHref }: { resumeHref?: string }) {
             <div style={{ color: c }}>
               <CountUp value={n} className="block font-[family-name:var(--font-heading)] text-[1.85rem] font-semibold leading-none tracking-tight sm:text-[2.4rem]" />
             </div>
-            <p className="mt-2 text-[0.58rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.12em] text-white/80 sm:text-[0.65rem] sm:tracking-[0.14em]">
+            <p className="mt-2 text-xs font-[family-name:var(--font-mono)] text-white/80">
               {l}
             </p>
-            <p className="mt-1 text-[0.65rem] leading-snug text-white/40 sm:text-[0.7rem]">{d}</p>
+            <p className="mt-1 text-xs leading-snug text-white/50">{d}</p>
           </div>
         ))}
       </div>

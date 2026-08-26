@@ -13,9 +13,8 @@ const Playground = dynamic(() => import("./Playground"), {
 });
 
 /**
- * Renders whichever view is active. The switcher itself now lives in SiteNav
- * — a second sticky bar here was 56px of permanent chrome (17% of a small
- * phone viewport) duplicating navigation the header already owns.
+ * Renders whichever view is active. Dashboard / Playground live in the left
+ * rail (and the mobile menu) so this file only switches the main pane.
  */
 export default function ModeSwitch({ children }: { children: React.ReactNode }) {
   const { mode } = useMode();

@@ -37,7 +37,7 @@ export default function Magnetic({
   return (
     <motion.div
       ref={ref}
-      className={className}
+      className={className ? `max-w-full ${className}` : "max-w-full"}
       style={{ x: sx, y: sy, display: "inline-block" }}
       onPointerMove={onMove}
       onPointerLeave={reset}

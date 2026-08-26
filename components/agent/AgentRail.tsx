@@ -7,13 +7,18 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   AudioLines,
+  Blocks,
   Box,
+  CircleHelp,
+  LayoutDashboard,
   Network,
   Phone,
   Shield,
   Terminal,
   User,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useMode } from "@/components/modes/ModeProvider";
 
 const VoiceAgent = dynamic(() => import("@/components/agent/VoiceAgent"), {
   ssr: false,
@@ -36,14 +41,20 @@ function ChatSkeleton() {
   );
 }
 
-const ICONS = [
-  { Icon: AudioLines, label: "Voice", href: "#main" },
-  { Icon: User, label: "About", href: "#about" },
-  { Icon: Network, label: "Experience", href: "#experience" },
-  { Icon: Box, label: "Work", href: "#work" },
-  { Icon: Shield, label: "Stack", href: "#stack" },
-  { Icon: Terminal, label: "Contact", href: "#contact" },
+const SECTIONS = [
+  { Icon: AudioLines, label: "Voice", id: "main" },
+  { Icon: User, label: "About", id: "about" },
+  { Icon: Network, label: "Experience", id: "experience" },
+  { Icon: Box, label: "Work", id: "work" },
+  { Icon: Shield, label: "Stack", id: "stack" },
+  { Icon: CircleHelp, label: "Insights", id: "faq" },
+  { Icon: Terminal, label: "Contact", id: "contact" },
 ] as const;
+
+const MODE_ITEMS = [
+  { Icon: LayoutDashboard, id: "dashboard" as const, label: "Dashboard" },
+  { Icon: Blocks, id: "playground" as const, label: "Playground" },
+];
 
 const emptySubscribe = () => () => {};
 
@@ -66,6 +77,8 @@ function CallTimer() {
  */
 export default function AgentRail() {
   const reduce = useReducedMotion();
+  const pathname = usePathname();
+  const { mode, select, goToSection } = useMode();
   const [open, setOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
   const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
@@ -93,42 +106,68 @@ export default function AgentRail() {
   return (
     <>
       <div className="hidden h-screen lg:flex">
-        <nav
-          aria-label="Section jump"
-          className="flex w-14 shrink-0 flex-col items-center border-r border-white/[0.06] bg-[#03050c] py-5"
-        >
-          <div className="flex flex-1 flex-col items-center gap-3.5 pt-2">
-            {ICONS.map(({ Icon, label, href }, i) => (
-              <a
-                key={label}
-                href={href}
-                aria-label={label}
-                className={`focus-ring grid h-9 w-9 place-items-center rounded-xl transition ${
-                  i === 0
-                    ? "bg-[var(--cyan)]/20 text-[var(--cyan)] shadow-[0_0_16px_oklch(0.789_0.134_205_/_0.35)]"
-                    : "text-white/40 hover:bg-white/5 hover:text-[var(--cyan)]"
-                }`}
-              >
-                <Icon className="h-4 w-4" strokeWidth={1.5} />
-              </a>
-            ))}
+        <nav aria-label="Site" className="z-30 w-44 shrink-0 self-stretch">
+          <div className="flex h-full flex-col overflow-y-auto border-r border-white/[0.06] bg-[#03050c] py-4">
+            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-2.5 pt-1">
+              {SECTIONS.map(({ Icon, label, id }) => {
+                const active =
+                  id === "work"
+                    ? pathname.startsWith("/work")
+                    : pathname === "/" && mode === "home" && id === "main";
+                return (
+                  <a
+                    key={id}
+                    href={pathname === "/" ? `#${id}` : `/#${id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      goToSection(id);
+                    }}
+                    aria-current={active ? "page" : undefined}
+                    className={`focus-ring flex h-9 min-w-0 items-center gap-3 rounded-xl px-2 transition ${
+                      active
+                        ? "bg-[var(--cyan)]/20 text-[var(--cyan)] shadow-[0_0_16px_oklch(0.789_0.134_205_/_0.35)]"
+                        : "text-white/55 hover:bg-white/5 hover:text-[var(--cyan)]"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+                    <span className="truncate text-xs">{label}</span>
+                  </a>
+                );
+              })}
+            </div>
+            <div className="mt-2 flex flex-col gap-2 border-t border-white/[0.08] px-2.5 pt-3">
+              {MODE_ITEMS.map(({ Icon, id, label }) => {
+                const active = pathname === "/" && mode === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => {
+                      select(id);
+                      if (pathname === "/") {
+                        window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+                      }
+                    }}
+                    className={`focus-ring flex h-9 min-w-0 items-center gap-3 rounded-xl px-2 transition ${
+                      active
+                        ? "bg-[var(--amber)]/20 text-[var(--amber)]"
+                        : "text-white/55 hover:bg-white/5 hover:text-[var(--amber)]"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+                    <span className="truncate text-xs">{label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <span
-            aria-hidden="true"
-            className="mb-2 grid h-10 w-10 place-items-center rounded-full border border-[var(--cyan)]/30"
-            style={{
-              boxShadow:
-                "inset 0 0 16px oklch(0.789 0.134 205 / 0.45), 0 0 20px oklch(0.789 0.134 205 / 0.25)",
-            }}
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--cyan)]" style={{ boxShadow: "0 0 8px var(--cyan)" }} />
-          </span>
         </nav>
 
         <div className="relative flex w-[22rem] shrink-0 flex-col overflow-hidden border-r border-white/[0.08] bg-[#05070f] xl:w-[24rem]">
           <div className="relative z-20 shrink-0 border-b border-white/[0.06] bg-[#05070f] px-5 pb-3 pt-5">
-            <p className="text-[0.65rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.22em] text-white/55">
-              Voice agent console
+            <p className="label-xs text-white/55">
+              Voice console
             </p>
             <span className="mt-2.5 flex h-4 items-end gap-[2px]" aria-hidden="true">
               {[3, 7, 4, 11, 6, 13, 5, 10, 4, 12, 7, 9, 5].map((h, i) => (
@@ -181,7 +220,7 @@ export default function AgentRail() {
                 ["Specialty", "Genesys Cloud / Voice AI"],
                 ["Status", "Open to Genesys Cloud / voice-AI roles"],
               ].map(([k, v]) => (
-                <div key={k} className="grid grid-cols-[5.75rem_minmax(0,1fr)] gap-x-2 text-[0.7rem] leading-snug">
+                <div key={k} className="grid grid-cols-[5.75rem_minmax(0,1fr)] gap-x-2 text-sm leading-snug">
                   <dt className="font-[family-name:var(--font-mono)] uppercase tracking-[0.12em] text-white/35">
                     {k}
                   </dt>
@@ -189,19 +228,6 @@ export default function AgentRail() {
                 </div>
               ))}
             </dl>
-            <button
-              type="button"
-              data-agent-entry
-              onPointerDown={() => {
-                void import("@/components/agent/VoiceAgent");
-              }}
-              onClick={openChat}
-              className="focus-ring mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-[oklch(0.86_0.14_84)] to-[oklch(0.72_0.16_55)] text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-[oklch(0.16_0.03_84)]"
-              style={{ boxShadow: "0 0 28px oklch(0.837 0.164 84 / 0.35)" }}
-            >
-              <Phone className="h-3.5 w-3.5" aria-hidden="true" />
-              Talk to me
-            </button>
           </div>
         </div>
       </div>

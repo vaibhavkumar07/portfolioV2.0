@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { track } from "@/lib/track";
 
 export type Mode = "home" | "dashboard" | "playground";
@@ -12,7 +12,7 @@ export const MODES: { id: Mode; label: string }[] = [
   { id: "playground", label: "Playground" },
 ];
 
-const SECTIONS = ["work", "experience", "about", "stack", "faq", "contact"];
+const SECTIONS = ["main", "work", "experience", "about", "stack", "faq", "contact"];
 
 type Ctx = {
   mode: Mode;
@@ -44,6 +44,8 @@ export function useMode(): Ctx {
  * truth. State lives in `?view=` (no localStorage) so a fresh visit lands on HOME.
  */
 export default function ModeProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
   const [mode, setMode] = useState<Mode>("home");
   const modeRef = useRef(mode);
   const pendingScroll = useRef<string | null>(null);
@@ -51,24 +53,34 @@ export default function ModeProvider({ children }: { children: React.ReactNode }
     modeRef.current = mode;
   }, [mode]);
 
-  // Deep-link read must happen post-hydration (SSR always renders HOME).
+  // Deep-link + leave-home: SSR always renders HOME; work/404 are not modes.
   useEffect(() => {
+    if (pathname !== "/") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMode("home");
+      return;
+    }
     const url = new URLSearchParams(window.location.search).get("view");
     if (url === "dashboard" || url === "playground") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMode(url);
       track(`mode_${url}`);
+    } else {
+      setMode("home");
     }
-  }, []);
+  }, [pathname]);
 
   const select = useCallback((m: Mode) => {
+    if (pathname !== "/") {
+      router.push(m === "home" ? "/" : `/?view=${m}`);
+      return;
+    }
     setMode(m);
     track(`mode_${m}`);
     const u = new URL(window.location.href);
     if (m === "home") u.searchParams.delete("view");
     else u.searchParams.set("view", m);
     window.history.replaceState(null, "", u);
-  }, []);
+  }, [pathname, router]);
 
   const openSection = useCallback(
     (id: string) => {
@@ -90,6 +102,10 @@ export default function ModeProvider({ children }: { children: React.ReactNode }
   // the URL hash already matched the section you clicked.
   const goToSection = useCallback(
     (id: string) => {
+      if (pathname !== "/") {
+        router.push(`/#${id}`);
+        return;
+      }
       const next = `#${id}`;
       if (window.location.hash !== next) {
         const u = new URL(window.location.href);
@@ -98,7 +114,7 @@ export default function ModeProvider({ children }: { children: React.ReactNode }
       }
       openSection(id);
     },
-    [openSection],
+    [openSection, pathname, router],
   );
 
   // Browser back/forward, rail <a href="#…">, and manual hash edits.

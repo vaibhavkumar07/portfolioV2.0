@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-import TiltCard from "@/components/fx/TiltCard";
 
 export default function WorkCard({
   href,
@@ -21,10 +19,10 @@ export default function WorkCard({
 }) {
   const num = String(index + 1).padStart(2, "0");
   return (
-    <TiltCard className="group relative h-[24rem] w-[min(calc(100vw-2.5rem),22rem)] shrink-0 sm:h-[28rem] sm:w-[24rem]">
+    <div className="group relative h-[22rem] w-[min(calc(100vw-2.5rem),22rem)] shrink-0 sm:h-[24rem] sm:w-[24rem]">
       <Link
         href={href}
-        className="focus-ring relative flex h-full w-full flex-col justify-between overflow-hidden rounded-2xl border p-6 sm:p-7"
+        className="focus-ring relative flex h-full w-full flex-col overflow-hidden rounded-2xl border p-6 sm:p-7"
         style={{
           borderColor: featured
             ? "color-mix(in oklch, var(--cyan) 70%, transparent)"
@@ -52,52 +50,24 @@ export default function WorkCard({
             style={{ boxShadow: "0 0 20px var(--cyan)" }}
           />
         )}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-8 top-16 h-40 w-40 rounded-full opacity-50 blur-2xl"
-          style={{ background: "radial-gradient(circle, var(--violet), transparent 70%)" }}
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-24 right-8 h-28 w-28 rounded-full border border-[var(--cyan)]/25 opacity-50"
-          style={{ boxShadow: "inset 0 0 30px oklch(0.789 0.134 205 / 0.2)" }}
-        />
 
         <div className="relative">
-          <p className="text-[0.65rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.16em] text-[var(--violet)]">
+          <p className="text-xs font-[family-name:var(--font-mono)] tracking-wide text-[var(--violet)]">
+            <span className="mr-2 tabular-nums text-white/45">{num}</span>
             {category}
           </p>
-          <h3 className="mt-4 max-w-[14ch] font-[family-name:var(--font-heading)] text-[1.65rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-[1.85rem]">
+          <h3 className="mt-4 max-w-[16ch] font-[family-name:var(--font-heading)] text-[1.55rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-[1.7rem]">
             {title}
           </h3>
-          <p className="mt-4 line-clamp-4 max-w-[36ch] text-[0.85rem] leading-relaxed text-white/50">
+          <p className="mt-3 line-clamp-3 max-w-[36ch] text-sm leading-relaxed text-white/55">
             {description}
           </p>
-          <span className="mt-6 inline-flex items-center gap-2 text-[0.7rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.12em] text-[var(--cyan)]">
-            Open case study
-            <span aria-hidden="true">→</span>
-          </span>
         </div>
-
-        <div className="relative flex items-end justify-between">
-          <span
-            aria-hidden="true"
-            className="font-[family-name:var(--font-heading)] text-5xl font-semibold leading-none tracking-tight"
-            style={{
-              color: "transparent",
-              WebkitTextStroke: "1px color-mix(in oklch, var(--cyan) 55%, transparent)",
-            }}
-          >
-            {num}
-          </span>
-          <span
-            aria-hidden="true"
-            className="grid h-9 w-9 place-items-center rounded-full border border-[var(--cyan)]/35 text-[var(--cyan)]"
-          >
-            <ArrowUpRight className="h-4 w-4" />
-          </span>
-        </div>
+        <span className="relative mt-auto pt-6 inline-flex items-center gap-2 text-xs font-[family-name:var(--font-mono)] text-[var(--cyan)]">
+          Open case study
+          <span aria-hidden="true">→</span>
+        </span>
       </Link>
-    </TiltCard>
+    </div>
   );
 }

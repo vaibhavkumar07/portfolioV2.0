@@ -42,9 +42,7 @@ function Row({
   current: boolean;
 }) {
   return (
-    /* Top-aligned on desktop so the PERIOD / LOCATION / FOCUS labels share one
-       baseline across all three columns; centering pushed them out of line. */
-    <div className="group relative grid grid-cols-1 gap-5 border-b border-border py-7 md:grid-cols-12 md:items-start md:gap-8 md:py-8">
+    <div className="group relative border-b border-border py-7 md:py-8">
       {/* Hover wash — decorative, sits under the content. Opacity-only so it
           costs nothing on reduced-motion. */}
       <span
@@ -61,8 +59,9 @@ function Row({
         className="pointer-events-none absolute left-0 top-0 h-full w-0.5 origin-top scale-y-0 bg-[var(--cyan)] transition-transform duration-300 group-hover:scale-y-100 motion-reduce:transition-none"
       />
 
-      {/* Role + employer */}
-      <div className="relative z-10 md:col-span-5">
+      {/* Role, employer, dates, location, focus — one cluster so the eye
+          doesn't jump a full grid column to find when/where. */}
+      <div className="relative z-10 max-w-3xl">
         <div className="label-xs mb-2 flex items-center gap-2 text-muted-foreground">
           {/* Plain muted rather than a cyan opacity variant: at 40% alpha the
               index vanished against the paper surface. */}
@@ -79,29 +78,27 @@ function Row({
             </span>
           )}
         </div>
-        <h3 className="t-title">{role}</h3>
+        <h3 className="t-role">{role}</h3>
         <p className="mt-2 text-sm text-muted-foreground">{org}</p>
-      </div>
-
-      {/* Meta — mirrors the "Caller details" key/value rhythm in the About card */}
-      <dl className="relative z-10 space-y-2 md:col-span-4">
-        <Meta k="Period" v={period} />
-        <Meta k="Location" v={location} />
-      </dl>
-
-      {/* Focus */}
-      <div className="relative z-10 md:col-span-3">
-        <span className="label-xs mb-2 block text-muted-foreground">Focus</span>
-        <span className="inline-block rounded-xl border border-[var(--violet)]/30 bg-[var(--violet)]/10 px-3 py-1.5 text-sm text-foreground/90">
-          {focus}
-        </span>
+        <p className="mt-1 text-sm text-foreground/80">
+          {period}
+          <span className="text-muted-foreground"> · {location}</span>
+        </p>
+        <div className="mt-3">
+          <span className="label-xs mb-2 block text-muted-foreground">Focus</span>
+          <span className="inline-block rounded-xl border border-[var(--violet)]/30 bg-[var(--violet)]/10 px-3 py-1.5 text-sm text-foreground/90">
+            {focus}
+          </span>
+        </div>
       </div>
 
       {/* Credentials earned in this role — spans the full row so they read as
           events on the timeline rather than a fourth column of metadata. */}
       {credentials && credentials.length > 0 && (
-        <div className="band-cert relative z-10 rounded-2xl px-3 py-2.5 md:col-span-12">
-          <span className="label-xs mb-2 block text-[var(--cyan)]">Certified in this role</span>
+        <div className="band-cert relative z-10 mt-5 rounded-2xl px-3 py-2.5">
+          <span className="mb-2 block font-[family-name:var(--font-mono)] text-xs text-[var(--cyan)]">
+            Certified in this role
+          </span>
           <ul className="space-y-2">
             {credentials.map((c) => (
               <li key={c.name} className="flex items-center gap-3">
@@ -141,7 +138,7 @@ function Row({
       {/* Recognition — amber, so certifications (cyan) and awards stay legible
           as two different kinds of thing at a glance. */}
       {awards && awards.length > 0 && (
-        <div className="relative z-10 md:col-span-12">
+        <div className="relative z-10 mt-5">
           <span className="label-xs mb-2 block text-[var(--amber)]">Recognition</span>
           <ul className="flex flex-wrap gap-2">
             {awards.map((a) => (
@@ -156,15 +153,6 @@ function Row({
           </ul>
         </div>
       )}
-    </div>
-  );
-}
-
-function Meta({ k, v }: { k: string; v: string }) {
-  return (
-    <div className="flex justify-between gap-4 md:block">
-      <dt className="label-xs text-muted-foreground">{k}</dt>
-      <dd className="text-right text-sm text-foreground/90 md:mt-1 md:text-left">{v}</dd>
     </div>
   );
 }

@@ -7,11 +7,12 @@ import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { MODES, useMode } from "@/components/modes/ModeProvider";
 
 const SECTIONS = [
-  { id: "stack", label: "Expertise" },
   { id: "work", label: "Work" },
   { id: "experience", label: "Experience" },
   { id: "about", label: "About" },
+  { id: "stack", label: "Stack" },
   { id: "faq", label: "Insights" },
+  { id: "contact", label: "Contact" },
 ];
 
 /** Mock-exact top bar inside the main content frame. */
@@ -53,7 +54,7 @@ export default function SiteNav({ email }: { email: string }) {
           >
             V. Yadav
           </Link>
-          {/* Mobile: OPERATOR CONSOLE branding */}
+          {/* Mobile: operator console branding */}
           <span className="flex items-center gap-2 sm:hidden">
             <span
               aria-hidden="true"
@@ -62,41 +63,11 @@ export default function SiteNav({ email }: { email: string }) {
             >
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--cyan)]" />
             </span>
-            <span className="hidden min-[380px]:inline text-[0.6rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.18em] text-white/50">
+            <span className="hidden min-[380px]:inline text-xs font-[family-name:var(--font-mono)] text-white/50">
               Operator console
             </span>
           </span>
         </div>
-
-        <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
-          {SECTIONS.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => goToSection(s.id)}
-              className="focus-ring rounded-md px-2.5 py-1.5 text-[0.7rem] text-white/50 transition hover:text-white"
-            >
-              {s.label}
-            </button>
-          ))}
-          <span aria-hidden="true" className="mx-2 h-3.5 w-px bg-white/10" />
-          {MODES.filter((m) => m.id !== "home").map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => {
-                select(m.id);
-                window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
-              }}
-              aria-pressed={mode === m.id}
-              className={`focus-ring rounded-md px-2.5 py-1.5 text-[0.7rem] transition ${
-                mode === m.id ? "text-[var(--cyan)]" : "text-white/50 hover:text-white"
-              }`}
-            >
-              {m.label}
-            </button>
-          ))}
-        </nav>
 
         <div className="flex items-center gap-2">
           <button
@@ -110,7 +81,7 @@ export default function SiteNav({ email }: { email: string }) {
           </button>
           <a
             href={`mailto:${email}`}
-            className="focus-ring relative inline-flex min-h-9 shrink-0 items-center gap-1 rounded-xl border border-[var(--amber)]/60 bg-[var(--amber)]/10 px-2.5 text-[0.65rem] font-medium text-[var(--amber)] transition hover:bg-[var(--amber)]/20 sm:gap-1.5 sm:px-3.5 sm:text-[0.7rem]"
+            className="focus-ring relative inline-flex min-h-9 shrink-0 items-center gap-1 rounded-xl border border-[var(--amber)]/60 bg-[var(--amber)]/10 px-2.5 text-xs font-medium text-[var(--amber)] transition hover:bg-[var(--amber)]/20 sm:gap-1.5 sm:px-3.5"
             style={{ boxShadow: "0 0 20px oklch(0.837 0.164 84 / 0.22)" }}
           >
             Hire me

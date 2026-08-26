@@ -174,11 +174,11 @@
     text-transform: uppercase;
     line-height: 1.4;
   }
-  .label-xs { font-size: 0.6875rem; letter-spacing: 0.16em; }
+  .label-xs { font-size: 0.75rem; letter-spacing: 0.16em; }
   .label-md { font-size: 0.8125rem; letter-spacing: 0.12em; }
 
-  .section-y { padding-block: 4.5rem; }
-  @media (min-width: 768px) { .section-y { padding-block: 6.5rem; } }
+  .section-y { padding-block: 3rem; }
+  @media (min-width: 768px) { .section-y { padding-block: 4rem; } }
 
   .t-mega {
     font-family: var(--font-heading);
@@ -192,6 +192,14 @@
     font-size: var(--text-title);
     line-height: 1.02;
     letter-spacing: -0.025em;
+    font-weight: 600;
+  }
+  /* Job titles sit under section headings (t-title). */
+  .t-role {
+    font-family: var(--font-heading);
+    font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
     font-weight: 600;
   }
   .t-lead {
@@ -298,8 +306,6 @@
     .faq-answer { animation: none; }
     .agent-wave-bar { animation: none; }
   }
-
-  .tilt-card { perspective: 1000px; }
 
   .gradient-text-animated {
     background: linear-gradient(

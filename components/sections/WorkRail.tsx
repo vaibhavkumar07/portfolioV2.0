@@ -59,28 +59,6 @@ export default function WorkRail({ projects }: { projects: Project[] }) {
 
   return (
     <div className="relative">
-      <div className="mb-6 flex items-center justify-end gap-2" style={{ paddingInline: pad }}>
-        <button
-          type="button"
-          aria-label="Previous"
-          onClick={() => goTo(active - 1)}
-          className="focus-ring grid h-11 w-11 place-items-center rounded-md border border-white/20 text-white/60 hover:border-[var(--cyan)] hover:text-[var(--cyan)] lg:h-8 lg:w-8"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <span className="min-w-[3.5rem] text-center text-[0.75rem] font-[family-name:var(--font-mono)] tabular-nums text-[var(--cyan)]">
-          {String(active + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-        </span>
-        <button
-          type="button"
-          aria-label="Next"
-          onClick={() => goTo(active + 1)}
-          className="focus-ring grid h-11 w-11 place-items-center rounded-md border border-white/20 text-white/60 hover:border-[var(--cyan)] hover:text-[var(--cyan)] lg:h-8 lg:w-8"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
-
       <div
         ref={railRef}
         className="rail gap-5 pb-8 pt-2"
@@ -108,17 +86,36 @@ export default function WorkRail({ projects }: { projects: Project[] }) {
             />
           </div>
         ))}
-        {/* Desktop spacer so the last card can center; phones snap to start */}
-        <span aria-hidden="true" className="hidden w-[min(40vw,12rem)] shrink-0 lg:block" />
       </div>
 
-      <div className="mt-4 flex items-center gap-4" style={{ paddingInline: pad }}>
-        <div className="flex items-center gap-2 text-[0.6rem] font-[family-name:var(--font-mono)] uppercase tracking-[0.16em] text-white/40">
+      <div className="mt-4 flex flex-wrap items-center gap-3 sm:gap-4" style={{ paddingInline: pad }}>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Previous"
+            onClick={() => goTo(active - 1)}
+            className="focus-ring grid h-11 w-11 place-items-center rounded-md border border-white/25 bg-[#080b12]/80 text-white/80 hover:border-[var(--cyan)] hover:text-[var(--cyan)]"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="Next"
+            onClick={() => goTo(active + 1)}
+            className="focus-ring grid h-11 w-11 place-items-center rounded-md border border-white/25 bg-[#080b12]/80 text-white/80 hover:border-[var(--cyan)] hover:text-[var(--cyan)]"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+        <span className="min-w-[3.5rem] text-[0.75rem] font-[family-name:var(--font-mono)] tabular-nums text-[var(--cyan)]">
+          {String(active + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+        </span>
+        <div className="hidden items-center gap-2 text-xs font-[family-name:var(--font-mono)] uppercase tracking-[0.16em] text-white/70 sm:flex">
           <span>Scroll</span>
-          <span className="h-px w-6 bg-white/25" />
+          <span className="h-px w-6 bg-white/40" />
           <span>Drag</span>
         </div>
-        <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/10">
+        <div className="h-1.5 min-w-[6rem] flex-1 overflow-hidden rounded-full bg-white/20">
           <div
             className="h-full rounded-full transition-[width] duration-300"
             style={{

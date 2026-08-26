@@ -1,14 +1,10 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import Image from "next/image";
 import ModeSwitch from "@/components/modes/ModeSwitch";
-import ModeProvider from "@/components/modes/ModeProvider";
 import Reveal, { RevealItem, RevealStagger } from "@/components/fx/Reveal";
 import Magnetic from "@/components/fx/Magnetic";
-import SiteNav from "@/components/sections/SiteNav";
 import TrustPanel from "@/components/sections/TrustPanel";
 import Experience from "@/components/sections/Experience";
-import AgentRail from "@/components/agent/AgentRail";
 import HeroCopy from "@/components/sections/HeroCopy";
 import WorkRail from "@/components/sections/WorkRail";
 import FaqList from "@/components/sections/FaqList";
@@ -101,18 +97,8 @@ const hasResume = existsSync(join(process.cwd(), "public", RESUME_FILE));
 
 export default function Home() {
   return (
-    <div className="relative lg:flex">
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-
-      {/* Mock console: icon rail + portrait panel (self-sizing) */}
-      <aside className="lg:sticky lg:top-0 lg:h-screen lg:self-start">
-        <AgentRail />
-      </aside>
-
-      {/* Main content frame */}
-      <div className="min-w-0 flex-1 border-white/[0.04] pb-[calc(6.75rem+env(safe-area-inset-bottom,0px))] lg:border-l lg:pb-0">
-      <ModeProvider>
-      <SiteNav email={PROFILE.email} />
 
       <main id="main">
       <ModeSwitch>
@@ -148,34 +134,6 @@ export default function Home() {
                 </div>
               ))}
             </div>
-
-            {/* Vendor credentials — the badges a Genesys hiring manager scans
-                for. Their own card so they read as credentials, not bullets. */}
-            <div className="glass h-fit rounded-3xl p-5">
-              <div className="label-xs mb-4 text-[var(--cyan)]">Genesys certified</div>
-              <ul className="space-y-4">
-                {VENDOR_CREDENTIALS.map((c) => (
-                  <li key={c.name} className="flex items-center gap-4">
-                    {c.badge && (
-                      <Image
-                        src={c.badge}
-                        alt={`${c.name} badge`}
-                        width={64}
-                        height={64}
-                        className="h-16 w-16 shrink-0 object-contain"
-                      />
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold leading-snug">{c.name}</p>
-                      <p className="label-xs mt-1 text-muted-foreground">
-                        {c.issuer}
-                        {c.issued ? ` · ${c.issued}${c.expires ? ` – ${c.expires}` : ""}` : ""}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
         </div>
       </Section>
@@ -187,7 +145,7 @@ export default function Home() {
           {["Platform", "AI/ML", "Dev", "Integration"].map((cat) => (
             <RevealItem key={cat}>
               <div className="glass h-full rounded-3xl p-5">
-                <div className="label-xs mb-4 text-[var(--cyan)]">{cat}</div>
+                <div className="label-md mb-4 text-[var(--cyan)]">{cat}</div>
                 <ul className="space-y-3">
                   {skills
                     .filter((s) => s.category === cat)
@@ -224,8 +182,8 @@ export default function Home() {
               className="focus-ring group mt-10 block w-fit max-w-full"
             >
               <span
-                className="block break-words font-[family-name:var(--font-heading)] font-semibold leading-[0.95] tracking-[-0.03em] text-foreground transition-colors duration-300 group-hover:text-[var(--amber)]"
-                style={{ fontSize: "clamp(1.35rem, 5vw, 4rem)" }}
+                className="block max-w-full font-[family-name:var(--font-heading)] font-semibold leading-[1.1] tracking-[-0.03em] text-foreground transition-colors duration-300 group-hover:text-[var(--amber)]"
+                style={{ fontSize: "clamp(1.05rem, 4.2vw, 2.35rem)" }}
               >
                 {PROFILE.email}
               </span>
@@ -254,20 +212,18 @@ export default function Home() {
       </Section>
       </ModeSwitch>
       </main>
-      </ModeProvider>
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-7 text-center sm:flex-row sm:text-left">
           <span className="label-xs text-muted-foreground">
             © {new Date().getFullYear()} Vaibhavkumar Yadav · Richardson, TX
           </span>
-          <a href={`mailto:${PROFILE.email}`} className="focus-ring label-xs rounded-lg text-muted-foreground transition hover:text-foreground">
+          <a href={`mailto:${PROFILE.email}`} className="focus-ring rounded-lg text-xs text-muted-foreground transition hover:text-foreground">
             {PROFILE.email}
           </a>
         </div>
       </footer>
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -296,7 +252,7 @@ function Section({
     /* scroll-mt clears the sticky header */
     <section id={id} className={`section-y scroll-mt-28 ${skin}`}>
       <div className={bleed ? "" : "mx-auto max-w-6xl px-5 sm:px-8"}>
-        <div className={bleed ? "mx-auto mb-12 max-w-6xl px-5 sm:px-8" : "mb-12"}>
+        <div className={bleed ? "mx-auto mb-8 max-w-6xl px-5 sm:px-8" : "mb-8"}>
           <Reveal>
             {/* The numeral sits behind the title and overlaps it, rather than
                 aligning beside it — inline, a 13rem glyph drags the heading to
@@ -308,7 +264,7 @@ function Section({
               >
                 {num}
               </span>
-              <span className="label-xs block text-muted-foreground">&gt; {hint}</span>
+              <span className="block font-[family-name:var(--font-mono)] text-xs text-muted-foreground">&gt; {hint}</span>
               <h2 className="t-title mt-1">{title}</h2>
             </div>
           </Reveal>

@@ -62,7 +62,7 @@ function FlowNode({ data }: NodeProps) {
       <div className="leading-tight">
         <div className="mono text-[0.55rem] tracking-[0.16em]" style={{ color: c.ring }}>{d.kind.toUpperCase()}</div>
         <div className="text-sm font-semibold text-foreground">{d.label}</div>
-        {d.sub && <div className="text-[0.68rem] text-muted-foreground">{d.sub}</div>}
+        {d.sub && <div className="text-xs text-muted-foreground">{d.sub}</div>}
       </div>
       {d.kind !== "end" && <Handle type="source" position={Position.Right} style={{ background: c.ring }} />}
     </div>
@@ -230,7 +230,7 @@ export default function Playground() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-10">
-      <div className="label-xs mb-1 text-[var(--cyan)]">&gt; INTERACTIVE</div>
+      <div className="mb-1 font-[family-name:var(--font-mono)] text-xs text-[var(--cyan)]">&gt; Interactive</div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Build &amp; run a flow</h2>
@@ -248,12 +248,12 @@ export default function Playground() {
               onClick={() => switchMode(m)}
               aria-pressed={mode === m}
               aria-label={`Switch to ${m} flow`}
-              className={`focus-ring mono flex min-h-9 items-center gap-1.5 rounded-md px-3 py-1.5 text-[0.66rem] tracking-[0.12em] transition ${
+              className={`focus-ring mono flex min-h-9 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs transition ${
                 mode === m ? "bg-[var(--cyan)]/15 text-[var(--cyan)]" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {m === "voice" ? <PhoneCall className="h-3.5 w-3.5" /> : <MessageSquare className="h-3.5 w-3.5" />}
-              {m.toUpperCase()}
+              {m === "voice" ? "Voice" : "Chat"}
             </button>
           ))}
         </div>
@@ -281,22 +281,22 @@ export default function Playground() {
         {/* Live simulator */}
         <div className="flex h-[clamp(340px,55vh,440px)] flex-col overflow-hidden glass rounded-3xl lg:h-[520px]">
           <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-            <span className="label-xs text-muted-foreground">
-              {mode === "voice" ? "LIVE CALL" : "LIVE CHAT"}
+            <span className="font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
+              {mode === "voice" ? "Live call" : "Live chat"}
             </span>
             <button
               onClick={start}
               disabled={running}
-              className="focus-ring mono min-h-9 rounded-md border border-[var(--amber)]/40 bg-[var(--amber)]/10 px-3 py-1 text-[0.64rem] tracking-[0.12em] text-[var(--amber)] transition enabled:hover:bg-[var(--amber)]/20 disabled:opacity-50"
+              className="focus-ring min-h-9 rounded-md border border-[var(--amber)]/40 bg-[var(--amber)]/10 px-3 py-1 text-xs text-[var(--amber)] transition enabled:hover:bg-[var(--amber)]/20 disabled:opacity-50"
             >
-              {running ? "RUNNING…" : "▶ RUN"}
+              {running ? "Running…" : "Run"}
             </button>
           </div>
 
           <div ref={scriptRef} className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-4 py-4">
             {transcript.length === 0 && (
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Press <span className="text-[var(--amber)]">▶ RUN</span> to start a{" "}
+                Press <span className="text-[var(--amber)]">Run</span> to start a{" "}
                 {mode === "voice" ? "call" : "chat"} and route it yourself.
               </p>
             )}
@@ -323,7 +323,7 @@ export default function Playground() {
                       {mode === "voice" ? <span className="mono mr-1 text-[var(--cyan)]">{b.key}</span> : null}
                       {b.label}
                     </span>
-                    <span className="mono ml-auto text-[0.6rem] text-muted-foreground">{b.sub}</span>
+                    <span className="ml-auto text-xs text-muted-foreground">{b.sub}</span>
                   </button>
                 ))}
               </div>
@@ -337,12 +337,12 @@ export default function Playground() {
 
 function Bubble({ line }: { line: Line }) {
   if (line.who === "sys")
-    return <p className="mono text-center text-[0.64rem] tracking-wide text-muted-foreground">{line.text}</p>;
+    return <p className="text-center text-xs text-muted-foreground">{line.text}</p>;
   const isBot = line.who === "bot";
   return (
     <div className={isBot ? "" : "text-right"}>
-      <span className="mono mb-0.5 block text-[0.56rem] tracking-[0.16em] text-muted-foreground">
-        {isBot ? "SYSTEM" : "YOU"}
+      <span className="mb-0.5 block text-xs text-muted-foreground">
+        {isBot ? "System" : "You"}
       </span>
       <p
         className={`inline-block max-w-[88%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
